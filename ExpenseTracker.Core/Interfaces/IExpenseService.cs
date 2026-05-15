@@ -1,0 +1,13 @@
+﻿using ExpenseTracker.Core.Models;
+
+namespace ExpenseTracker.Core.Interfaces;
+
+public interface IExpenseService
+{
+    Task AddExpenseAsync(Expense expense);
+    Task<List<Expense>> GetExpensesAsync();
+    Task MarkAsPaidAsync(int id);
+    Task DeleteExpenseAsync(int id);
+    Task UpdateExpenseAsync(Expense expense);
+    Task<List<Expense>> GetByMonthAsync(int month);
+}

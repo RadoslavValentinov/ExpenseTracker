@@ -6,15 +6,32 @@ namespace ExpenseTracker.Core.Services;
 public class TaskService : ITaskService
 {
     private readonly ITaskRepository _repository;
+    private readonly IReminderService _reminderService;
 
-    public TaskService(ITaskRepository repository)
+    public TaskService(
+        ITaskRepository repository,
+        IReminderService reminderService)
     {
         _repository = repository;
+        _reminderService = reminderService;
     }
 
     public async Task AddTaskAsync(TaskItem task)
     {
         await _repository.AddAsync(task);
+
+        if (task.DueDate.HasValue)
+        {
+            var reminder = new Reminder
+            {
+                Title = $"Task: {task.Title}",
+                ReminderDate = task.DueDate.Value,
+                Type = "Task",
+                ReferenceId = task.Id
+            };
+
+            await _reminderService.AddAsync(reminder);
+        }
     }
 
     public async Task<List<TaskItem>> GetTasksAsync()

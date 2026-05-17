@@ -21,17 +21,26 @@ public class ReminderRepository : IReminderRepository
     }
 
     public async Task<List<Reminder>> GetAllAsync()
-    {                                       
+    {
         return await _context.Reminders.ToListAsync();
     }
 
-    public Task<List<Reminder>> GetPendingAsync()
+    public async Task<List<Reminder>> GetPendingAsync()
     {
-        throw new NotImplementedException();
+        return await _context.Reminders
+            .Where(r => !r.IsTriggered &&
+                        r.ReminderDate <= DateTime.UtcNow)
+            .ToListAsync();
     }
 
-    public Task MarkAsTriggeredAsync(int id)
+    public async Task MarkAsTriggeredAsync(int id)
     {
-        throw new NotImplementedException();
+        var reminder = await _context.Reminders.FindAsync(id);
+
+        if (reminder == null)
+            return;
+
+        reminder.IsTriggered = true;
+        await _context.SaveChangesAsync();
     }
 }

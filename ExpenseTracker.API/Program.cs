@@ -28,13 +28,15 @@ builder.Services.AddScoped<ITaskRepository, TaskRepository>();
 builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddScoped<IReminderRepository, ReminderRepository>();
 builder.Services.AddScoped<IReminderService, ReminderService>();
+builder.Services.AddScoped<IRecurringExpenseRepository, RecurringExpenseRepository>();
+builder.Services.AddScoped<IRecurringExpenseService, RecurringExpenseService>();
+
 
 builder.Services.AddHostedService<ReminderBackgroundService>();
 
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

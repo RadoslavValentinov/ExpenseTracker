@@ -33,6 +33,7 @@ builder.Services.AddScoped<IRecurringExpenseService, RecurringExpenseService>();
 
 
 builder.Services.AddHostedService<ReminderBackgroundService>();
+builder.Services.AddHostedService<RecurringExpenseBackgroundService>();
 
 
 var app = builder.Build();

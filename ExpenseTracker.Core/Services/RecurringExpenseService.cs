@@ -26,4 +26,9 @@ public class RecurringExpenseService : IRecurringExpenseService
     {
         return _repository.GetActiveAsync();
     }
+
+    public Task UpdateAsync(RecurringExpense recurringExpense)
+    {
+        return _repository.UpdateAsync(recurringExpense);
+    }
 }

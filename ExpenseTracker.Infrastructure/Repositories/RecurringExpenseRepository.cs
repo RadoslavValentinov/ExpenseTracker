@@ -31,4 +31,10 @@ public class RecurringExpenseRepository : IRecurringExpenseRepository
             .Where(r => r.IsActive)
             .ToListAsync();
     }
+
+    public async Task UpdateAsync(RecurringExpense recurringExpense)
+    {
+        _context.RecurringExpenses.Update(recurringExpense);
+        await _context.SaveChangesAsync();
+    }
 }

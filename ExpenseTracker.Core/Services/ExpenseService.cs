@@ -19,16 +19,18 @@ public class ExpenseService : IExpenseService
     public async Task AddExpenseAsync(Expense expense)
     {
         await _repository.AddAsync(expense);
-
-        var reminder = new Reminder
+        if (expense.DueDate > DateTime.MinValue)
         {
-            Title = $"Pay {expense.Title}",
-            ReminderDate = expense.DueDate.AddDays(-1),
-            Type = "Expense",
-            ReferenceId = expense.Id
-        };
+            var reminder = new Reminder
+            {
+                Title = $"Pay {expense.Title}",
+                ReminderDate = expense.DueDate.AddDays(-1),
+                Type = "Expense",
+                ReferenceId = expense.Id
+            };
 
-        await _reminderService.AddAsync(reminder);
+            await _reminderService.AddAsync(reminder);
+        }
     }
 
     public async Task<List<Expense>> GetExpensesAsync()

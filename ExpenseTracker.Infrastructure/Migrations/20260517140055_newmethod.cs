@@ -5,7 +5,7 @@
 namespace ExpenseTracker.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class newmethod : Migration
+    public partial class Newmethod : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

@@ -1,0 +1,41 @@
+﻿using System.Net.Http.Json;
+using ExpenseTracker.Core.Models;
+using ExpenseTracker.UI.Models;
+
+namespace ExpenseTracker.UI.Services;
+
+public class ExpenseApiService
+{
+    private readonly IHttpClientFactory _factory;
+
+    public ExpenseApiService(IHttpClientFactory factory)
+    {
+        _factory = factory;
+    }
+
+    public async Task<List<Expense>> GetExpensesAsync()
+    {
+        var client = _factory.CreateClient("Api");
+
+        var expenses = await client.GetFromJsonAsync<List<Expense>>(
+            "api/Expenses");
+
+        return expenses ?? new List<Expense>();
+    }
+
+    public async Task AddExpenseAsync(CreateExpenseDto dto)
+    {
+        var client = _factory.CreateClient("Api");
+
+        var response = await client.PostAsJsonAsync(
+            "api/Expenses",
+            dto);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var error = await response.Content.ReadAsStringAsync();
+
+            throw new Exception(error);
+        }
+    }
+}

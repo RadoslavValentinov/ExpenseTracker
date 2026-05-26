@@ -12,7 +12,7 @@ namespace ExpenseTracker.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     [Migration("20260517140055_newmethod")]
-    partial class newmethod
+    partial class Newmethod
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

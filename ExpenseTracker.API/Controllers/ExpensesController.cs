@@ -1,5 +1,7 @@
-﻿using ExpenseTracker.Core.Interfaces;
+﻿using ExpenseTracker.API.DTOs;
+using ExpenseTracker.Core.Interfaces;
 using ExpenseTracker.Core.Models;
+using ExpenseTracker.Core.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExpenseTracker.API.Controllers;
@@ -16,9 +18,19 @@ public class ExpensesController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> AddExpense(Expense expense)
+    public async Task<IActionResult> AddExpense(CreateExpenseDto dto)
     {
+        var expense = new Expense
+        {
+            Title = dto.Title,
+            Amount = dto.Amount,
+            DueDate = dto.DueDate,
+            Category = dto.Category,
+            IsPaid = false
+        };
+
         await _service.AddExpenseAsync(expense);
+
         return Ok();
     }
 

@@ -1,0 +1,108 @@
+﻿@page "/expenses"
+
+
+@using ExpenseTracker.Core.Models
+@using ExpenseTracker.UI.Services
+@using ExpenseTracker.UI.Models;
+
+
+@inject ExpenseApiService ExpenseService
+
+
+
+@if (expenses == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+
+    <h4>Add Expense</h4>
+
+    <div class="mb-3">
+        <input class="form-control"
+               placeholder="Title"
+               @bind="newExpense.Title" />
+    </div>
+
+    <div class="mb-3">
+        <input class="form-control"
+               type="number"
+               placeholder="Amount"
+               @bind="newExpense.Amount" />
+    </div>
+
+    <div class="mb-3">
+        <input class="form-control"
+               type="date"
+               @bind="newExpense.DueDate" />
+    </div>
+
+    <div class="mb-3">
+        <input class="form-control"
+               placeholder="Category"
+               @bind="newExpense.Category" />
+    </div>
+
+    <button class="btn btn-primary"
+            @onclick="AddExpense">
+        Add
+    </button>
+
+    <hr />
+
+
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Amount</th>
+                <th>Due Date</th>
+                <th>Paid</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var expense in expenses)
+            {
+                <tr>
+                    <td>@expense.Title</td>
+                    <td>@expense.Amount</td>
+                    <td>@expense.DueDate.ToShortDateString()</td>
+                    <td>@expense.IsPaid</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+
+@code {
+
+    private List<Expense>? expenses;
+    private CreateExpenseDto newExpense = new();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        expenses = await ExpenseService.GetExpensesAsync();
+    }
+
+    private async Task AddExpense()
+    {
+        try
+        {
+            await ExpenseService.AddExpenseAsync(newExpense);
+
+            expenses = await ExpenseService.GetExpensesAsync();
+
+            newExpense = new CreateExpenseDto();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+}

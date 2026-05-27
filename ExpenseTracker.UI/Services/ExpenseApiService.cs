@@ -13,6 +13,16 @@ public class ExpenseApiService
         _factory = factory;
     }
 
+
+    public async Task MarkAsPaidAsync(int id)
+    {
+        var client = _factory.CreateClient("Api");
+
+        await client.PutAsync(
+            $"api/Expenses/{id}/pay",
+            null);
+    }
+
     public async Task<List<Expense>> GetExpensesAsync()
     {
         var client = _factory.CreateClient("Api");

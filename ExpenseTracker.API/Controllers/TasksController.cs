@@ -1,7 +1,6 @@
 ﻿using ExpenseTracker.API.DTOs;
 using ExpenseTracker.Core.Interfaces;
 using ExpenseTracker.Core.Models;
-using ExpenseTracker.Core.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExpenseTracker.API.Controllers;
@@ -18,7 +17,7 @@ public class TasksController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> AddTask(CreateTaskDto dto)
+    public async Task<IActionResult> Create(CreateTaskDto dto)
     {
         var task = new TaskItem
         {
@@ -26,6 +25,7 @@ public class TasksController : ControllerBase
             Description = dto.Description,
             DueDate = dto.DueDate,
             Priority = dto.Priority,
+            ReminderTime = dto.ReminderTime,
             IsCompleted = false
         };
 
@@ -37,20 +37,16 @@ public class TasksController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        return Ok(await _service.GetTasksAsync());
+        var tasks = await _service.GetTasksAsync();
+
+        return Ok(tasks);
     }
 
     [HttpPut("{id}/complete")]
     public async Task<IActionResult> Complete(int id)
     {
         await _service.CompleteTaskAsync(id);
-        return Ok();
-    }
 
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
-    {
-        await _service.DeleteTaskAsync(id);
         return Ok();
     }
 }

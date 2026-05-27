@@ -20,12 +20,12 @@ public class TaskService : ITaskService
     {
         await _repository.AddAsync(task);
 
-        if (task.DueDate.HasValue)
+        if (task.ReminderTime.HasValue)
         {
             var reminder = new Reminder
             {
                 Title = $"Task: {task.Title}",
-                ReminderDate = task.DueDate.Value,
+                ReminderDate = task.ReminderTime.Value,
                 Type = "Task",
                 ReferenceId = task.Id
             };
@@ -42,14 +42,12 @@ public class TaskService : ITaskService
     public async Task CompleteTaskAsync(int id)
     {
         var task = await _repository.GetByIdAsync(id);
-        if (task == null) return;
+
+        if (task == null)
+            return;
 
         task.IsCompleted = true;
-        await _repository.UpdateAsync(task);
-    }
 
-    public async Task DeleteTaskAsync(int id)
-    {
-        await _repository.DeleteAsync(id);
+        await _repository.UpdateAsync(task);
     }
 }

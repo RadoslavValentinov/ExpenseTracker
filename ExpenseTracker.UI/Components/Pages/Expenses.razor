@@ -1,0 +1,254 @@
+﻿@page "/expenses"
+
+@using ExpenseTracker.Core.Models
+@using ExpenseTracker.UI.Models
+@using ExpenseTracker.UI.Services
+
+@inject ExpenseApiService ExpenseService
+
+<h3>Expenses</h3>
+
+<div class="row mb-4">
+
+    <div class="col-md-3">
+
+        <div class="card shadow-sm">
+
+            <div class="card-body">
+
+                <h5>Total</h5>
+
+                <h3>@TotalAmount.ToString("C")</h3>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-3">
+
+        <div class="card shadow-sm">
+
+            <div class="card-body">
+
+                <h5>Paid</h5>
+
+                <h3 class="text-success">
+                    @PaidAmount.ToString("C")
+                </h3>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-3">
+
+        <div class="card shadow-sm">
+
+            <div class="card-body">
+
+                <h5>Unpaid</h5>
+
+                <h3 class="text-danger">
+                    @UnpaidAmount.ToString("C")
+                </h3>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-3">
+
+        <div class="card shadow-sm">
+
+            <div class="card-body">
+
+                <h5>Upcoming</h5>
+
+                <h3>
+                    @UpcomingCount
+                </h3>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<h4>Add Expense</h4>
+
+<div class="mb-3">
+
+    <input class="form-control"
+           placeholder="Title"
+           @bind="newExpense.Title" />
+
+</div>
+
+<div class="mb-3">
+
+    <input class="form-control"
+           type="number"
+           placeholder="Amount"
+           @bind="newExpense.Amount" />
+
+</div>
+
+<div class="mb-3">
+
+    <input class="form-control"
+           type="date"
+           @bind="newExpense.DueDate" />
+
+</div>
+
+<div class="mb-3">
+
+    <input class="form-control"
+           placeholder="Category"
+           @bind="newExpense.Category" />
+
+</div>
+
+<button class="btn btn-primary"
+        @onclick="AddExpense">
+
+    Add
+
+</button>
+
+<hr />
+
+@if (expenses == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <table class="table">
+
+        <thead>
+
+            <tr>
+                <th>Title</th>
+                <th>Amount</th>
+                <th>Due Date</th>
+                <th>Paid</th>
+                <th>Actions</th>
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            @foreach (var expense in expenses)
+            {
+                <tr>
+
+                    <td>@expense.Title</td>
+
+                    <td>@expense.Amount</td>
+
+                    <td>@expense.DueDate.ToShortDateString()</td>
+
+                    <td>
+
+                        @if (expense.IsPaid)
+                        {
+                            <span class="text-success">
+                                Paid ✅
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="text-danger">
+                                Unpaid
+                            </span>
+                        }
+
+                    </td>
+                    <td>
+
+                        @if (!expense.IsPaid)
+                        {
+                            <button class="btn btn-success btn-sm"
+                                    @onclick="() => MarkAsPaid(expense.Id)">
+
+                                Pay
+
+                            </button>
+                        }
+
+                    </td>
+
+                </tr>
+            }
+
+        </tbody>
+
+    </table>
+}
+
+@code {
+
+    private List<Expense>? expenses;
+
+    private CreateExpenseDto newExpense = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        expenses = await ExpenseService.GetExpensesAsync();
+    }
+
+    private async Task MarkAsPaid(int id)
+    {
+        await ExpenseService.MarkAsPaidAsync(id);
+
+        expenses = await ExpenseService.GetExpensesAsync();
+    }
+
+
+    private async Task AddExpense()
+    {
+        try
+        {
+            await ExpenseService.AddExpenseAsync(newExpense);
+
+            expenses = await ExpenseService.GetExpensesAsync();
+
+            newExpense = new CreateExpenseDto();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    private decimal TotalAmount =>
+    expenses?.Sum(e => e.Amount) ?? 0;
+
+    private decimal PaidAmount =>
+        expenses?
+            .Where(e => e.IsPaid)
+            .Sum(e => e.Amount) ?? 0;
+
+    private decimal UnpaidAmount =>
+        expenses?
+            .Where(e => !e.IsPaid)
+            .Sum(e => e.Amount) ?? 0;
+
+    private int UpcomingCount =>
+        expenses?
+            .Count(e =>
+                !e.IsPaid &&
+                e.DueDate > DateTime.Now) ?? 0;
+
+}

@@ -1,23 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ExpenseTracker.Core.Models
+﻿public class TaskItem
 {
-    public class TaskItem
-    {
-        public int Id { get; set; }
+    public int Id { get; set; }
 
-        public string Title { get; set; } = null!;
+    public string Title { get; set; } = string.Empty;
 
-        public string? Description { get; set; }
+    public string? Description { get; set; }
 
-        public DateTime? DueDate { get; set; }
+    public DateTime DueDate { get; set; }
 
-        public bool IsCompleted { get; set; } = false;
+    public int Priority { get; set; }
 
-        public int Priority { get; set; }
-    }
+    public bool IsCompleted { get; set; }
+
+    public bool HasReminder { get; set; }
+
+    public DateTime? ReminderTime { get; set; }
+
+    public bool RepeatMonthly { get; set; }
+
+    public DateTime CreatedDate { get; set; }
+        = DateTime.Now;
 }

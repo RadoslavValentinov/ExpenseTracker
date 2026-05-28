@@ -1,0 +1,202 @@
+﻿@page "/tasks"
+
+@using ExpenseTracker.Core.Models
+@using ExpenseTracker.UI.Models
+@using ExpenseTracker.UI.Services
+
+@inject TaskApiService TaskService
+
+<h3>Tasks</h3>
+
+<div class="card shadow-sm p-4 mb-4">
+
+    <h5>Add Task</h5>
+
+    <div class="mb-3">
+
+        <input class="form-control"
+               placeholder="Title"
+               @bind="newTask.Title" />
+
+    </div>
+
+    <div class="mb-3">
+
+        <textarea class="form-control"
+                  placeholder="Description"
+                  @bind="newTask.Description">
+        </textarea>
+
+    </div>
+
+    <div class="mb-3">
+
+        <label>Due Date</label>
+
+        <input class="form-control"
+               type="datetime-local"
+               @bind="newTask.DueDate" />
+
+    </div>
+
+    <div class="mb-3">
+
+        <label>Reminder Time</label>
+
+        <input class="form-control"
+               type="datetime-local"
+               @bind="newTask.ReminderTime" />
+
+    </div>
+
+    <div class="mb-3">
+
+        <label>Priority</label>
+
+        <select class="form-select"
+                @bind="newTask.Priority">
+
+            <option value="0">Low</option>
+            <option value="1">Medium</option>
+            <option value="2">High</option>
+
+        </select>
+
+    </div>
+
+    <button class="btn btn-primary"
+            @onclick="AddTask">
+
+        Add Task
+
+    </button>
+
+</div>
+
+@if (tasks == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <div class="row g-4">
+
+        @foreach (var task in tasks)
+        {
+            <div class="col-lg-4 col-md-6">
+
+                <div class="card p-4 h-100 task-card">
+
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+
+                        <div>
+
+                            <h5 class="fw-bold mb-1">
+                                @task.Title
+                            </h5>
+
+                            <p class="text-muted small mb-0">
+                                @task.Description
+                            </p>
+
+                        </div>
+
+                        @if (task.Priority == 2)
+                        {
+                            <span class="badge bg-danger">
+                                High
+                            </span>
+                        }
+                        else if (task.Priority == 1)
+                        {
+                            <span class="badge bg-warning text-dark">
+                                Medium
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">
+                                Low
+                            </span>
+                        }
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <p class="mb-2">
+
+                            <strong>Due:</strong>
+                            @task.DueDate.ToShortDateString()
+
+                        </p>
+
+                        @if (task.ReminderTime.HasValue)
+                        {
+                            <span class="badge bg-primary">
+
+                                🔔
+                                @task.ReminderTime.Value.ToShortTimeString()
+
+                            </span>
+                        }
+
+                    </div>
+
+                    <div class="mt-auto">
+
+                        @if (task.IsCompleted)
+                        {
+                            <span class="badge bg-success p-2">
+
+                                ✅ Completed
+
+                            </span>
+                        }
+                        else
+                        {
+                            <button class="btn btn-success w-100"
+                                    @onclick="() => CompleteTask(task.Id)">
+
+                                Complete Task
+
+                            </button>
+                        }
+
+                    </div>
+
+                </div>
+
+            </div>
+        }
+
+    </div>
+}
+
+@code {
+
+    private List<TaskItem>? tasks;
+
+    private CreateTaskDto newTask = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        tasks = await TaskService.GetTasksAsync();
+    }
+
+    private async Task AddTask()
+    {
+        await TaskService.AddTaskAsync(newTask);
+
+        tasks = await TaskService.GetTasksAsync();
+
+        newTask = new CreateTaskDto();
+    }
+
+    private async Task CompleteTask(int id)
+    {
+        await TaskService.CompleteTaskAsync(id);
+
+        tasks = await TaskService.GetTasksAsync();
+    }
+}

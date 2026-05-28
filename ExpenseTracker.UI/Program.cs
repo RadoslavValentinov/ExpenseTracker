@@ -11,6 +11,7 @@ internal class Program
             .AddInteractiveServerComponents();
 
         builder.Services.AddScoped<ExpenseApiService>();
+        builder.Services.AddScoped<TaskApiService>();
 
         builder.Services.AddHttpClient("Api", client =>
         {

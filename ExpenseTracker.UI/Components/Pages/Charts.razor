@@ -1,0 +1,68 @@
+﻿@page "/charts"
+
+@using ExpenseTracker.Core.Models
+@using ExpenseTracker.UI.Services
+@using Microsoft.JSInterop
+
+@inject ExpenseApiService ExpenseService
+@inject IJSRuntime JS
+
+<h3 class="mb-4">
+    Expense Analytics
+</h3>
+
+@if (expenses == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <div class="card p-4">
+
+        <h5 class="mb-4">
+            Monthly Expenses
+        </h5>
+
+        <div style="height:400px;">
+
+            <canvas id="expensesChart"></canvas>
+
+        </div>
+
+    </div>
+}
+
+@code {
+
+    private List<Expense>? expenses;
+
+    protected override async Task OnInitializedAsync()
+    {
+        expenses =
+            await ExpenseService.GetExpensesAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(
+        bool firstRender)
+    {
+        if (firstRender && expenses != null)
+        {
+            var grouped = expenses
+                .GroupBy(x => x.DueDate.Month)
+                .OrderBy(x => x.Key);
+
+            var labels = grouped
+                .Select(x => $"Month {x.Key}")
+                .ToArray();
+
+            var values = grouped
+                .Select(x => x.Sum(e => e.Amount))
+                .ToArray();
+
+            await JS.InvokeVoidAsync(
+                "renderExpensesChart",
+                labels,
+                values);
+        }
+    }
+}

@@ -1,9 +1,20 @@
-﻿window.renderExpensesChart = (labels, values) => {
+﻿let expensesChart = null;
+
+window.renderExpensesChart = (labels, values) => {
 
     const ctx =
         document.getElementById('expensesChart');
 
-    new Chart(ctx, {
+    if (!ctx)
+        return;
+
+    // destroy old chart
+
+    if (expensesChart !== null) {
+        expensesChart.destroy();
+    }
+
+    expensesChart = new Chart(ctx, {
 
         type: 'bar',
 

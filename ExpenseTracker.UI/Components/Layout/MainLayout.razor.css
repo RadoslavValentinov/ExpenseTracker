@@ -13,6 +13,8 @@ h3, h4, h5 {
     font-weight: 700;
 }
 
+
+
 .app-layout {
     display: flex;
     min-height: 100vh;
@@ -31,26 +33,16 @@ h3, h4, h5 {
     box-shadow: 4px 0 20px rgba(0,0,0,0.08);
 }
 
-.logo-section {
-    margin-bottom: 50px;
-}
-
-    .logo-section h2 {
-        margin: 0;
-        font-size: 28px;
-        font-weight: 700;
-    }
-
-    .logo-section p {
-        opacity: 0.7;
-        margin-top: 8px;
-    }
-
 .sidebar-nav {
     display: flex;
     flex-direction: column;
     gap: 12px;
 }
+
+    .sidebar-nav .nav-item {
+        text-decoration: none;
+        color: whitesmoke;
+    }
 
 .nav-item {
     color: white;
@@ -72,6 +64,23 @@ h3, h4, h5 {
         box-shadow: 0 8px 20px rgba(59,130,246,0.35);
         color: white !important;
     }
+
+
+.logo-section {
+    margin-bottom: 50px;
+}
+
+    .logo-section h2 {
+        margin: 0;
+        font-size: 28px;
+        font-weight: 700;
+    }
+
+    .logo-section p {
+        opacity: 0.7;
+        margin-top: 8px;
+    }
+
 
 
 /* MAIN CONTENT */

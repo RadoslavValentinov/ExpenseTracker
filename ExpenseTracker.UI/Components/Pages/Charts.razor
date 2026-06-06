@@ -3,66 +3,77 @@
 @using ExpenseTracker.Core.Models
 @using ExpenseTracker.UI.Services
 @using Microsoft.JSInterop
+@using System.Globalization
 
 @inject ExpenseApiService ExpenseService
 @inject IJSRuntime JS
 
+@{
+    var culture = new CultureInfo("bg-BG");
+    string monthName = culture.TextInfo.ToTitleCase(DateTime.Now.ToString("MMMM", culture));
+}
+
 <h3 class="mb-4">
-    Expense Analytics
+    Анализ на разходите
+    <br />За месец @monthName
 </h3>
 
-@if (expenses == null)
-{
-    <p>Loading...</p>
-}
-else
-{
-    <div class="card p-4">
+<div class="card p-4">
 
-        <h5 class="mb-4">
-            Monthly Expenses
-        </h5>
+    <h5 class="mb-4">
+        Последни разходи
+    </h5>
 
-        <div style="height:400px;">
+    <div style="height:400px;">
 
-            <canvas id="expensesChart"></canvas>
-
-        </div>
+        <canvas id="expensesChart"></canvas>
 
     </div>
-}
+
+</div>
 
 @code {
 
-    private List<Expense>? expenses;
+    private List<Expense> expenses = new();
 
     protected override async Task OnInitializedAsync()
     {
-        expenses =
+        var result =
             await ExpenseService.GetExpensesAsync();
+
+        if (result != null)
+        {
+            expenses = result;
+        }
     }
 
     protected override async Task OnAfterRenderAsync(
         bool firstRender)
     {
-        if (firstRender && expenses != null)
-        {
-            var grouped = expenses
-                .GroupBy(x => x.DueDate.Month)
-                .OrderBy(x => x.Key);
+        // IMPORTANT:
+        // Wait until data is loaded
 
-            var labels = grouped
-                .Select(x => $"Month {x.Key}")
-                .ToArray();
+        if (expenses.Count == 0)
+            return;
 
-            var values = grouped
-                .Select(x => x.Sum(e => e.Amount))
-                .ToArray();
+        var latestExpenses = expenses
+            .Where(s => s.CreatedDate.Month == DateTime.Now.Month)
+            .OrderByDescending(x => x.Id)
+            .Take(7)
+            .Reverse()
+            .ToList();
 
-            await JS.InvokeVoidAsync(
-                "renderExpensesChart",
-                labels,
-                values);
-        }
+        var labels = latestExpenses
+            .Select(x => x.Title)
+            .ToArray();
+
+        var values = latestExpenses
+            .Select(x => (double)x.Amount)
+            .ToArray();
+
+        await JS.InvokeVoidAsync(
+            "renderExpensesChart",
+            labels,
+            values);
     }
 }

@@ -28,7 +28,7 @@ public class ExpenseApiService
         var client = _factory.CreateClient("Api");
 
         var expenses = await client.GetFromJsonAsync<List<Expense>>(
-            "api/Expenses");
+            "api/expenses");
 
         return expenses ?? new List<Expense>();
     }

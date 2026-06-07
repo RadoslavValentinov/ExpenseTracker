@@ -19,7 +19,9 @@ builder.Services.AddSwaggerGen();
 
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite("Data Source=expenses.db"));
+    options.UseSqlite(
+        builder.Configuration.GetConnectionString("DefaultConnection")));
+
 builder.Services.AddScoped<IExpenseRepository, ExpenseRepository>();
 builder.Services.AddScoped<IExpenseService, ExpenseService>();
 builder.Services.AddScoped<ITaskRepository, TaskRepository>();

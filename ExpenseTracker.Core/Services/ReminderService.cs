@@ -20,6 +20,7 @@ public class ReminderService : IReminderService
     public async Task<List<Reminder>> GetPendingAsync()
     {
         return await _repository.GetPendingAsync();
+       
     }
 
     public async Task MarkAsTriggeredAsync(int id)

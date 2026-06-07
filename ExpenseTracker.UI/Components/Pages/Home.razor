@@ -121,7 +121,7 @@ else
                             </strong>
 
                             <p class="text-muted small mb-0">
-                                @task.DueDate.ToShortDateString()
+                                @(task.DueDate.ToShortDateString() ?? "No due date")
                             </p>
 
                         </div>

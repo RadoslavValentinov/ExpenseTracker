@@ -28,8 +28,8 @@ public class ReminderRepository : IReminderRepository
     public async Task<List<Reminder>> GetPendingAsync()
     {
         return await _context.Reminders
-            .Where(r => !r.IsTriggered &&
-                        r.ReminderDate <= DateTime.UtcNow)
+            .Where(r => !r.IsTriggered)
+            .OrderBy(r => r.ReminderDate)
             .ToListAsync();
     }
 

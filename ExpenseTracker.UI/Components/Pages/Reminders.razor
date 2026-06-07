@@ -1,0 +1,55 @@
+﻿@page "/reminders"
+
+@inject ReminderApiService ReminderService
+
+<h3>Reminders</h3>
+
+@if (reminders == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Date</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var reminder in reminders)
+            {
+                <tr>
+                    <td>@reminder.Title</td>
+                    <td>@reminder.ReminderDate.ToShortDateString()</td>
+                    <td>
+                        <button class="btn btn-success"
+                                @onclick="() => TriggerReminder(reminder.Id)">
+                            Complete
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+
+    private List<Reminder>? reminders;
+
+    protected override async Task OnInitializedAsync()
+    {
+        reminders = await ReminderService.GetAllAsync();
+    }
+
+    private async Task TriggerReminder(int id)
+    {
+        await ReminderService.TriggerAsync(id);
+
+        reminders = await ReminderService.GetAllAsync();
+    }
+}

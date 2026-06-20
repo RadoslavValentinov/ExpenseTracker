@@ -25,6 +25,14 @@ public class ReminderRepository : IReminderRepository
         return await _context.Reminders.ToListAsync();
     }
 
+    public async Task<List<Reminder>> GetCompletedAsync()
+    {
+        return await _context.Reminders
+            .Where(r => r.IsTriggered)
+            .OrderByDescending(r => r.ReminderDate)
+            .ToListAsync();
+    }
+
     public async Task<List<Reminder>> GetPendingAsync()
     {
         return await _context.Reminders

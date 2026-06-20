@@ -24,11 +24,9 @@ public class ReminderBackgroundService : BackgroundService
             foreach (var reminder in pending)
             {
                 Console.WriteLine($"🔔 REMINDER: {reminder.Title}");
-
-                await service.MarkAsTriggeredAsync(reminder.Id);
             }
 
-            await Task.Delay(10000, stoppingToken); // every 10 sec
+            await Task.Delay(10000, stoppingToken);
         }
     }
 }

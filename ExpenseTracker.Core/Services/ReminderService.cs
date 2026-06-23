@@ -17,6 +17,11 @@ public class ReminderService : IReminderService
         await _repository.AddAsync(reminder);
     }
 
+    public async Task<List<Reminder>> GetCompletedAsync()
+    {
+        return await _repository.GetCompletedAsync();
+    }
+
     public async Task<List<Reminder>> GetPendingAsync()
     {
         return await _repository.GetPendingAsync();

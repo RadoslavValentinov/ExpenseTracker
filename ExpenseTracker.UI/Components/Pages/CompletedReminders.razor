@@ -1,0 +1,70 @@
+﻿@page "/completed-reminders"
+
+@using ExpenseTracker.Core.Models
+@using ExpenseTracker.UI.Services
+
+@inject ReminderApiService ReminderService
+
+<h3 class="mb-4">
+    Completed Reminders
+</h3>
+
+@if (reminders == null)
+{
+    <p>Loading...</p>
+}
+else if (!reminders.Any())
+{
+    <div class="alert alert-info">
+        No completed reminders found.
+    </div>
+}
+else
+{
+    <table class="table table-striped">
+
+        <thead>
+
+            <tr>
+                <th>Title</th>
+                <th>Date</th>
+                <th>Type</th>
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            @foreach (var reminder in reminders)
+            {
+                <tr>
+
+                    <td>
+                        @reminder.Title
+                    </td>
+
+                    <td>
+                        @reminder.ReminderDate.ToShortDateString()
+                    </td>
+
+                    <td>
+                        @reminder.Type
+                    </td>
+
+                </tr>
+            }
+
+        </tbody>
+
+    </table>
+}
+
+@code {
+
+    private List<Reminder>? reminders;
+
+    protected override async Task OnInitializedAsync()
+    {
+        reminders = await ReminderService.GetCompletedAsync();
+    }
+}

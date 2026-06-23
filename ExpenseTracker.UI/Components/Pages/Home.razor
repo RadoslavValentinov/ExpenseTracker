@@ -3,12 +3,18 @@
 @using ExpenseTracker.Core.Models
 @using ExpenseTracker.UI.Services
 
+
 @inject ExpenseApiService ExpenseService
 @inject TaskApiService TaskService
+@inject ReminderApiService ReminderService
 
 <h3 class="mb-4">
     Dashboard
 </h3>
+
+<p class="text-muted mb-4">
+    Overview of your expenses, tasks and reminders.
+</p>
 
 @if (expenses == null || tasks == null)
 {
@@ -22,10 +28,10 @@ else
 
         <div class="col-lg-3 col-md-6">
 
-            <div class="card p-4">
+            <div class="card p-4 shadow-sm border-start border-primary border-4">
 
                 <p class="text-muted mb-2">
-                    Total Expenses
+                    💰 Total Expenses
                 </p>
 
                 <h2 class="fw-bold">
@@ -38,10 +44,10 @@ else
 
         <div class="col-lg-3 col-md-6">
 
-            <div class="card p-4">
+            <div class="card p-4 shadow-sm border-start border-danger border-4">
 
                 <p class="text-muted mb-2">
-                    Unpaid
+                    ❌ Unpaid
                 </p>
 
                 <h2 class="fw-bold text-danger">
@@ -54,10 +60,10 @@ else
 
         <div class="col-lg-3 col-md-6">
 
-            <div class="card p-4">
+            <div class="card p-4 shadow-sm border-start border-success border-4">
 
                 <p class="text-muted mb-2">
-                    Tasks
+                    📋 Tasks
                 </p>
 
                 <h2 class="fw-bold">
@@ -70,16 +76,30 @@ else
 
         <div class="col-lg-3 col-md-6">
 
-            <div class="card p-4">
+            <div class="card p-4 shadow-sm border-start border-success border-4">
 
                 <p class="text-muted mb-2">
-                    Completed
+                    🔔 Active Reminders
+                </p>
+
+                <h2 class="fw-bold text-warning">
+                    @(reminders?.Count ?? 0)
+                </h2>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="card p-4 shadow-sm border-start border-info border-4">
+
+                <p class="text-muted mb-2">
+                    ✅ Completed
                 </p>
 
                 <h2 class="fw-bold text-success">
-
                     @tasks.Count(x => x.IsCompleted)
-
                 </h2>
 
             </div>
@@ -121,7 +141,7 @@ else
                             </strong>
 
                             <p class="text-muted small mb-0">
-                                @(task.DueDate.ToShortDateString() ?? "No due date")
+                                @task.DueDate.ToShortDateString()
                             </p>
 
                         </div>
@@ -177,22 +197,59 @@ else
                             </strong>
 
                             <p class="text-muted small mb-0">
-
-                                @expense.DueDate
-                                .ToShortDateString()
-
+                                @expense.DueDate.ToShortDateString()
                             </p>
 
                         </div>
 
                         <span class="fw-bold">
-
                             @expense.Amount.ToString("C")
-
                         </span>
 
                     </div>
                 }
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- QUICK LINKS -->
+
+    <div class="row g-4 mt-1">
+
+        <div class="col-12">
+
+            <div class="card p-4">
+
+                <h5 class="fw-bold mb-3">
+                    Quick Links
+                </h5>
+
+                <div class="d-flex flex-wrap gap-3">
+
+                    <a class="btn btn-primary"
+                       href="/expenses">
+                        💰 Expenses
+                    </a>
+
+                    <a class="btn btn-success"
+                       href="/tasks">
+                        ✅ Tasks
+                    </a>
+
+                    <a class="btn btn-warning"
+                       href="/reminders">
+                        🔔 Active Reminders
+                    </a>
+
+                    <a class="btn btn-secondary"
+                       href="/completed-reminders">
+                        ✔️ Completed Reminders
+                    </a>
+
+                </div>
 
             </div>
 
@@ -207,15 +264,19 @@ else
 
     private List<TaskItem>? tasks;
 
+    private List<Reminder>? reminders;
+
     private decimal UnpaidAmount =>
-     expenses?
-         .Where(x => !x.IsPaid)
-         .Sum(x => x.Amount) ?? 0;
+        expenses?
+            .Where(x => !x.IsPaid)
+            .Sum(x => x.Amount) ?? 0;
 
     protected override async Task OnInitializedAsync()
     {
         expenses = await ExpenseService.GetExpensesAsync();
 
         tasks = await TaskService.GetTasksAsync();
+
+        reminders = await ReminderService.GetAllAsync();
     }
 }

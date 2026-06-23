@@ -4,12 +4,29 @@
 
 <h3>Reminders</h3>
 
+
 @if (reminders == null)
 {
     <p>Loading...</p>
 }
 else
 {
+
+    <EditForm Model="newReminder" OnValidSubmit="AddReminder">
+
+        <InputText @bind-Value="newReminder.Title" />
+
+        <InputDate @bind-Value="@newReminder.ReminderDate" />
+
+        <InputText @bind-Value="newReminder.Type" />
+
+        <button type="submit" class="btn btn-primary">
+            Add Reminder
+        </button>
+
+    </EditForm>
+
+
     <table class="table">
         <thead>
             <tr>
@@ -52,4 +69,16 @@ else
 
         reminders = await ReminderService.GetAllAsync();
     }
+
+    private Reminder newReminder = new();
+
+    private async Task AddReminder()
+    {
+        await ReminderService.CreateAsync(newReminder);
+
+        reminders = await ReminderService.GetAllAsync();
+
+        newReminder = new Reminder();
+    }
+
 }

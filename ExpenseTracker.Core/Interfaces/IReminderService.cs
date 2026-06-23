@@ -6,5 +6,6 @@ public interface IReminderService
 {
     Task AddAsync(Reminder reminder);
     Task<List<Reminder>> GetPendingAsync();
+    Task<List<Reminder>> GetCompletedAsync();
     Task MarkAsTriggeredAsync(int id);
 }

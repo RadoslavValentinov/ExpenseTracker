@@ -23,8 +23,24 @@ public class ReminderApiService
         return await response.Content.ReadFromJsonAsync<List<Reminder>>() ?? new();
     }
 
+    public async Task<List<Reminder>> GetCompletedAsync()
+    {
+        return await _http.GetFromJsonAsync<List<Reminder>>(
+            "api/reminders/completed") ?? new();
+    }
+
     public async Task TriggerAsync(int id)
     {
         await _http.PutAsync($"api/reminders/{id}/trigger", null);
     }
+
+    public async Task CreateAsync(Reminder reminder)
+    {
+        var response = await _http.PostAsJsonAsync(
+            "api/reminders",
+            reminder);
+
+        response.EnsureSuccessStatusCode();
+    }
+
 }

@@ -24,6 +24,12 @@ public class RemindersController : ControllerBase
         return Ok(reminders);
     }
 
+    [HttpGet("completed")]
+    public async Task<ActionResult<List<Reminder>>> GetCompleted()
+    {
+        return Ok(await _service.GetCompletedAsync());
+    }
+
     [HttpPost]
     public async Task<IActionResult> Create(Reminder reminder)
     {

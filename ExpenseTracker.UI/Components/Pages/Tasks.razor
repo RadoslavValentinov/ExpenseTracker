@@ -8,7 +8,7 @@
 
 <h3>Tasks</h3>
 
-<div class="card shadow-sm p-4 mb-4">
+<div class="card p-4 h-100 shadow-sm task-card">
 
     <h5>Add Task</h5>
 
@@ -83,61 +83,56 @@ else
 
         @foreach (var task in tasks)
         {
-            <div class="col-lg-4 col-md-6">
+            <div class="col-xl-4 col-lg-6">
 
-                <div class="card p-4 h-100 task-card">
+                <div class="card p-4  shadow-sm task-card">
 
-                    <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="mb-3">
 
-                        <div>
+                        <div class="d-flex justify-content-between align-items-start">
 
-                            <h5 class="fw-bold mb-1">
+                            <h5 class="fw-bold task-title mb-0">
                                 @task.Title
                             </h5>
 
-                            <p class="text-muted small mb-0">
-                                @task.Description
-                            </p>
+                            @if (task.Priority == 2)
+                            {
+                                <span class="badge bg-danger">
+                                    High
+                                </span>
+                            }
+                            else if (task.Priority == 1)
+                            {
+                                <span class="badge bg-warning text-dark">
+                                    Medium
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success">
+                                    Low
+                                </span>
+                            }
 
                         </div>
 
-                        @if (task.Priority == 2)
-                        {
-                            <span class="badge bg-danger">
-                                High
-                            </span>
-                        }
-                        else if (task.Priority == 1)
-                        {
-                            <span class="badge bg-warning text-dark">
-                                Medium
-                            </span>
-                        }
-                        else
-                        {
-                            <span class="badge bg-success">
-                                Low
-                            </span>
-                        }
+                        <p class="text-muted task-description mt-2">
+                            @task.Description
+                        </p>
 
                     </div>
 
                     <div class="mb-3">
 
                         <p class="mb-2">
-
                             <strong>Due:</strong>
                             @task.DueDate.ToShortDateString()
-
                         </p>
 
                         @if (task.ReminderTime.HasValue)
                         {
                             <span class="badge bg-primary">
-
-                                🔔
-                                @task.ReminderTime.Value.ToShortTimeString()
-
+                                🔔 @task.ReminderTime.Value.ToShortTimeString()
                             </span>
                         }
 
@@ -147,20 +142,25 @@ else
 
                         @if (task.IsCompleted)
                         {
-                            <span class="badge bg-success p-2">
-
+                            <span class="badge bg-success p-2 w-100 d-block text-center">
                                 ✅ Completed
-
                             </span>
                         }
                         else
                         {
-                            <button class="btn btn-success w-100"
-                                    @onclick="() => CompleteTask(task.Id)">
+                            <div class="d-flex gap-2">
 
-                                Complete Task
+                                <button class="btn btn-success flex-fill"
+                                        @onclick="() => CompleteTask(task.Id)">
+                                    Complete
+                                </button>
 
-                            </button>
+                                <button class="btn btn-danger flex-fill"
+                                        @onclick="() => DeleteTask(task.Id)">
+                                    Delete
+                                </button>
+
+                            </div>
                         }
 
                     </div>
@@ -171,7 +171,9 @@ else
         }
 
     </div>
+
 }
+
 
 @code {
 
@@ -196,6 +198,13 @@ else
     private async Task CompleteTask(int id)
     {
         await TaskService.CompleteTaskAsync(id);
+
+        tasks = await TaskService.GetTasksAsync();
+    }
+
+    private async Task DeleteTask(int id)
+    {
+        await TaskService.DeleteAsync(id);
 
         tasks = await TaskService.GetTasksAsync();
     }

@@ -208,6 +208,12 @@ else
                         }
 
                     </td>
+                    <td>
+                        <button class="btn btn-danger btn-sm"
+                                @onclick="() => DeleteExpense(expense.Id)">
+                            Delete
+                        </button>
+                    </td>
 
                 </tr>
             }
@@ -231,6 +237,13 @@ else
     private async Task MarkAsPaid(int id)
     {
         await ExpenseService.MarkAsPaidAsync(id);
+
+        expenses = await ExpenseService.GetExpensesAsync();
+    }
+
+    private async Task DeleteExpense(int id)
+    {
+        await ExpenseService.DeleteAsync(id);
 
         expenses = await ExpenseService.GetExpensesAsync();
     }

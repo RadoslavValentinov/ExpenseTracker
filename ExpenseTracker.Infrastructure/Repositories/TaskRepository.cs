@@ -39,9 +39,11 @@ public class TaskRepository : ITaskRepository
     public async Task DeleteAsync(int id)
     {
         var task = await _context.Tasks.FindAsync(id);
-        if (task == null) return;
 
-        _context.Tasks.Remove(task);
-        await _context.SaveChangesAsync();
+        if (task != null)
+        {
+            _context.Tasks.Remove(task);
+            await _context.SaveChangesAsync();
+        }
     }
 }

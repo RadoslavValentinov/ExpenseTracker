@@ -8,13 +8,18 @@
 @inject TaskApiService TaskService
 @inject ReminderApiService ReminderService
 
-<h3 class="mb-4">
-    Dashboard
-</h3>
+<div class="dashboard-header">
 
-<p class="text-muted mb-4">
-    Overview of your expenses, tasks and reminders.
-</p>
+    <h2 class="fw-bold">
+        Dashboard
+    </h2>
+
+    <p class="text-muted">
+        Overview of your expenses, tasks and reminders
+    </p>
+
+</div>
+
 
 @if (expenses == null || tasks == null)
 {
@@ -34,7 +39,7 @@ else
                     💰 Total Expenses
                 </p>
 
-                <h2 class="fw-bold">
+                <h2 class="dashboard-stat">
                     @expenses.Sum(x => x.Amount).ToString("C")
                 </h2>
 
@@ -50,7 +55,7 @@ else
                     ❌ Unpaid
                 </p>
 
-                <h2 class="fw-bold text-danger">
+                <h2 class="dashboard-stat">
                     @UnpaidAmount.ToString("C")
                 </h2>
 
@@ -66,7 +71,7 @@ else
                     📋 Tasks
                 </p>
 
-                <h2 class="fw-bold">
+                <h2 class="dashboard-stat">
                     @tasks.Count
                 </h2>
 
@@ -82,7 +87,7 @@ else
                     🔔 Active Reminders
                 </p>
 
-                <h2 class="fw-bold text-warning">
+                <h2 class="dashboard-stat">
                     @(reminders?.Count ?? 0)
                 </h2>
 
@@ -98,7 +103,7 @@ else
                     ✅ Completed
                 </p>
 
-                <h2 class="fw-bold text-success">
+                <h2 class="dashboard-stat">
                     @tasks.Count(x => x.IsCompleted)
                 </h2>
 
@@ -229,22 +234,22 @@ else
 
                 <div class="d-flex flex-wrap gap-3">
 
-                    <a class="btn btn-primary"
+                    <a class="btn btn-primary quick-link-btn"
                        href="/expenses">
                         💰 Expenses
                     </a>
 
-                    <a class="btn btn-success"
+                    <a class="btn btn-primary quick-link-btn"
                        href="/tasks">
                         ✅ Tasks
                     </a>
 
-                    <a class="btn btn-warning"
+                    <a class="btn btn-primary quick-link-btn"
                        href="/reminders">
                         🔔 Active Reminders
                     </a>
 
-                    <a class="btn btn-secondary"
+                    <a class="btn btn-primary quick-link-btn"
                        href="/completed-reminders">
                         ✔️ Completed Reminders
                     </a>

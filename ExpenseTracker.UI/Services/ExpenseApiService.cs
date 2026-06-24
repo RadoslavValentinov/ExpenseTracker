@@ -1,6 +1,7 @@
-﻿using System.Net.Http.Json;
-using ExpenseTracker.Core.Models;
+﻿using ExpenseTracker.Core.Models;
 using ExpenseTracker.UI.Models;
+using System.Net.Http.Json;
+using static System.Net.WebRequestMethods;
 
 namespace ExpenseTracker.UI.Services;
 
@@ -47,5 +48,12 @@ public class ExpenseApiService
 
             throw new Exception(error);
         }
+    }
+
+    public async Task DeleteAsync(int id)
+    {
+        var client = _factory.CreateClient("Api");
+
+        await client.DeleteAsync($"api/expenses/{id}");
     }
 }

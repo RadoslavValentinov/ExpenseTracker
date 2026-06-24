@@ -38,4 +38,11 @@ public class TaskApiService
             $"api/tasks/{id}/complete",
             null);
     }
+
+    public async Task DeleteAsync(int id)
+    {
+        var client = _factory.CreateClient("Api");
+
+        await client.DeleteAsync($"api/tasks/{id}");
+    }
 }

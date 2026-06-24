@@ -9,4 +9,6 @@ public interface ITaskService
     Task<List<TaskItem>> GetTasksAsync();
 
     Task CompleteTaskAsync(int id);
+
+    Task DeleteAsync(int id);
 }

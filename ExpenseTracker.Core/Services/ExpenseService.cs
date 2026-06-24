@@ -38,6 +38,8 @@ public class ExpenseService : IExpenseService
         return await _repository.GetAllAsync();
     }
 
+
+
     public async Task MarkAsPaidAsync(int id)
     {
         var expense = await _repository.GetByIdAsync(id);
@@ -47,7 +49,7 @@ public class ExpenseService : IExpenseService
         await _repository.UpdateAsync(expense);
     }
 
-    public async Task DeleteExpenseAsync(int id)
+    public async Task DeleteAsync(int id)
     {
         await _repository.DeleteAsync(id);
     }

@@ -45,10 +45,12 @@ namespace ExpenseTracker.Infrastructure.Repositories
         public async Task DeleteAsync(int id)
         {
             var expense = await _context.Expenses.FindAsync(id);
-            if (expense == null) return;
 
-            _context.Expenses.Remove(expense);
-            await _context.SaveChangesAsync();
+            if (expense != null)
+            {
+                _context.Expenses.Remove(expense);
+                await _context.SaveChangesAsync();
+            }
         }
 
         public async Task<List<Expense>> GetByMonthAsync(int month)
@@ -56,6 +58,18 @@ namespace ExpenseTracker.Infrastructure.Repositories
             return await _context.Expenses
                 .Where(e => e.DueDate.Month == month)
                 .ToListAsync();
+        }
+
+        public async Task MarkAsPaidAsync(int id)
+        {
+            var expense = await _context.Expenses.FindAsync(id);
+
+            if (expense == null)
+                return;
+
+            expense.IsPaid = true;
+
+            await _context.SaveChangesAsync();
         }
     }
 }

@@ -7,7 +7,7 @@ public interface IExpenseService
     Task AddExpenseAsync(Expense expense);
     Task<List<Expense>> GetExpensesAsync();
     Task MarkAsPaidAsync(int id);
-    Task DeleteExpenseAsync(int id);
+    Task DeleteAsync(int id);
     Task UpdateExpenseAsync(Expense expense);
     Task<List<Expense>> GetByMonthAsync(int month);
 }

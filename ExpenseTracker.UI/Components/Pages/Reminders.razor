@@ -70,7 +70,10 @@ else
         reminders = await ReminderService.GetAllAsync();
     }
 
-    private Reminder newReminder = new();
+    private Reminder newReminder = new()
+    {
+        ReminderDate = DateTime.Today
+    };
 
     private async Task AddReminder()
     {

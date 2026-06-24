@@ -121,9 +121,18 @@ h3, h4, h5 {
     padding: 35px;
 }
 
+.row h2{
+    text-align:center;
+}
+
+.card {
+    text-align:center;
+}
+
+
+
 
 /* TASK CARDS */
-
 .task-card {
     position: relative;
     overflow: hidden;
@@ -158,6 +167,7 @@ h3, h4, h5 {
         transform: translateY(-4px);
         box-shadow: 0 16px 35px rgba(0,0,0,0.08);
     }
+
 
 
 
@@ -209,23 +219,108 @@ h3, h4, h5 {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 20px;
-    padding: 18px 0;
-    border-bottom: 1px solid #f1f1f1;
+    padding: 12px 16px;
+    margin-bottom: 10px;
+    border-radius: 20px;
+    background-color: #f8f9fa;
+    transition: all 0.2s ease;
 }
 
-    .dashboard-item:last-child {
-        border-bottom: none;
+    .dashboard-item:hover {
+        background-color: #eef2ff;
+        transform: translateX(3px);
     }
 
-
-a {
-    text-decoration: none !important;
+.card {
+    border: none;
+    text-align:center;
+    border-radius: 20px 10px;
 }
 
-    a:hover {
-        text-decoration: none !important;
+    .card:hover {
+        transform: translateY(-2px);
+        transition: 0.2s ease;
+        box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15);
     }
+
+.dashboard-stat {
+    font-size: 2rem;
+    text-align:center;
+    font-weight: 700;
+}
+
+.dashboard-header {
+    margin-bottom: 25px;
+}
+
+.quick-link-btn {
+    min-width: 180px;
+}
+
+
+.task-card {
+    border-radius: 16px;
+    min-height: 320px;
+}
+
+.task-title {
+    flex: 1;
+    margin-right: 10px;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+}
+
+.task-description {
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    max-height: 120px;
+    overflow-y: auto;
+}
+.task-title,
+.task-description {
+    width: 100%;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+.task-description {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.task-card {
+    min-height: 280px;
+}
+
+.task-title {
+    word-break: break-all;
+    overflow-wrap: anywhere;
+    margin-bottom: 10px;
+}
+
+.task-description {
+    min-height: 60px;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    color: #6c757d;
+}
+
+.task-buttons {
+    margin-top: auto;
+}
+
+.priority-badge {
+    flex-shrink: 0;
+}
+
+
+
+
+
+
 
 
 

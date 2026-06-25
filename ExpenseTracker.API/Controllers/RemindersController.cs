@@ -45,4 +45,12 @@ public class RemindersController : ControllerBase
 
         return NoContent();
     }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        await _service.DeleteAsync(id);
+
+        return Ok();
+    }
 }

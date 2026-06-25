@@ -8,4 +8,5 @@ public interface IReminderService
     Task<List<Reminder>> GetPendingAsync();
     Task<List<Reminder>> GetCompletedAsync();
     Task MarkAsTriggeredAsync(int id);
+    Task DeleteAsync(int id);
 }

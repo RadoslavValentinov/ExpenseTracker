@@ -54,7 +54,7 @@ public class ExpenseService : IExpenseService
         await _repository.DeleteAsync(id);
     }
 
-    public async Task UpdateExpenseAsync(Expense expense)
+    public async Task UpdateAsync(Expense expense)
     {
         await _repository.UpdateAsync(expense);
     }

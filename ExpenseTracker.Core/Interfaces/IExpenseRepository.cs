@@ -16,5 +16,6 @@ namespace ExpenseTracker.Core.Interfaces
         Task DeleteAsync(int id);
         Task<List<Expense>> GetByMonthAsync(int month);
         Task MarkAsPaidAsync(int id);
+
     }
 }

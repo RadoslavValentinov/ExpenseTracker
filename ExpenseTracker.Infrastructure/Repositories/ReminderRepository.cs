@@ -51,4 +51,15 @@ public class ReminderRepository : IReminderRepository
         reminder.IsTriggered = true;
         await _context.SaveChangesAsync();
     }
+
+    public async Task DeleteAsync(int id)
+    {
+        var reminder = await _context.Reminders.FindAsync(id);
+
+        if (reminder != null)
+        {
+            _context.Reminders.Remove(reminder);
+            await _context.SaveChangesAsync();
+        }
+    }
 }

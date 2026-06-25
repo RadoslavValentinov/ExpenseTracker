@@ -315,10 +315,9 @@ h3, h4, h5 {
 .priority-badge {
     flex-shrink: 0;
 }
-
-
-
-
+.card.mt-auto button {
+    margin-top: 10px;
+}
 
 
 
@@ -326,9 +325,7 @@ h3, h4, h5 {
 
 
 /* MOBILE */
-
 @media (max-width: 768px) {
-
     .sidebar {
         width: 90px;
         padding: 20px 10px;

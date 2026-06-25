@@ -43,4 +43,8 @@ public class ReminderApiService
         response.EnsureSuccessStatusCode();
     }
 
+    public async Task DeleteAsync(int id)
+    {
+        await _http.DeleteAsync($"api/reminders/{id}");
+    }
 }

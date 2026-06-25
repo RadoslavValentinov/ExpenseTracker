@@ -66,10 +66,16 @@ public class ExpensesController : ControllerBase
         return Ok();
     }
 
-    [HttpPut]
-    public async Task<IActionResult> Update(Expense expense)
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(
+      int id,
+      Expense expense)
     {
-        await _service.UpdateExpenseAsync(expense);
+        if (id != expense.Id)
+            return BadRequest();
+
+        await _service.UpdateAsync(expense);
+
         return Ok();
     }
 
@@ -79,4 +85,5 @@ public class ExpensesController : ControllerBase
         var result = await _service.GetByMonthAsync(month);
         return Ok(result);
     }
+
 }

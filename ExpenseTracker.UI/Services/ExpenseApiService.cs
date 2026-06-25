@@ -50,6 +50,15 @@ public class ExpenseApiService
         }
     }
 
+    public async Task UpdateAsync(Expense expense)
+    {
+        var client = _factory.CreateClient("Api");
+
+        await client.PutAsJsonAsync(
+            $"api/expenses/{expense.Id}",
+            expense);
+    }
+
     public async Task DeleteAsync(int id)
     {
         var client = _factory.CreateClient("Api");

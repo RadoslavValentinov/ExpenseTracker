@@ -84,7 +84,9 @@
         <div>
 
             <h4 class="mb-1">
-                Add Expense
+                @(editingExpenseId == null
+                                ? "Add Expense"
+                                : "Edit Expense")
             </h4>
 
             <p class="text-muted mb-0">
@@ -134,12 +136,20 @@
 
     <div class="mt-4">
 
-        <button class="btn btn-primary"
-                @onclick="AddExpense">
-
-            Add Expense
-
-        </button>
+        @if (editingExpenseId == null)
+        {
+            <button class="btn btn-primary"
+                    @onclick="AddExpense">
+                Add Expense
+            </button>
+        }
+        else
+        {
+            <button class="btn btn-warning"
+                    @onclick="SaveExpense">
+                Save Changes
+            </button>
+        }
 
     </div>
 
@@ -209,11 +219,19 @@ else
 
                     </td>
                     <td>
+
+                        <button class="btn btn-warning btn-sm me-2"
+                                @onclick="() => EditExpense(expense)">
+                            Edit
+                        </button>
+
                         <button class="btn btn-danger btn-sm"
                                 @onclick="() => DeleteExpense(expense.Id)">
                             Delete
                         </button>
+
                     </td>
+
 
                 </tr>
             }
@@ -226,6 +244,7 @@ else
 @code {
 
     private List<Expense>? expenses;
+    private int? editingExpenseId;
 
     private CreateExpenseDto newExpense = new();
 
@@ -246,6 +265,16 @@ else
         await ExpenseService.DeleteAsync(id);
 
         expenses = await ExpenseService.GetExpensesAsync();
+    }
+
+    private void EditExpense(Expense expense)
+    {
+        editingExpenseId = expense.Id;
+
+        newExpense.Title = expense.Title;
+        newExpense.Amount = expense.Amount;
+        newExpense.DueDate = expense.DueDate;
+        newExpense.Category = expense.Category;
     }
 
 

@@ -8,6 +8,6 @@ public interface IExpenseService
     Task<List<Expense>> GetExpensesAsync();
     Task MarkAsPaidAsync(int id);
     Task DeleteAsync(int id);
-    Task UpdateExpenseAsync(Expense expense);
+    Task UpdateAsync(Expense expense);
     Task<List<Expense>> GetByMonthAsync(int month);
 }

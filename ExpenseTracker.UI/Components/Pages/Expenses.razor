@@ -271,12 +271,42 @@ else
     {
         editingExpenseId = expense.Id;
 
-        newExpense.Title = expense.Title;
-        newExpense.Amount = expense.Amount;
-        newExpense.DueDate = expense.DueDate;
-        newExpense.Category = expense.Category;
+        newExpense = new CreateExpenseDto
+        {
+            Id = expense.Id,
+            Title = expense.Title,
+            Amount = expense.Amount,
+            DueDate = expense.DueDate,
+            Category = expense.Category
+        };
     }
 
+
+    private async Task SaveExpense()
+    {
+        try
+        {
+            await ExpenseService.UpdateAsync(new Expense
+            {
+                Id = editingExpenseId!.Value,
+                Title = newExpense.Title,
+                Amount = newExpense.Amount,
+                DueDate = newExpense.DueDate,
+                Category = newExpense.Category,
+                IsPaid = false
+            });
+
+            expenses = await ExpenseService.GetExpensesAsync();
+
+            editingExpenseId = null;
+
+            newExpense = new CreateExpenseDto();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
 
     private async Task AddExpense()
     {

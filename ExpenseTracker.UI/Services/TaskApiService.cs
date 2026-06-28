@@ -39,6 +39,15 @@ public class TaskApiService
             null);
     }
 
+    public async Task UpdateAsync(TaskItem task)
+    {
+        var client = _factory.CreateClient("Api");
+
+        await client.PutAsJsonAsync(
+            $"api/tasks/{task.Id}",
+            task);
+    }
+
     public async Task DeleteAsync(int id)
     {
         var client = _factory.CreateClient("Api");

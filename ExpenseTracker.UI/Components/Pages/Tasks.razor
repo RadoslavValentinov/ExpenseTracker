@@ -10,7 +10,11 @@
 
 <div class="card p-4  shadow-sm task-card">
 
-    <h5>Add Task</h5>
+    <h5>
+        @(editingTaskId == null
+                ? "Add Task"
+                : "Edit Task")
+    </h5>
 
     <div class="mb-3">
 
@@ -64,12 +68,20 @@
 
     </div>
 
-    <button class="btn btn-primary"
-            @onclick="AddTask">
-
-        Add Task
-
-    </button>
+    @if (editingTaskId == null)
+    {
+        <button class="btn btn-primary"
+                @onclick="AddTask">
+            Add Task
+        </button>
+    }
+    else
+    {
+        <button class="btn btn-warning"
+                @onclick="SaveTask">
+            Save Changes
+        </button>
+    }
 
 </div>
 
@@ -159,6 +171,11 @@ else
                                     Complete
                                 </button>
 
+                                <button class="btn btn-warning flex-fill"
+                                        @onclick="() => EditTask(task)">
+                                    Edit
+                                </button>
+
                                 <button class="btn btn-danger flex-fill"
                                         @onclick="() => DeleteTask(task.Id)">
                                     Delete
@@ -183,7 +200,12 @@ else
 
     private List<TaskItem>? tasks;
 
+    private int? editingTaskId;
+
+    private TaskItem? editingTask;
+
     private CreateTaskDto newTask = new();
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -206,10 +228,48 @@ else
         tasks = await TaskService.GetTasksAsync();
     }
 
+    private void EditTask(TaskItem task)
+    {
+        editingTask = task;
+
+        editingTaskId = task.Id;
+
+        newTask = new CreateTaskDto
+        {
+            Title = task.Title,
+            Description = task.Description,
+            DueDate = task.DueDate,
+            ReminderTime = task.ReminderTime,
+            Priority = task.Priority
+        };
+    }
+
     private async Task DeleteTask(int id)
     {
         await TaskService.DeleteAsync(id);
 
         tasks = await TaskService.GetTasksAsync();
     }
+
+    private async Task SaveTask()
+    {
+        if (editingTask == null)
+            return;
+
+        editingTask.Title = newTask.Title;
+        editingTask.Description = newTask.Description;
+        editingTask.DueDate = newTask.DueDate;
+        editingTask.Priority = newTask.Priority;
+        editingTask.ReminderTime = newTask.ReminderTime;
+
+        await TaskService.UpdateAsync(editingTask);
+
+        tasks = await TaskService.GetTasksAsync();
+
+        editingTask = null;
+        editingTaskId = null;
+
+        newTask = new CreateTaskDto();
+    }
+
 }

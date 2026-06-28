@@ -50,6 +50,19 @@ public class TasksController : ControllerBase
         return Ok();
     }
 
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(
+    int id,
+    TaskItem task)
+    {
+        if (id != task.Id)
+            return BadRequest();
+
+        await _service.UpdateAsync(task);
+
+        return Ok();
+    }
+
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {

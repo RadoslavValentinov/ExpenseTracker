@@ -8,6 +8,7 @@ public interface IReminderRepository
     Task<List<Reminder>> GetCompletedAsync();
     Task<List<Reminder>> GetAllAsync();
     Task<List<Reminder>> GetPendingAsync();
+    Task UpdateAsync(Reminder reminder);
     Task MarkAsTriggeredAsync(int id);
     Task DeleteAsync(int id);
 }

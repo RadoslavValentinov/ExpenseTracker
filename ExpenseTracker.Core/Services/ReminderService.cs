@@ -28,6 +28,11 @@ public class ReminderService : IReminderService
        
     }
 
+    public async Task UpdateAsync(Reminder reminder)
+    {
+        await _repository.UpdateAsync(reminder);
+    }
+
     public async Task MarkAsTriggeredAsync(int id)
     {
         await _repository.MarkAsTriggeredAsync(id);

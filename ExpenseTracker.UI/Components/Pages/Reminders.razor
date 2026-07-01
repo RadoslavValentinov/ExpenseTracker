@@ -12,7 +12,14 @@
 else
 {
 
-    <EditForm Model="newReminder" OnValidSubmit="AddReminder">
+    <h5>
+        @(editingReminderId == null
+            ? "Add Reminder"
+            : "Edit Reminder")
+</h5>
+
+
+    <EditForm Model="newReminder" OnValidSubmit="@(editingReminderId == null ? AddReminder : SaveReminder)">
 
         <InputText @bind-Value="newReminder.Title" />
 
@@ -36,12 +43,30 @@ else
 
         </InputSelect>
 
-        <button type="submit" class="btn btn-primary">
-            Add Reminder
-        </button>
+    @if (editingReminderId == null)
+        {
+            <button type="submit" class="btn btn-primary">
+                Add Reminder
+            </button>
+        }
+        else
+        {
+            <button type="submit" class="btn btn-warning">
+                Save Changes
+            </button>
+        }
 
     </EditForm>
 
+    <br />
+
+    <div class="mb-3">
+
+        <input class="form-control"
+               placeholder="🔍 Search reminders..."
+               @bind="searchText" />
+
+    </div>
 
     <table class="table">
         <thead>
@@ -53,7 +78,7 @@ else
         </thead>
 
         <tbody>
-            @foreach (var reminder in reminders)
+            @foreach (var reminder in FilteredReminders)
             {
                 <tr>
                     <td>@reminder.Title</td>
@@ -62,6 +87,10 @@ else
                         <button class="btn btn-success"
                                 @onclick="() => TriggerReminder(reminder.Id)">
                             Complete
+                        </button>
+                        <button class="btn btn-warning btn-sm"
+                                @onclick="() => EditReminder(reminder)">
+                            Edit
                         </button>
                         <button class="btn btn-danger btn-sm"
                                 @onclick="() => DeleteReminder(reminder.Id)">
@@ -76,7 +105,14 @@ else
 
 @code {
 
+    private string searchText = "";
+
+    private int? editingReminderId;
+
+    private Reminder? editingReminder;
+
     private List<Reminder>? reminders;
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -101,7 +137,28 @@ else
 
         reminders = await ReminderService.GetAllAsync();
 
-        newReminder = new Reminder();
+        newReminder = new Reminder
+        {
+            ReminderDate = DateTime.Today
+        };
+    }
+
+    private void EditReminder(Reminder reminder)
+    {
+        editingReminder = reminder;
+
+        editingReminderId = reminder.Id;
+
+        newReminder = new Reminder
+        {
+            Id = reminder.Id,
+            Title = reminder.Title,
+            ReminderDate = reminder.ReminderDate,
+            Type = reminder.Type,
+            ReferenceId = reminder.ReferenceId,
+            IsTriggered = reminder.IsTriggered,
+            CreatedAt = reminder.CreatedAt
+        };
     }
 
 
@@ -111,5 +168,37 @@ else
 
         reminders = await ReminderService.GetAllAsync();
     }
+
+    private async Task SaveReminder()
+    {
+        if (editingReminder == null)
+            return;
+
+        editingReminder.Title = newReminder.Title;
+        editingReminder.ReminderDate = newReminder.ReminderDate;
+        editingReminder.Type = newReminder.Type;
+        editingReminder.ReferenceId = newReminder.ReferenceId;
+
+        await ReminderService.UpdateAsync(editingReminder);
+
+        reminders = await ReminderService.GetAllAsync();
+
+        newReminder = new Reminder
+        {
+            ReminderDate = DateTime.Today
+        };
+
+        editingReminder = null;
+        editingReminderId = null;
+    }
+
+    private IEnumerable<Reminder> FilteredReminders =>
+    reminders?
+        .Where(r =>
+            string.IsNullOrWhiteSpace(searchText)
+            || r.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase)
+            || (!string.IsNullOrWhiteSpace(r.Type)
+                && r.Type.Contains(searchText, StringComparison.OrdinalIgnoreCase)))
+    ?? Enumerable.Empty<Reminder>();
 
 }

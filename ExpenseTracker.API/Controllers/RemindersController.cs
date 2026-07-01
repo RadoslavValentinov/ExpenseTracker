@@ -53,4 +53,17 @@ public class RemindersController : ControllerBase
 
         return Ok();
     }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(
+    int id,
+    Reminder reminder)
+    {
+        if (id != reminder.Id)
+            return BadRequest();
+
+        await _service.UpdateAsync(reminder);
+
+        return Ok();
+    }
 }

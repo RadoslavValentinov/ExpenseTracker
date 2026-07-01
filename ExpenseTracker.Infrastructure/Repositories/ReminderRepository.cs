@@ -33,6 +33,13 @@ public class ReminderRepository : IReminderRepository
             .ToListAsync();
     }
 
+    public async Task UpdateAsync(Reminder reminder)
+    {
+        _context.Reminders.Update(reminder);
+
+        await _context.SaveChangesAsync();
+    }
+
     public async Task<List<Reminder>> GetPendingAsync()
     {
         return await _context.Reminders

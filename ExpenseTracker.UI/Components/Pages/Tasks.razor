@@ -68,6 +68,7 @@
 
     </div>
 
+
     @if (editingTaskId == null)
     {
         <button class="btn btn-primary"
@@ -85,15 +86,27 @@
 
 </div>
 
+
+
+
 @if (tasks == null)
 {
     <p>Loading...</p>
 }
 else
 {
+    <br />
+    <div class="mb-3">
+
+        <input class="form-control"
+               placeholder="🔍 Search tasks..."
+               @bind="searchText" />
+
+    </div>
+
     <div class="row g-4">
 
-        @foreach (var task in tasks)
+        @foreach (var task in FilteredTasks)
         {
             <div class="col-xl-4 col-lg-6">
 
@@ -198,6 +211,8 @@ else
 
 @code {
 
+    private string searchText = "";
+
     private List<TaskItem>? tasks;
 
     private int? editingTaskId;
@@ -271,5 +286,14 @@ else
 
         newTask = new CreateTaskDto();
     }
+
+    private IEnumerable<TaskItem> FilteredTasks =>
+    tasks?
+        .Where(t =>
+            string.IsNullOrWhiteSpace(searchText)
+            || t.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase)
+            || (!string.IsNullOrWhiteSpace(t.Description)
+                && t.Description.Contains(searchText, StringComparison.OrdinalIgnoreCase)))
+    ?? Enumerable.Empty<TaskItem>();
 
 }

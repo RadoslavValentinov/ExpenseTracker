@@ -47,4 +47,14 @@ public class ReminderApiService
     {
         await _http.DeleteAsync($"api/reminders/{id}");
     }
+
+
+    public async Task UpdateAsync(Reminder reminder)
+    {
+        var response = await _http.PutAsJsonAsync(
+            $"api/reminders/{reminder.Id}",
+            reminder);
+
+        response.EnsureSuccessStatusCode();
+    }
 }

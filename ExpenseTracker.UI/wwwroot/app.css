@@ -66,3 +66,125 @@ h1:focus {
     transform: translateX(4px);
     color: white;
 }
+.dashboard-card {
+    border-radius: 18px;
+    transition: all .25s ease;
+}
+
+    .dashboard-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 25px rgba(0,0,0,.15);
+    }
+
+.dashboard-stat {
+    font-size: 2.4rem;
+    font-weight: 700;
+    text-align: center;
+    margin-top: 12px;
+}
+
+.dashboard-card p {
+    font-size: .95rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+/* ===========================
+   DASHBOARD 2.0
+=========================== */
+
+.dashboard-card {
+    border: none;
+    border-radius: 18px;
+    min-height: 170px;
+    transition: all .25s ease;
+    background: white;
+}
+
+    .dashboard-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 12px 28px rgba(0,0,0,.12);
+    }
+
+.dashboard-title {
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #6c757d;
+    margin-bottom: 10px;
+}
+
+.dashboard-stat {
+    text-align: center;
+    font-size: 2.5rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* Цветове */
+
+.dashboard-primary {
+    border-left: 6px solid #4F8EF7;
+}
+
+.dashboard-success {
+    border-left: 6px solid #34C759;
+}
+
+.dashboard-danger {
+    border-left: 6px solid #FF3B30;
+}
+
+.dashboard-warning {
+    border-left: 6px solid #FF9500;
+}
+
+.dashboard-info {
+    border-left: 6px solid #32ADE6;
+}
+
+.dashboard-secondary {
+    border-left: 6px solid #8E8E93;
+}
+
+.dashboard-purple {
+    border-left: 6px solid #AF52DE;
+}
+
+/* Dashboard списъци */
+
+.dashboard-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid #ececec;
+}
+
+    .dashboard-item:last-child {
+        border-bottom: none;
+    }
+
+/* Quick links */
+
+.quick-link-btn {
+    border-radius: 12px;
+    padding: 10px 18px;
+    font-weight: 600;
+    transition: .2s;
+}
+
+    .quick-link-btn:hover {
+        transform: translateY(-2px);
+    }
+
+.progress {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    font-weight: 700;
+    font-size: .95rem;
+    transition: width .5s ease;
+}

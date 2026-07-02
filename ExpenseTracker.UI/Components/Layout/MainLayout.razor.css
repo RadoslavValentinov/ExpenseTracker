@@ -319,6 +319,29 @@ h3, h4, h5 {
     margin-top: 10px;
 }
 
+.dashboard-card {
+    border-radius: 18px;
+    transition: all .25s ease;
+}
+
+    .dashboard-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 25px rgba(0,0,0,.15);
+    }
+
+.dashboard-stat {
+    font-size: 2.4rem;
+    font-weight: 700;
+    text-align: center;
+    margin-top: 12px;
+}
+
+.dashboard-card p {
+    font-size: .95rem;
+    font-weight: 600;
+    text-align: center;
+}
+
 
 
 

@@ -32,6 +32,8 @@ h1:focus {
     outline: 1px solid #e50000;
 }
 
+
+
 .validation-message {
     color: #e50000;
 }
@@ -187,4 +189,186 @@ h1:focus {
     font-weight: 700;
     font-size: .95rem;
     transition: width .5s ease;
+}
+
+.dashboard-card svg {
+    max-width: 220px;
+    margin: auto;
+    display: block;
+}
+
+.dashboard-card circle {
+    transition: stroke-dasharray .5s ease;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7,1fr);
+    gap: 10px;
+}
+
+.calendar-header {
+    text-align: center;
+    font-weight: bold;
+    padding: 10px;
+}
+
+.calendar-cell {
+    min-height: 120px;
+    padding: 10px;
+    border-radius: 14px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    transition: all .2s ease;
+}
+
+    .calendar-cell:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 18px rgba(0,0,0,.08);
+    }
+
+    .calendar-cell.empty {
+        border: none;
+        background: transparent;
+    }
+
+.today-cell {
+    background: #dbeafe;
+    border: 2px solid #3b82f6;
+}
+
+.day-number {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #374151;
+}
+
+.calendar-reminder {
+    margin-top: 6px;
+    padding: 4px 8px;
+    border-radius: 8px;
+    background: #eff6ff;
+    border-left: 4px solid #3b82f6;
+    color: #1d4ed8;
+    font-size: 12px;
+    font-weight: 600;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.calendar-expense {
+    margin-top: 6px;
+    padding: 4px 8px;
+    border-radius: 8px;
+    background: #fef2f2;
+    border-left: 4px solid #ef4444;
+    color: #b91c1c;
+    font-size: 12px;
+    font-weight: 600;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.calendar-task {
+    margin-top: 6px;
+    padding: 4px 8px;
+    border-radius: 8px;
+    background: #f0fdf4;
+    border-left: 4px solid #22c55e;
+    color: #15803d;
+    font-size: 12px;
+    font-weight: 600;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.expense-day {
+    background: #fef2f2;
+    border: 2px solid #ef4444;
+}
+
+.task-day {
+    background: #f0fdf4;
+    border: 2px solid #22c55e;
+}
+
+.reminder-day {
+    background: #eff6ff;
+    border: 2px solid #3b82f6;
+}
+
+.calendar-indicators {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 8px;
+}
+
+.calendar-bar {
+    width: 4px;
+    height: 18px;
+    border-radius: 20px;
+}
+
+.expense-bar {
+    background: #ef4444;
+}
+
+.task-bar {
+    background: #22c55e;
+}
+
+.reminder-bar {
+    background: #3b82f6;
+}
+
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.calendar-modal {
+    width: 400px;
+    background: white;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.2);
+}
+
+.modal-item {
+    padding: 8px;
+    margin-bottom: 6px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+    .modal-item:hover {
+        opacity: .8;
+    }
+
+.reminder-item {
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.expense-item {
+    background: #fef2f2;
+    color: #b91c1c;
+}
+
+.task-item {
+    background: #f0fdf4;
+    color: #15803d;
 }

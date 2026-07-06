@@ -2,6 +2,7 @@
 
 @using ExpenseTracker.Core.Models
 @using ExpenseTracker.UI.Services
+@using System.Globalization
 
 
 @inject ExpenseApiService ExpenseService
@@ -429,6 +430,88 @@ else
             </div>
 
         </div>
+        <div class="row g-4 mt-3">
+
+            <div class="col-lg-6">
+
+                <div class="card p-4 dashboard-card">
+
+                    <h5 class="fw-bold mb-4">
+                        💸 Expense Distribution
+                    </h5>
+
+                    <div class="text-center">
+
+                        <svg width="220" height="220" viewBox="0 0 42 42">
+
+                            <circle cx="21"
+                                    cy="21"
+                                    r="15.915"
+                                    fill="transparent"
+                                    stroke="#eeeeee"
+                                    stroke-width="3">
+                            </circle>
+
+                            <circle cx="21"
+                                    cy="21"
+                                    r="15.915"
+                                    fill="transparent"
+                                    stroke="#198754"
+                                    stroke-width="3"
+                                    stroke-dasharray="@($"{PaidPercent.ToString(CultureInfo.InvariantCulture)} {100 - PaidPercent}")"
+                                    stroke-linecap="round"
+                                    transform="rotate(-90 21 21)">
+                            </circle>
+
+                            <text x="21"
+                                  y="22"
+                                  text-anchor="middle"
+                                  font-size="4"
+                                  font-weight="bold">
+
+                                @($"{PaidPercent:F0}%")
+
+                            </text>
+
+                        </svg>
+
+                    </div>
+
+                    <hr />
+
+                    <div class="d-flex justify-content-around">
+
+                        <div>
+
+                            <span class="badge bg-success">
+                                Paid
+                            </span>
+
+                            <p class="fw-bold mt-2">
+                                @PaidExpenses.ToString("C")
+                            </p>
+
+                        </div>
+
+                        <div>
+
+                            <span class="badge bg-danger">
+                                Unpaid
+                            </span>
+
+                            <p class="fw-bold mt-2">
+                                @UnpaidExpenses.ToString("C")
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
 
     </div>
 
@@ -483,6 +566,17 @@ else
 
     private List<Reminder>? reminders;
 
+
+    private decimal PaidExpenses =>
+    expenses?
+        .Where(x => x.IsPaid)
+        .Sum(x => x.Amount) ?? 0;
+
+    private decimal UnpaidExpenses =>
+        expenses?
+            .Where(x => !x.IsPaid)
+            .Sum(x => x.Amount) ?? 0;
+
     private decimal UnpaidAmount =>
         expenses?
             .Where(x => !x.IsPaid)
@@ -509,6 +603,11 @@ else
         TotalExpenses == 0
             ? 0
             : (int)((PaidAmount / TotalExpenses) * 100);
+
+    private double PaidPercent =>
+    TotalExpenses == 0
+        ? 0
+        : (double)(PaidAmount / TotalExpenses * 100);
 
     private int ReminderProgress =>
     reminders == null || reminders.Count == 0
@@ -540,4 +639,5 @@ else
         TotalTasks == 0
             ? 0
             : (CompletedTasks * 100) / TotalTasks;
+
 }

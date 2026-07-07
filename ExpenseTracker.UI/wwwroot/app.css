@@ -33,6 +33,23 @@ h1:focus {
 }
 
 
+.details-panel {
+    margin-top: 20px;
+    padding: 16px;
+    border-radius: 12px;
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+}
+
+    .details-panel h5 {
+        margin-bottom: 15px;
+    }
+
+    .details-panel p {
+        margin-bottom: 8px;
+    }x
+
+
 
 .validation-message {
     color: #e50000;

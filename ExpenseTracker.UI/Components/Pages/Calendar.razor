@@ -6,30 +6,41 @@
 @inject ReminderApiService ReminderService
 @inject ExpenseApiService ExpenseService
 @inject TaskApiService TaskService
-@inject NavigationManager NavigationManager
 
 <h3 class="mb-4">
     📅 Calendar
 </h3>
 
+<div class="card shadow-sm calendar-card">
 
-<div class="card p-4 shadow-sm">
+    <div class="calendar-toolbar">
 
-    <h5>
-        @currentMonth.ToString("MMMM yyyy")
-    </h5>
+        <button class="btn btn-outline-secondary"
+                @onclick="PreviousMonth">
+            ←
+        </button>
+
+        <h4 class="mb-0">
+            @CurrentMonth.ToString("MMMM yyyy")
+        </h4>
+
+        <button class="btn btn-outline-secondary"
+                @onclick="NextMonth">
+            →
+        </button>
+
+    </div>
 
     <hr />
 
     <div class="calendar-grid">
 
-        <div class="calendar-header">Mon</div>
-        <div class="calendar-header">Tue</div>
-        <div class="calendar-header">Wed</div>
-        <div class="calendar-header">Thu</div>
-        <div class="calendar-header">Fri</div>
-        <div class="calendar-header">Sat</div>
-        <div class="calendar-header">Sun</div>
+        @foreach (var day in WeekDays)
+        {
+            <div class="calendar-header">
+                @day
+            </div>
+        }
 
         @for (int i = 0; i < FirstDayOffset; i++)
         {
@@ -38,250 +49,61 @@
 
         @for (int day = 1; day <= DaysInMonth; day++)
         {
-            <div class="calendar-cell @GetDayClass(day) @(IsToday(day) ? "today-cell" : "")"
-                 @onclick="() => OpenDay(day)">
-
-                <div class="calendar-indicators">
-
-                    @if (HasExpense(day))
-                    {
-                        <span class="calendar-bar expense-bar"></span>
-                    }
-
-                    @if (HasTask(day))
-                    {
-                        <span class="calendar-bar task-bar"></span>
-                    }
-
-                    @if (HasReminder(day))
-                    {
-                        <span class="calendar-bar reminder-bar"></span>
-                    }
-
-                </div>
+            <div class="calendar-cell">
 
                 <div class="day-number">
                     @day
                 </div>
 
-                @foreach (var reminder in GetRemindersForDay(day))
-                {
-                    <div class="calendar-reminder">
-
-                        🔔 @reminder.Title
-
-                    </div>
-                }
-
-                @foreach (var expense in GetExpensesForDay(day))
-                {
-                    <div class="calendar-expense">
-                        💰 @expense.Title
-                    </div>
-                }
-
-                @foreach (var task in GetTasksForDay(day))
-                {
-                    <div class="calendar-task">
-                        ✅ @task.Title
-                    </div>
-                }
-
             </div>
         }
 
-
     </div>
-
 
 </div>
 
-@if (showModal && selectedDay != null)
-{
-    <div class="modal-backdrop" @onclick="CloseModal">
-
-        <div class="calendar-modal" @onclick:stopPropagation="true">
-
-            <div class="d-flex justify-content-between mb-3">
-                <h5>📅 Day @selectedDay</h5>
-
-                <button class="btn btn-sm btn-close" @onclick="CloseModal"></button>
-            </div>
-
-            <hr />
-
-            <h6>🔔 Reminders</h6>
-
-            @foreach (var r in SelectedReminders)
-            {
-                <div class="modal-item reminder-item"
-                     @onclick="@(() => NavigationManager.NavigateTo("/reminders"))">
-                    🔔 @r.Title
-                </div>
-            }
-
-            <h6 class="mt-3">💰 Expenses</h6>
-
-            @foreach (var e in SelectedExpenses)
-            {
-                <div class="modal-item expense-item"
-                     @onclick="@(() => NavigationManager.NavigateTo("/expenses"))">
-                    💰 @e.Title
-                </div>
-            }
-
-            <h6 class="mt-3">✅ Tasks</h6>
-
-            @foreach (var t in SelectedTasks)
-            {
-                <div class="modal-item task-item"
-                     @onclick="@(() => NavigationManager.NavigateTo("/tasks"))">
-                    ✅ @t.Title
-                </div>
-            }
-
-        </div>
-
-    </div>
-}
-
-
-
-
 @code {
 
-    private List<Reminder>? reminders;
+    private DateTime CurrentMonth = new(DateTime.Today.Year,
+                                        DateTime.Today.Month,
+                                        1);
 
-    private List<Expense>? expenses;
-
-    private List<TaskItem>? tasks;
-
-    private int? selectedDay;
-
-    private bool showModal;
-
-    private DateTime currentMonth = DateTime.Today;
-
-    protected override async Task OnInitializedAsync()
+    private readonly string[] WeekDays =
     {
-        reminders = await ReminderService.GetAllAsync();
-
-        expenses = await ExpenseService.GetExpensesAsync();
-
-        tasks = await TaskService.GetTasksAsync();
-    }
-
-    private void OpenDay(int day)
-    {
-        selectedDay = day;
-        showModal = true;
-    }
-
-    private void CloseModal()
-    {
-        showModal = false;
-        selectedDay = null;
-    }
-
-    private IEnumerable<Reminder> SelectedReminders =>
-    selectedDay == null
-        ? Enumerable.Empty<Reminder>()
-        : GetRemindersForDay(selectedDay.Value);
-
-    private IEnumerable<Expense> SelectedExpenses =>
-        selectedDay == null
-            ? Enumerable.Empty<Expense>()
-            : GetExpensesForDay(selectedDay.Value);
-
-    private IEnumerable<TaskItem> SelectedTasks =>
-        selectedDay == null
-            ? Enumerable.Empty<TaskItem>()
-            : GetTasksForDay(selectedDay.Value);
+        "Mon",
+        "Tue",
+        "Wed",
+        "Thu",
+        "Fri",
+        "Sat",
+        "Sun"
+    };
 
     private int DaysInMonth =>
-    DateTime.DaysInMonth(currentMonth.Year, currentMonth.Month);
+        DateTime.DaysInMonth(CurrentMonth.Year,
+                             CurrentMonth.Month);
 
     private int FirstDayOffset
     {
         get
         {
-            var firstDay = new DateTime(currentMonth.Year, currentMonth.Month, 1);
+            var firstDay = new DateTime(
+                CurrentMonth.Year,
+                CurrentMonth.Month,
+                1);
 
             return ((int)firstDay.DayOfWeek + 6) % 7;
         }
     }
 
-    private bool IsToday(int day)
+    private void PreviousMonth()
     {
-        return currentMonth.Year == DateTime.Today.Year
-            && currentMonth.Month == DateTime.Today.Month
-            && day == DateTime.Today.Day;
+        CurrentMonth = CurrentMonth.AddMonths(-1);
     }
 
-
-    private IEnumerable<Reminder> GetRemindersForDay(int day)
+    private void NextMonth()
     {
-        return reminders?
-            .Where(r =>
-                r.ReminderDate.Year == currentMonth.Year &&
-                r.ReminderDate.Month == currentMonth.Month &&
-                r.ReminderDate.Day == day)
-            ?? Enumerable.Empty<Reminder>();
-    }
-
-    private IEnumerable<Expense> GetExpensesForDay(int day)
-    {
-        return expenses?
-            .Where(e =>
-                e.DueDate.Year == currentMonth.Year &&
-                e.DueDate.Month == currentMonth.Month &&
-                e.DueDate.Day == day)
-            ?? Enumerable.Empty<Expense>();
-    }
-
-    private IEnumerable<TaskItem> GetTasksForDay(int day)
-    {
-        return tasks?
-            .Where(t =>
-                t.DueDate.Year == currentMonth.Year &&
-                t.DueDate.Month == currentMonth.Month &&
-                t.DueDate.Day == day)
-            ?? Enumerable.Empty<TaskItem>();
-    }
-
-    private string GetDayClass(int day)
-    {
-        var hasExpense = GetExpensesForDay(day).Any(e => !e.IsPaid);
-        var hasTask = GetTasksForDay(day).Any();
-        var hasReminder = GetRemindersForDay(day).Any();
-
-
-        if (hasExpense)
-            return "expense-day";
-
-        if (hasTask)
-            return "task-day";
-
-        if (hasReminder)
-            return "reminder-day";
-
-        return "";
-    }
-
-    private bool HasExpense(int day)
-    {
-        return GetExpensesForDay(day).Any(e => !e.IsPaid);
-    }
-
-    private bool HasTask(int day)
-    {
-        return GetTasksForDay(day).Any();
-    }
-
-    private bool HasReminder(int day)
-    {
-        return GetRemindersForDay(day).Any();
+        CurrentMonth = CurrentMonth.AddMonths(1);
     }
 
 }
-

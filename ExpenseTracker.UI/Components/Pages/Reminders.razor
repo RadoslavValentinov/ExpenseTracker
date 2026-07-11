@@ -1,4 +1,6 @@
 ﻿@page "/reminders"
+@page "/reminders/{Id:int?}"
+
 
 @inject ReminderApiService ReminderService
 
@@ -105,6 +107,9 @@ else
 
 @code {
 
+    [Parameter]
+    public int? Id { get; set; }
+
     private string searchText = "";
 
     private int? editingReminderId;
@@ -117,6 +122,16 @@ else
     protected override async Task OnInitializedAsync()
     {
         reminders = await ReminderService.GetAllAsync();
+
+        if (Id != null)
+        {
+            var reminder = reminders.FirstOrDefault(x => x.Id == Id);
+
+            if (reminder != null)
+            {
+                EditReminder(reminder);
+            }
+        }
     }
 
     private async Task TriggerReminder(int id)

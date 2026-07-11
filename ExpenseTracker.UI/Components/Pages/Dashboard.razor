@@ -1,6 +1,7 @@
 ﻿@page "/"
 
 @using ExpenseTracker.Core.Models
+@using ExpenseTracker.UI.Models
 @using ExpenseTracker.UI.Services
 @using System.Globalization
 
@@ -8,6 +9,29 @@
 @inject ExpenseApiService ExpenseService
 @inject TaskApiService TaskService
 @inject ReminderApiService ReminderService
+@inject NotificationService NotificationService
+
+
+<h4>Notifications Test</h4>
+
+@foreach (var n in notifications)
+{
+    <div class="card mb-2 p-3">
+
+        <strong>@n.Type</strong>
+
+        <br />
+
+        @n.Title
+
+        <br />
+
+        @n.Description
+
+    </div>
+}
+
+
 
 <div class="dashboard-header">
 
@@ -566,6 +590,8 @@ else
 
     private List<Reminder>? reminders;
 
+    private List<NotificationItem> notifications = new();
+
 
     private decimal PaidExpenses =>
     expenses?
@@ -589,6 +615,8 @@ else
         tasks = await TaskService.GetTasksAsync();
 
         reminders = await ReminderService.GetAllAsync();
+
+        notifications = await NotificationService.GetNotificationsAsync();
     }
 
     private decimal PaidAmount =>

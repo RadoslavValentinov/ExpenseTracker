@@ -1,12 +1,17 @@
 ﻿@page "/expenses"
+@page "/expenses/{Id:int?}"
+
 
 @using ExpenseTracker.Core.Models
 @using ExpenseTracker.UI.Models
 @using ExpenseTracker.UI.Services
+@using Microsoft.AspNetCore.Components
 
 @inject ExpenseApiService ExpenseService
 
 <h3>Expenses</h3>
+
+
 
 <div class="row g-4 mb-4">
 
@@ -258,12 +263,24 @@ else
     private List<Expense>? expenses;
     private int? editingExpenseId;
     private string searchText = "";
+    [Parameter]
+    public int? Id { get; set; }
 
     private CreateExpenseDto newExpense = new();
 
     protected override async Task OnInitializedAsync()
     {
         expenses = await ExpenseService.GetExpensesAsync();
+
+        if (Id != null)
+        {
+            var expense = expenses.FirstOrDefault(x => x.Id == Id);
+
+            if (expense != null)
+            {
+                EditExpense(expense);
+            }
+        }
     }
 
     private async Task MarkAsPaid(int id)

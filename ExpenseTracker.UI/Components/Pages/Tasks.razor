@@ -1,4 +1,6 @@
 ﻿@page "/tasks"
+@page "/tasks/{Id:int?}"
+
 
 @using ExpenseTracker.Core.Models
 @using ExpenseTracker.UI.Models
@@ -212,6 +214,9 @@ else
 
 @code {
 
+    [Parameter]
+    public int? Id { get; set; }
+
     private string searchText = "";
 
     private List<TaskItem>? tasks;
@@ -225,7 +230,18 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+
         tasks = await TaskService.GetTasksAsync();
+
+        if (Id != null)
+        {
+            var task = tasks!.FirstOrDefault(x => x.Id == Id);
+
+            if (task != null)
+            {
+                EditTask(task);
+            }
+        }
     }
 
     private async Task AddTask()

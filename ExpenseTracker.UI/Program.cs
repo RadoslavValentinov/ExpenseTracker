@@ -13,6 +13,8 @@ internal class Program
         builder.Services.AddScoped<ExpenseApiService>();
         builder.Services.AddScoped<TaskApiService>();
         builder.Services.AddScoped<ReminderApiService>();
+        builder.Services.AddScoped<NotificationService>();
+
 
         builder.Services.AddHttpClient("Api", client =>
         {

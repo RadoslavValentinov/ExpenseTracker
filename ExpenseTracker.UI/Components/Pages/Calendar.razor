@@ -223,6 +223,20 @@
 
                         <p><strong>Type:</strong> @selectedReminder.Type</p>
 
+                        <div class="details-actions">
+
+                            <button class="btn btn-outline-primary"
+                                    @onclick="EditSelected">
+                                ✏️ Edit
+                            </button>
+
+                            <button class="btn btn-outline-danger"
+                                    @onclick="DeleteSelected">
+                                🗑 Delete
+                            </button>
+
+                        </div>
+
                     </div>
                 }
 
@@ -240,6 +254,20 @@
 
                         <p><strong>Due:</strong> @selectedExpense.DueDate.ToShortDateString()</p>
 
+                        <div class="details-actions">
+
+                            <button class="btn btn-outline-primary"
+                                    @onclick="EditSelected">
+                                ✏️ Edit
+                            </button>
+
+                            <button class="btn btn-outline-danger"
+                                    @onclick="DeleteSelected">
+                                🗑 Delete
+                            </button>
+
+                        </div>
+
                     </div>
                 }
 
@@ -256,6 +284,20 @@
                         <p><strong>Priority:</strong> @selectedTask.Priority</p>
 
                         <p><strong>Due:</strong> @selectedTask.DueDate.ToShortDateString()</p>
+
+                        <div class="details-actions">
+
+                            <button class="btn btn-outline-primary"
+                                    @onclick="EditSelected">
+                                ✏️ Edit
+                            </button>
+
+                            <button class="btn btn-outline-danger"
+                                    @onclick="DeleteSelected">
+                                🗑 Delete
+                            </button>
+
+                        </div>
 
                     </div>
                 }
@@ -456,6 +498,75 @@
         selectedExpense = null;
 
         StateHasChanged();
+    }
+
+    private async Task DeleteSelected()
+    {
+        if (selectedExpense != null)
+        {
+            await ExpenseService.DeleteAsync(selectedExpense.Id);
+
+            expenses = await ExpenseService.GetExpensesAsync();
+
+            selectedExpense = null;
+
+            CloseModal();
+
+            StateHasChanged();
+
+            return;
+        }
+
+        if (selectedTask != null)
+        {
+            await TaskService.DeleteAsync(selectedTask.Id);
+
+            tasks = await TaskService.GetTasksAsync();
+
+            selectedTask = null;
+
+            CloseModal();
+
+            StateHasChanged();
+
+            return;
+        }
+
+        if (selectedReminder != null)
+        {
+            await ReminderService.DeleteAsync(selectedReminder.Id);
+
+            reminders = await ReminderService.GetAllAsync();
+
+            selectedReminder = null;
+
+            CloseModal();
+
+            StateHasChanged();
+
+            return;
+        }
+    }
+
+    private void EditSelected()
+    {
+        if (selectedExpense != null)
+        {
+            NavigationManager.NavigateTo($"/expenses/{selectedExpense.Id}");
+            return;
+        }
+
+        if (selectedTask != null)
+        {
+            NavigationManager.NavigateTo($"/tasks/{selectedTask.Id}");
+            return;
+        }
+
+        if (selectedReminder != null)
+        {
+            NavigationManager.NavigateTo($"/reminders/{selectedReminder.Id}");
+            return;
+        }
     }
 
 }

@@ -23,11 +23,11 @@ else
 
     <EditForm Model="newReminder" OnValidSubmit="@(editingReminderId == null ? AddReminder : SaveReminder)">
 
-        <InputText @bind-Value="newReminder.Title" />
+        <InputText @bind-Value="newReminder.Title" style="margin:10px 0px" />
 
-        <InputDate @bind-Value="@newReminder.ReminderDate" />
+        <InputDate @bind-Value="@newReminder.ReminderDate" style="margin:10px 0px" />
 
-        <InputSelect @bind-Value="newReminder.Type" class="form-select">
+        <InputSelect @bind-Value="newReminder.Type" class="form-select" style="width:400px" >
 
             <option value="">Select Type</option>
 

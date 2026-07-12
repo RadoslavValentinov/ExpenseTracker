@@ -343,6 +343,55 @@ h3, h4, h5 {
 }
 
 
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 28px;
+    background: white;
+    border-bottom: 1px solid #ececec;
+}
+
+.topbar-left p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 15px;
+}
+
+.topbar-right {
+    display: flex;
+    align-items: center;
+}
+
+.notification-btn {
+    position: relative;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 30px;
+    transition: .25s;
+    color: #374151;
+}
+
+    .notification-btn:hover {
+        transform: scale(1.12);
+        color: #2563eb;
+        text-shadow: 0 0 8px rgba(37,99,235,.35);
+    }
+
+.notification-count {
+    position: absolute;
+    top: -6px;
+    right: -8px;
+    font-family:Arial, Helvetica, sans-serif;
+    font-weight:bold;
+    font-size: 12px;
+    font-weight: 700;
+    color: #ef4444;
+}
+
+
+
 
 
 

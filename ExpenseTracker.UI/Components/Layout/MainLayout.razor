@@ -1,4 +1,9 @@
-﻿@inherits LayoutComponentBase
+﻿@using ExpenseTracker.UI.Services
+@inherits LayoutComponentBase
+
+@inject NotificationService NotificationService
+@inject NavigationManager NavigationManager 
+
 
 <div class="app-layout">
 
@@ -59,11 +64,25 @@
 
         <header class="topbar">
 
-            <div>
+            <div class="topbar-left">
+                <p>Manage your finances and tasks</p>
+            </div>
 
-                <p>
-                    Manage your finances and tasks
-                </p>
+            <div class="topbar-right">
+
+                <button class="notification-btn"
+                        @onclick="OpenNotifications">
+
+                    🔔
+
+                    @if (notificationCount > 0)
+                    {
+                        <span class="notification-count">
+                            @(notificationCount > 99 ? "99+" : notificationCount.ToString())
+                        </span>
+                    }
+
+                </button>
 
             </div>
 
@@ -78,3 +97,21 @@
     </div>
 
 </div>
+
+@code {
+
+    private int notificationCount;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var notifications = await NotificationService.GetNotificationsAsync();
+
+        notificationCount = notifications.Count;
+    }
+
+    private void OpenNotifications()
+    {
+        NavigationManager.NavigateTo("/notifications");
+    }
+
+}

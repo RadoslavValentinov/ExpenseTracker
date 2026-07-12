@@ -1,0 +1,113 @@
+﻿@page "/notifications"
+
+@using ExpenseTracker.UI.Models
+@using ExpenseTracker.UI.Services
+
+@inject NotificationService NotificationService
+@inject NavigationManager NavigationManager
+
+<h3 class="mb-4">
+    🔔 Notifications
+</h3>
+
+@if (notifications == null)
+{
+    <p>Loading...</p>
+}
+else if (!notifications.Any())
+{
+    <div class="alert alert-success">
+        🎉 You have no notifications.
+    </div>
+}
+else
+{
+    <div class="notifications-container">
+
+        @foreach (var notification in notifications)
+        {
+            <div class="notification-card">
+
+                <div class="notification-header">
+
+                    <div class="notification-icon">
+                        @GetIcon(notification.Type)
+                    </div>
+
+                    <div class="notification-title">
+
+                        <h5>@notification.Title</h5>
+
+                        <span class="notification-type">
+                            @notification.Type
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <div class="notification-description">
+
+                    @notification.Description
+
+                </div>
+
+                <div class="notification-footer">
+
+                    <div class="notification-date">
+
+                        📅 @notification.Date.ToString("dd MMM yyyy")
+
+                    </div>
+
+                    <div class="notification-buttons">
+
+                        <button class="btn btn-primary"
+                                @onclick="() => Open(notification)">
+
+                            Open
+
+                        </button>
+
+                        <button class="btn btn-outline-danger">
+
+                            Delete
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+        }
+
+    </div>
+}
+
+@code {
+
+    private List<NotificationItem> notifications = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        notifications = await NotificationService.GetNotificationsAsync();
+    }
+
+    private void Open(NotificationItem notification)
+    {
+        NavigationManager.NavigateTo(notification.Url);
+    }
+
+    private string GetIcon(string type)
+    {
+        return type switch
+        {
+            "Expense" => "💰",
+            "Task" => "✅",
+            "Reminder" => "🔔",
+            _ => "📌"
+        };
+    }
+
+}

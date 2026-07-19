@@ -10,6 +10,38 @@
     🔔 Notifications
 </h3>
 
+<div class="notifications-toolbar">
+
+    <input class="form-control notification-search"
+           placeholder="🔍 Search notifications..."
+           @bind="searchText" />
+</div>
+
+<div class="notification-filters">
+
+    <button class="@(selectedFilter == "All" ? "active-filter" : "")"
+            @onclick='() => SetFilter("All")'>
+        All
+    </button>
+
+    <button class="@(selectedFilter == "Expense" ? "active-filter" : "")"
+            @onclick='() => SetFilter("Expense")'>
+        💰 Expenses
+    </button>
+
+    <button class="@(selectedFilter == "Task" ? "active-filter" : "")"
+            @onclick='() => SetFilter("Task")'>
+        ✅ Tasks
+    </button>
+
+    <button class="@(selectedFilter == "Reminder" ? "active-filter" : "")"
+            @onclick='() => SetFilter("Reminder")'>
+        🔔 Reminders
+    </button>
+
+</div>
+
+
 @if (notifications == null)
 {
     <p>Loading...</p>
@@ -24,7 +56,7 @@ else
 {
     <div class="notifications-container">
 
-        @foreach (var notification in notifications)
+        @foreach (var notification in FilteredNotifications)
         {
             <div class="notification-card">
 
@@ -69,11 +101,11 @@ else
 
                         </button>
 
-                        <button class="btn btn-outline-danger">
-
+                        @* <button class="btn btn-outline-danger"
+            
                             Delete
 
-                        </button>
+                        </button> *@
 
                     </div>
 
@@ -87,6 +119,10 @@ else
 
 @code {
 
+    private string searchText = "";
+
+    private string selectedFilter = "All";
+
     private List<NotificationItem> notifications = new();
 
     protected override async Task OnInitializedAsync()
@@ -99,6 +135,28 @@ else
         NavigationManager.NavigateTo(notification.Url);
     }
 
+    private void SetFilter(string filter)
+    {
+        selectedFilter = filter;
+    }
+
+
+    private IEnumerable<NotificationItem> FilteredNotifications =>
+     notifications.Where(n =>
+
+         (string.IsNullOrWhiteSpace(searchText)
+         || n.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase)
+         || (!string.IsNullOrWhiteSpace(n.Description)
+             && n.Description.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+         || n.Type.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+
+         &&
+
+         (selectedFilter == "All"
+         || n.Type == selectedFilter)
+     );
+
+
     private string GetIcon(string type)
     {
         return type switch
@@ -109,5 +167,6 @@ else
             _ => "📌"
         };
     }
+
 
 }

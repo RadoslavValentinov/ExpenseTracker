@@ -49,6 +49,14 @@ public class ReminderApiService
     }
 
 
+    //public async Task MarkAsReadAsync(int id)
+    //{
+    //    var client = _http.CreateClient("Api");
+
+    //    await client.PutAsync($"api/reminders/{id}/read", null);
+    //}
+
+
     public async Task UpdateAsync(Reminder reminder)
     {
         var response = await _http.PutAsJsonAsync(

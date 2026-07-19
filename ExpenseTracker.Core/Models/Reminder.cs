@@ -14,5 +14,7 @@ public class Reminder
 
     public int ReferenceId { get; set; }
 
+    public bool IsRead { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

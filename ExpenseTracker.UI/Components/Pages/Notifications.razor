@@ -4,6 +4,9 @@
 @using ExpenseTracker.UI.Services
 
 @inject NotificationService NotificationService
+@inject ReminderApiService ReminderApiService
+@inject TaskApiService TaskApiService
+@inject ExpenseApiService ExpenseApiService
 @inject NavigationManager NavigationManager
 
 <h3 class="mb-4">
@@ -101,11 +104,36 @@ else
 
                         </button>
 
-                        @* <button class="btn btn-outline-danger"
-            
-                            Delete
+                        @if (notification.Type == "Reminder")
+                        {
+                            <button class="btn btn-outline-success" style="margin-left: 10px;"
+                                    @onclick="() => MarkAsRead(notification)">
 
-                        </button> *@
+                                Mark as Read
+
+                            </button>
+                        }
+
+                        @if (notification.Type == "Task")
+                        {
+                            <button class="btn btn-outline-success" style="margin-left: 10px;"
+                                    @onclick="() => CompleteTask(notification)">
+
+                                Complete
+
+                            </button>
+                        }
+
+                        @if (notification.Type == "Expense")
+                        {
+                            <button class="btn btn-success" style="margin-left: 10px;"
+                                    @onclick="() => MarkAsPaid(notification)">
+
+                                Mark as Paid
+
+                            </button>
+                        }
+
 
                     </div>
 
@@ -133,6 +161,36 @@ else
     private void Open(NotificationItem notification)
     {
         NavigationManager.NavigateTo(notification.Url);
+    }
+
+    private async Task MarkAsRead(NotificationItem notification)
+    {
+        if (notification.Type != "Reminder")
+            return;
+
+        await ReminderApiService.MarkAsReadAsync(notification.Id);
+
+        notifications = await NotificationService.GetNotificationsAsync();
+    }
+
+    private async Task CompleteTask(NotificationItem notification)
+    {
+        if (notification.Type != "Task")
+            return;
+
+        await TaskApiService.CompleteTaskAsync(notification.Id);
+
+        notifications = await NotificationService.GetNotificationsAsync();
+    }
+
+    private async Task MarkAsPaid(NotificationItem notification)
+    {
+        if (notification.Type != "Expense")
+            return;
+
+        await ExpenseApiService.MarkAsPaidAsync(notification.Id);
+
+        notifications = await NotificationService.GetNotificationsAsync();
     }
 
     private void SetFilter(string filter)
@@ -167,6 +225,5 @@ else
             _ => "📌"
         };
     }
-
 
 }

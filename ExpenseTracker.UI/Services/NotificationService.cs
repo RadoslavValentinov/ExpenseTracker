@@ -24,10 +24,10 @@ public class NotificationService
     {
         var notifications = new List<NotificationItem>();
 
-        
+
         var reminders = await _reminderService.GetAllAsync();
 
-        foreach (var reminder in reminders)
+        foreach (var reminder in reminders.Where(r => !r.IsRead))
         {
             notifications.Add(new NotificationItem
             {
@@ -37,11 +37,11 @@ public class NotificationService
                 Type = "Reminder",
                 Date = reminder.ReminderDate,
                 Url = $"/reminders/{reminder.Id}",
-                IsRead = false
+                IsRead = reminder.IsRead
             });
         }
 
-        
+
         var expenses = await _expenseService.GetExpensesAsync();
 
         foreach (var expense in expenses.Where(x => !x.IsPaid))
@@ -62,7 +62,7 @@ public class NotificationService
         var tasks = await _taskService.GetTasksAsync() ?? new List<TaskItem>();
 
 
-        foreach (var task in tasks!)
+        foreach (var task in tasks.Where(t => !t.IsCompleted))
         {
             notifications.Add(new NotificationItem
             {
@@ -72,7 +72,7 @@ public class NotificationService
                 Type = "Task",
                 Date = task.DueDate,
                 Url = $"/tasks/{task.Id}",
-                IsRead = false
+                IsRead = task.IsCompleted
             });
         }
 

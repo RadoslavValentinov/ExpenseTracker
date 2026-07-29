@@ -10,4 +10,5 @@ public interface IReminderService
     Task MarkAsTriggeredAsync(int id);
     Task DeleteAsync(int id);
     Task UpdateAsync(Reminder reminder);
+    Task MarkAsReadAsync(int id);
 }

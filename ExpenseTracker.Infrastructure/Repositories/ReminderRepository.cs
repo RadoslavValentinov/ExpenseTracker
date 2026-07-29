@@ -59,6 +59,20 @@ public class ReminderRepository : IReminderRepository
         await _context.SaveChangesAsync();
     }
 
+    public async Task MarkAsReadAsync(int id)
+    {
+        var reminder = await _context.Reminders.FindAsync(id);
+
+        if (reminder == null)
+            return;
+
+        reminder.IsRead = true;
+
+        _context.Reminders.Update(reminder);
+
+        await _context.SaveChangesAsync();
+    }
+
     public async Task DeleteAsync(int id)
     {
         var reminder = await _context.Reminders.FindAsync(id);

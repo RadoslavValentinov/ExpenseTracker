@@ -38,6 +38,11 @@ public class ReminderService : IReminderService
         await _repository.MarkAsTriggeredAsync(id);
     }
 
+    public async Task MarkAsReadAsync(int id)
+    {
+        await _repository.MarkAsReadAsync(id);
+    }
+
     public async Task DeleteAsync(int id)
     {
         await _repository.DeleteAsync(id);

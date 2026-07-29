@@ -47,6 +47,14 @@ public class RemindersController : ControllerBase
         return NoContent();
     }
 
+    [HttpPut("{id}/read")]
+    public async Task<IActionResult> MarkAsRead(int id)
+    {
+        await _service.MarkAsReadAsync(id);
+
+        return NoContent();
+    }
+
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {

@@ -71,24 +71,42 @@
 
                 @foreach (var reminder in GetRemindersForDay(day))
                 {
-                    <div class="calendar-reminder">
-
-                        🔔 @reminder.Title
-
+                    <div class="calendar-dot reminder-dot"
+                         title="@reminder.Title"
+                         @onclick:stopPropagation="true"
+                         @onclick="() => ShowReminder(reminder)">
                     </div>
                 }
 
                 @foreach (var expense in GetExpensesForDay(day))
                 {
-                    <div class="calendar-expense">
-                        💰 @expense.Title
+                    <div class="calendar-dot expense-dot"
+                         title="@expense.Title"
+                         @onclick:stopPropagation="true"
+                         @onclick="() => ShowExpense(expense)">
                     </div>
                 }
 
                 @foreach (var task in GetTasksForDay(day))
                 {
-                    <div class="calendar-task">
-                        ✅ @task.Title
+                    <div class="calendar-dot task-dot"
+                         title="@task.Title"
+                         @onclick:stopPropagation="true"
+                         @onclick="() => ShowTask(task)">
+                    </div>
+                }
+
+                @{
+                    var totalItems =
+                    GetRemindersForDay(day).Count()
+                    + GetExpensesForDay(day).Count()
+                    + GetTasksForDay(day).Count();
+                }
+
+                @if (totalItems > 3)
+                {
+                    <div class="calendar-more">
+                        +@(totalItems - 3) more...
                     </div>
                 }
 

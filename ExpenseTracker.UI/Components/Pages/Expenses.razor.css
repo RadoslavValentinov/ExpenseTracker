@@ -1,0 +1,75 @@
+﻿body {
+}
+@media (max-width: 768px) {
+
+    .expenses-table {
+        width: 100%;
+    }
+
+        .expenses-table thead {
+            display: none;
+        }
+
+        .expenses-table tbody {
+            display: block;
+            width: 100%;
+        }
+
+            .expenses-table tbody tr {
+                display: block;
+                width: 100%;
+                margin-bottom: 12px;
+                padding: 12px;
+                border: 1px solid #e5e7eb;
+                border-radius: 12px;
+                background: #fff;
+                box-sizing: border-box;
+            }
+
+            .expenses-table tbody td {
+                display: block;
+                width: 100%;
+                box-sizing: border-box;
+                padding: 5px 0;
+                border: none;
+            }
+
+                .expenses-table tbody td:nth-child(1) {
+                    font-weight: 600;
+                    font-size: 16px;
+                    margin-bottom: 4px;
+                }
+
+                .expenses-table tbody td:nth-child(2) {
+                    font-size: 14px;
+                }
+
+                .expenses-table tbody td:nth-child(3) {
+                    font-size: 14px;
+                }
+
+                .expenses-table tbody td:nth-child(4) {
+                    margin-top: 3px;
+                }
+
+                .expenses-table tbody td.expense-actions {
+                    margin-top: 10px;
+                    padding-top: 10px;
+                    border-top: 1px solid #eeeeee;
+                }
+
+    .expense-buttons {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+    }
+
+        .expense-buttons button {
+            flex: 1;
+            max-width: 90px;
+            margin: 0;
+        }
+}

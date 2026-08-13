@@ -181,7 +181,7 @@
 }
 else
 {
-    <table class="table align-middle">
+    <table class="expenses-table">
 
         <thead>
 
@@ -223,33 +223,88 @@ else
                         }
 
                     </td>
-                    <td>
+                    <td class="expense-actions">
 
-                        @if (!expense.IsPaid)
-                        {
-                            <button class="btn btn-success btn-sm"
-                                    @onclick="() => MarkAsPaid(expense.Id)">
+                        <div class="expense-buttons">
 
-                                Pay
+                            @if (!expense.IsPaid)
+                            {
+                                <button class="btn btn-success btn-sm"
+                                        @onclick="() => MarkAsPaid(expense.Id)">
+                                    Pay
+                                </button>
+                            }
 
+                            <button class="btn btn-warning btn-sm"
+                                    @onclick="() => EditExpense(expense)">
+                                Edit
                             </button>
-                        }
+
+                            <button class="btn btn-danger btn-sm"
+                                    @onclick="() => DeleteExpense(expense.Id)">
+                                Delete
+                            </button>
+
+                        </div>
 
                     </td>
+
+
+                </tr>
+                <tr>
+
                     <td>
-
-                        <button class="btn btn-warning btn-sm me-2"
-                                @onclick="() => EditExpense(expense)">
-                            Edit
-                        </button>
-
-                        <button class="btn btn-danger btn-sm"
-                                @onclick="() => DeleteExpense(expense.Id)">
-                            Delete
-                        </button>
-
+                        @expense.Title
                     </td>
 
+                    <td>
+                        @expense.Amount.ToString("N2")
+                    </td>
+
+                    <td>
+                        @expense.DueDate.ToShortDateString()
+                    </td>
+
+                    <td>
+                        @if (expense.IsPaid)
+                        {
+                            <span class="badge bg-success">
+                                Paid
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">
+                                Unpaid
+                            </span>
+                        }
+                    </td>
+
+                    <td class="expense-actions">
+
+                        <div class="expense-buttons">
+
+                            @if (!expense.IsPaid)
+                            {
+                                <button class="btn btn-success btn-sm"
+                                        @onclick="() => MarkAsPaid(expense.Id)">
+                                    Pay
+                                </button>
+                            }
+
+                            <button class="btn btn-warning btn-sm"
+                                    @onclick="() => EditExpense(expense)">
+                                Edit
+                            </button>
+
+                            <button class="btn btn-danger btn-sm"
+                                    @onclick="() => DeleteExpense(expense.Id)">
+                                Delete
+                            </button>
+
+                        </div>
+
+                    </td>
 
                 </tr>
             }

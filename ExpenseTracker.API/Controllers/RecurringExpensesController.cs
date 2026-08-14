@@ -28,4 +28,14 @@ public class RecurringExpensesController : ControllerBase
         await _service.AddAsync(recurringExpense);
         return Ok();
     }
+
+    [HttpPost("{id}/generate")]
+    public async Task<IActionResult> Generate(int id)
+    {
+        await _service.GenerateExpenseAsync(id);
+
+        return Ok();
+    }
+
+
 }

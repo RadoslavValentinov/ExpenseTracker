@@ -81,7 +81,13 @@ public class NotificationService
             .ToList();
     }
 
+    public async Task MarkAsReadAsync(NotificationItem notification)
+    {
+        if (notification.Type != "Reminder")
+            return;
 
+        await _reminderService.MarkAsReadAsync(notification.Id);
+    }
 
 
 }

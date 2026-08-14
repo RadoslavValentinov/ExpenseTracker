@@ -35,7 +35,7 @@ h3, h4, h5 {
     box-sizing: border-box;
 }
 
-    .sidebar a {
+    .sidebar .nav-item {
         display: flex;
         align-items: center;
         width: 100%;
@@ -51,10 +51,10 @@ h3, h4, h5 {
     }
 
 
-        .sidebar a.active {
+        .sidebar .nav-item.active {
             background: rgba(255, 255, 255, 0.12);
         }
-        .sidebar a:hover {
+        .sidebar .nav-item:hover {
             background: rgba(255, 255, 255, 0.08);
         }
 
@@ -532,5 +532,7 @@ h3, h4, h5 {
     .content-area {
         padding: 5px;
     }
+
+
 
 }

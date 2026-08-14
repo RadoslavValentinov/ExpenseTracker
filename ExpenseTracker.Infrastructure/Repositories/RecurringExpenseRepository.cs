@@ -32,6 +32,12 @@ public class RecurringExpenseRepository : IRecurringExpenseRepository
             .ToListAsync();
     }
 
+    public async Task<RecurringExpense?> GetByIdAsync(int id)
+    {
+        return await _context.RecurringExpenses
+            .FirstOrDefaultAsync(r => r.Id == id);
+    }
+
     public async Task UpdateAsync(RecurringExpense recurringExpense)
     {
         _context.RecurringExpenses.Update(recurringExpense);

@@ -168,7 +168,7 @@ else
         if (notification.Type != "Reminder")
             return;
 
-        await ReminderApiService.MarkAsReadAsync(notification.Id);
+        await NotificationService.MarkAsReadAsync(notification);
 
         notifications = await NotificationService.GetNotificationsAsync();
     }

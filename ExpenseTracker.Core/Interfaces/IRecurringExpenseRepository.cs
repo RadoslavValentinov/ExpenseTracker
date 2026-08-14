@@ -8,4 +8,5 @@ public interface IRecurringExpenseRepository
     Task<List<RecurringExpense>> GetAllAsync();
     Task<List<RecurringExpense>> GetActiveAsync();
     Task UpdateAsync(RecurringExpense recurringExpense);
+    Task<RecurringExpense?> GetByIdAsync(int id);
 }

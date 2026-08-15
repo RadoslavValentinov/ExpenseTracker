@@ -1,7 +1,6 @@
 ﻿@page "/expenses"
 @page "/expenses/{Id:int?}"
 
-
 @using ExpenseTracker.Core.Models
 @using ExpenseTracker.UI.Models
 @using ExpenseTracker.UI.Services
@@ -10,8 +9,6 @@
 @inject ExpenseApiService ExpenseService
 
 <h3>Expenses</h3>
-
-
 
 <div class="row g-4 mb-4">
 
@@ -82,7 +79,6 @@
 </div>
 
 
-
 <EditForm Model="newExpense"
           OnValidSubmit="@(editingExpenseId == null ? AddExpense : SaveExpense)">
 
@@ -103,7 +99,6 @@
         </div>
 
     </div>
-
 
 
     <div class="row g-3">
@@ -143,6 +138,7 @@
 
     </div>
 
+
     <div class="mt-4">
 
         @if (editingExpenseId == null)
@@ -163,7 +159,9 @@
     </div>
 
 </EditForm>
+
 <br />
+
 
 <div class="mb-3">
 
@@ -174,6 +172,7 @@
 </div>
 
 <hr />
+
 
 @if (expenses == null)
 {
@@ -186,11 +185,13 @@ else
         <thead>
 
             <tr>
+
                 <th>Title</th>
                 <th>Amount</th>
                 <th>Due Date</th>
                 <th>Paid</th>
                 <th>Actions</th>
+
             </tr>
 
         </thead>
@@ -199,58 +200,6 @@ else
 
             @foreach (var expense in FilteredExpenses)
             {
-                <tr>
-
-                    <td>@expense.Title</td>
-
-                    <td>@expense.Amount</td>
-
-                    <td>@expense.DueDate.ToShortDateString()</td>
-
-                    <td>
-
-                        @if (expense.IsPaid)
-                        {
-                            <span class="badge bg-success">
-                                Paid
-                            </span>
-                        }
-                        else
-                        {
-                            <span class="badge bg-danger">
-                                Unpaid
-                            </span>
-                        }
-
-                    </td>
-                    <td class="expense-actions">
-
-                        <div class="expense-buttons">
-
-                            @if (!expense.IsPaid)
-                            {
-                                <button class="btn btn-success btn-sm"
-                                        @onclick="() => MarkAsPaid(expense.Id)">
-                                    Pay
-                                </button>
-                            }
-
-                            <button class="btn btn-warning btn-sm"
-                                    @onclick="() => EditExpense(expense)">
-                                Edit
-                            </button>
-
-                            <button class="btn btn-danger btn-sm"
-                                    @onclick="() => DeleteExpense(expense.Id)">
-                                Delete
-                            </button>
-
-                        </div>
-
-                    </td>
-
-
-                </tr>
                 <tr>
 
                     <td>
@@ -266,6 +215,7 @@ else
                     </td>
 
                     <td>
+
                         @if (expense.IsPaid)
                         {
                             <span class="badge bg-success">
@@ -278,6 +228,7 @@ else
                                 Unpaid
                             </span>
                         }
+
                     </td>
 
                     <td class="expense-actions">
@@ -314,15 +265,20 @@ else
     </table>
 }
 
+
 @code {
 
     private List<Expense>? expenses;
+
     private int? editingExpenseId;
+
     private string searchText = "";
+
     [Parameter]
     public int? Id { get; set; }
 
     private CreateExpenseDto newExpense = new();
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -339,6 +295,7 @@ else
         }
     }
 
+
     private async Task MarkAsPaid(int id)
     {
         await ExpenseService.MarkAsPaidAsync(id);
@@ -346,12 +303,14 @@ else
         expenses = await ExpenseService.GetExpensesAsync();
     }
 
+
     private async Task DeleteExpense(int id)
     {
         await ExpenseService.DeleteAsync(id);
 
         expenses = await ExpenseService.GetExpensesAsync();
     }
+
 
     private void EditExpense(Expense expense)
     {
@@ -394,6 +353,7 @@ else
         }
     }
 
+
     private async Task AddExpense()
     {
         try
@@ -410,18 +370,22 @@ else
         }
     }
 
+
     private decimal TotalAmount =>
-    expenses?.Sum(e => e.Amount) ?? 0;
+        expenses?.Sum(e => e.Amount) ?? 0;
+
 
     private decimal PaidAmount =>
         expenses?
             .Where(e => e.IsPaid)
             .Sum(e => e.Amount) ?? 0;
 
+
     private decimal UnpaidAmount =>
-    expenses?
-        .Where(x => !x.IsPaid)
-        .Sum(x => x.Amount) ?? 0;
+        expenses?
+            .Where(e => !e.IsPaid)
+            .Sum(e => e.Amount) ?? 0;
+
 
     private int UpcomingCount =>
         expenses?
@@ -430,13 +394,17 @@ else
                 e.DueDate > DateTime.Now) ?? 0;
 
 
-
     private IEnumerable<Expense> FilteredExpenses =>
-    expenses?
-        .Where(e =>
-            string.IsNullOrWhiteSpace(searchText)
-            || e.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase)
-            || (!string.IsNullOrWhiteSpace(e.Category)
-                && e.Category.Contains(searchText, StringComparison.OrdinalIgnoreCase)))
-    ?? Enumerable.Empty<Expense>();
+        expenses?
+            .Where(e =>
+                string.IsNullOrWhiteSpace(searchText)
+                || e.Title.Contains(
+                    searchText,
+                    StringComparison.OrdinalIgnoreCase)
+                || (!string.IsNullOrWhiteSpace(e.Category)
+                    && e.Category.Contains(
+                        searchText,
+                        StringComparison.OrdinalIgnoreCase)))
+        ?? Enumerable.Empty<Expense>();
+
 }

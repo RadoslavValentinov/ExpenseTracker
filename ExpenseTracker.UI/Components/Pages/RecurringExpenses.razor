@@ -12,7 +12,9 @@
 <div class="card p-4 mb-4">
 
     <h5 class="mb-3">
-        Add Recurring Expense
+        @(editingExpenseId == null
+                ? "Add Recurring Expense"
+                : "Edit Recurring Expense")
     </h5>
 
     <div class="row g-3">
@@ -82,12 +84,31 @@
 
     <div class="mt-4">
 
-        <button class="btn btn-primary"
-                @onclick="AddRecurringExpense">
+        @if (editingExpenseId == null)
+        {
+            <button class="btn btn-primary"
+                    @onclick="AddRecurringExpense">
 
-            Add Recurring Expense
+                Add Recurring Expense
 
-        </button>
+            </button>
+        }
+        else
+        {
+            <button class="btn btn-warning me-2"
+                    @onclick="UpdateRecurringExpense">
+
+                Save Changes
+
+            </button>
+
+            <button class="btn btn-secondary"
+                    @onclick="CancelEdit">
+
+                Cancel
+
+            </button>
+        }
 
     </div>
 
@@ -171,13 +192,56 @@ else
 
                     <div class="mt-auto pt-3">
 
-                        @if (expense.IsActive)
-                        {
-                            <button class="btn btn-primary btn-sm w-100"
-                                    @onclick="() => GenerateExpense(expense.Id)">
-                                Generate Expense
-                            </button>
-                        }
+                        <div class="row g-2">
+
+                            @if (expense.IsActive)
+                            {
+                                <div class="col-6">
+
+                                    <button class="btn btn-primary btn-sm w-100"
+                                            @onclick="() => GenerateExpense(expense.Id)">
+
+                                        Generate
+
+                                    </button>
+
+                                </div>
+                            }
+
+                            <div class="col-6">
+
+                                <button class="btn btn-warning btn-sm w-100"
+                                        @onclick="() => EditRecurringExpense(expense)">
+
+                                    Edit
+
+                                </button>
+
+                            </div>
+
+                            <div class="col-6">
+
+                                <button class="btn btn-secondary btn-sm w-100"
+                                        @onclick="() => ToggleActive(expense)">
+
+                                    @(expense.IsActive ? "Disable" : "Enable")
+
+                                </button>
+
+                            </div>
+
+                            <div class="col-6">
+
+                                <button class="btn btn-danger btn-sm w-100"
+                                        @onclick="() => DeleteRecurringExpense(expense.Id)">
+
+                                    Delete
+
+                                </button>
+
+                            </div>
+
+                        </div>
 
                     </div>
 
@@ -194,16 +258,20 @@ else
 
     private List<RecurringExpense>? recurringExpenses;
 
+    private int? editingExpenseId;
+
     private RecurringExpense newExpense = new()
     {
         IsActive = true
     };
+
 
     protected override async Task OnInitializedAsync()
     {
         recurringExpenses =
             await RecurringExpenseService.GetAllAsync();
     }
+
 
     private async Task AddRecurringExpense()
     {
@@ -218,9 +286,68 @@ else
         };
     }
 
+
+    private void EditRecurringExpense(RecurringExpense expense)
+    {
+        editingExpenseId = expense.Id;
+
+        newExpense = new RecurringExpense
+        {
+            Id = expense.Id,
+            Title = expense.Title,
+            Amount = expense.Amount,
+            DayOfMonth = expense.DayOfMonth,
+            IsActive = expense.IsActive,
+            CreatedAt = expense.CreatedAt,
+            LastGeneratedDate = expense.LastGeneratedDate
+        };
+    }
+
+
+    private async Task UpdateRecurringExpense()
+    {
+        await RecurringExpenseService.UpdateAsync(newExpense);
+
+        recurringExpenses =
+            await RecurringExpenseService.GetAllAsync();
+
+        CancelEdit();
+    }
+
+
+    private void CancelEdit()
+    {
+        editingExpenseId = null;
+
+        newExpense = new RecurringExpense
+        {
+            IsActive = true
+        };
+    }
+
+
+    private async Task ToggleActive(RecurringExpense expense)
+    {
+        expense.IsActive = !expense.IsActive;
+
+        await RecurringExpenseService.UpdateAsync(expense);
+
+        recurringExpenses =
+            await RecurringExpenseService.GetAllAsync();
+    }
+
+
     private async Task GenerateExpense(int id)
     {
         await RecurringExpenseService.GenerateAsync(id);
+
+        recurringExpenses =
+            await RecurringExpenseService.GetAllAsync();
+    }
+
+    private async Task DeleteRecurringExpense(int id)
+    {
+        await RecurringExpenseService.DeleteAsync(id);
 
         recurringExpenses =
             await RecurringExpenseService.GetAllAsync();

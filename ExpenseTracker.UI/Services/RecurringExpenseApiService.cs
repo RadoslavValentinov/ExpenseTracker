@@ -39,12 +39,21 @@ public class RecurringExpenseApiService
             null);
     }
 
-    //public async Task UpdateAsync(RecurringExpense recurringExpense)
-    //{
-    //    var client = _factory.CreateClient("Api");
+    public async Task UpdateAsync(RecurringExpense recurringExpense)
+    {
+        var client = _factory.CreateClient("Api");
 
-    //    await client.PutAsJsonAsync(
-    //        $"api/RecurringExpenses/{recurringExpense.Id}",
-    //        recurringExpense);
-    //}
+        await client.PutAsJsonAsync(
+            $"api/RecurringExpenses/{recurringExpense.Id}",
+             recurringExpense);
+    }
+
+
+    public async Task DeleteAsync(int id)
+    {
+        var client = _factory.CreateClient("Api");
+
+        await client.DeleteAsync(
+            $"api/RecurringExpenses/{id}");
+    }
 }

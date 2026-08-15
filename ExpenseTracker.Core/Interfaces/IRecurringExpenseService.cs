@@ -10,4 +10,6 @@ public interface IRecurringExpenseService
     Task UpdateAsync(RecurringExpense recurringExpense);
     Task<RecurringExpense?> GetByIdAsync(int id);
     Task GenerateExpenseAsync(int id);
+
+    Task DeleteAsync(int id);
 }

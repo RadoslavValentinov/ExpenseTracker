@@ -5,7 +5,9 @@ namespace ExpenseTracker.Core.Services;
 
 public class RecurringExpenseService : IRecurringExpenseService
 {
-    private static readonly SemaphoreSlim _generationLock = new SemaphoreSlim(1, 1);
+    private static readonly SemaphoreSlim _generationLock =
+        new SemaphoreSlim(1, 1);
+
     private readonly IRecurringExpenseRepository _repository;
     private readonly IExpenseService _expenseService;
 
@@ -33,7 +35,8 @@ public class RecurringExpenseService : IRecurringExpenseService
 
         try
         {
-            var recurringExpense = await _repository.GetByIdAsync(id);
+            var recurringExpense =
+                await _repository.GetByIdAsync(id);
 
             if (recurringExpense == null)
                 return;
@@ -41,22 +44,38 @@ public class RecurringExpenseService : IRecurringExpenseService
             if (!recurringExpense.IsActive)
                 return;
 
-            var now = DateTime.Now;
+            var today = DateTime.Now.Date;
 
+            // If this recurring expense was already
+            // generated for the current month, stop.
             if (recurringExpense.LastGeneratedDate.HasValue &&
-                recurringExpense.LastGeneratedDate.Value.Year == now.Year &&
-                recurringExpense.LastGeneratedDate.Value.Month == now.Month)
+                recurringExpense.LastGeneratedDate.Value.Year == today.Year &&
+                recurringExpense.LastGeneratedDate.Value.Month == today.Month)
             {
                 return;
             }
 
+            // Calculate the actual due day for the current month.
+            // Example:
+            // DayOfMonth = 31
+            // February -> 28/29
             var day = Math.Min(
                 recurringExpense.DayOfMonth,
-                DateTime.DaysInMonth(now.Year, now.Month));
+                DateTime.DaysInMonth(
+                    today.Year,
+                    today.Month));
 
+            // If we haven't reached the due day yet,
+            // do not generate the expense.
+            if (today.Day < day)
+                return;
+
+            // The expense keeps the planned due date,
+            // even if we generate it later because the
+            // application was offline.
             var dueDate = new DateTime(
-                now.Year,
-                now.Month,
+                today.Year,
+                today.Month,
                 day);
 
             var expense = new Expense
@@ -70,6 +89,8 @@ public class RecurringExpenseService : IRecurringExpenseService
 
             await _expenseService.AddExpenseAsync(expense);
 
+            // Remember that this month's expense
+            // has already been generated.
             recurringExpense.LastGeneratedDate = DateTime.UtcNow;
 
             await _repository.UpdateAsync(recurringExpense);
@@ -90,9 +111,14 @@ public class RecurringExpenseService : IRecurringExpenseService
         return _repository.GetByIdAsync(id);
     }
 
-
     public Task UpdateAsync(RecurringExpense recurringExpense)
     {
         return _repository.UpdateAsync(recurringExpense);
+    }
+
+
+    public Task DeleteAsync(int id)
+    {
+        return _repository.DeleteAsync(id);
     }
 }

@@ -38,4 +38,26 @@ public class RecurringExpensesController : ControllerBase
     }
 
 
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(
+    int id,
+    RecurringExpense recurringExpense)
+    {
+        if (id != recurringExpense.Id)
+            return BadRequest();
+
+        await _service.UpdateAsync(recurringExpense);
+
+        return Ok();
+    }
+
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        await _service.DeleteAsync(id);
+
+        return NoContent();
+    }
+
 }

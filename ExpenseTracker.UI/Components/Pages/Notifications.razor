@@ -13,12 +13,15 @@
     🔔 Notifications
 </h3>
 
+
 <div class="notifications-toolbar">
 
     <input class="form-control notification-search"
            placeholder="🔍 Search notifications..."
            @bind="searchText" />
+
 </div>
+
 
 <div class="notification-filters">
 
@@ -49,9 +52,9 @@
 {
     <p>Loading...</p>
 }
-else if (!notifications.Any())
+else if (!FilteredNotifications.Any())
 {
-    <div class="alert alert-success">
+    <div class="alert alert-success mt-4">
         🎉 You have no notifications.
     </div>
 }
@@ -63,6 +66,8 @@ else
         {
             <div class="notification-card">
 
+                <!-- HEADER -->
+
                 <div class="notification-header">
 
                     <div class="notification-icon">
@@ -71,7 +76,9 @@ else
 
                     <div class="notification-title">
 
-                        <h5>@notification.Title</h5>
+                        <h5 class="mb-1">
+                            @notification.Title
+                        </h5>
 
                         <span class="notification-type">
                             @notification.Type
@@ -81,11 +88,17 @@ else
 
                 </div>
 
+
+                <!-- DESCRIPTION -->
+
                 <div class="notification-description">
 
                     @notification.Description
 
                 </div>
+
+
+                <!-- FOOTER -->
 
                 <div class="notification-footer">
 
@@ -95,18 +108,20 @@ else
 
                     </div>
 
-                    <div class="notification-buttons">
 
-                        <button class="btn btn-primary"
+                    <div class="notification-buttons d-flex gap-2">
+
+                        <button class="btn btn-primary btn-sm"
                                 @onclick="() => Open(notification)">
 
                             Open
 
                         </button>
 
+
                         @if (notification.Type == "Reminder")
                         {
-                            <button class="btn btn-outline-success" style="margin-left: 10px;"
+                            <button class="btn btn-outline-success btn-sm"
                                     @onclick="() => MarkAsRead(notification)">
 
                                 Mark as Read
@@ -114,9 +129,10 @@ else
                             </button>
                         }
 
+
                         @if (notification.Type == "Task")
                         {
-                            <button class="btn btn-outline-success" style="margin-left: 10px;"
+                            <button class="btn btn-outline-success btn-sm"
                                     @onclick="() => CompleteTask(notification)">
 
                                 Complete
@@ -124,16 +140,16 @@ else
                             </button>
                         }
 
+
                         @if (notification.Type == "Expense")
                         {
-                            <button class="btn btn-success" style="margin-left: 10px;"
+                            <button class="btn btn-success btn-sm"
                                     @onclick="() => MarkAsPaid(notification)">
 
                                 Mark as Paid
 
                             </button>
                         }
-
 
                     </div>
 
@@ -145,6 +161,7 @@ else
     </div>
 }
 
+
 @code {
 
     private string searchText = "";
@@ -153,15 +170,19 @@ else
 
     private List<NotificationItem> notifications = new();
 
+
     protected override async Task OnInitializedAsync()
     {
-        notifications = await NotificationService.GetNotificationsAsync();
+        notifications =
+            await NotificationService.GetNotificationsAsync();
     }
+
 
     private void Open(NotificationItem notification)
     {
         NavigationManager.NavigateTo(notification.Url);
     }
+
 
     private async Task MarkAsRead(NotificationItem notification)
     {
@@ -170,8 +191,10 @@ else
 
         await NotificationService.MarkAsReadAsync(notification);
 
-        notifications = await NotificationService.GetNotificationsAsync();
+        notifications =
+            await NotificationService.GetNotificationsAsync();
     }
+
 
     private async Task CompleteTask(NotificationItem notification)
     {
@@ -180,8 +203,10 @@ else
 
         await TaskApiService.CompleteTaskAsync(notification.Id);
 
-        notifications = await NotificationService.GetNotificationsAsync();
+        notifications =
+            await NotificationService.GetNotificationsAsync();
     }
+
 
     private async Task MarkAsPaid(NotificationItem notification)
     {
@@ -190,8 +215,10 @@ else
 
         await ExpenseApiService.MarkAsPaidAsync(notification.Id);
 
-        notifications = await NotificationService.GetNotificationsAsync();
+        notifications =
+            await NotificationService.GetNotificationsAsync();
     }
+
 
     private void SetFilter(string filter)
     {
@@ -200,19 +227,34 @@ else
 
 
     private IEnumerable<NotificationItem> FilteredNotifications =>
-     notifications.Where(n =>
+        notifications.Where(n =>
 
-         (string.IsNullOrWhiteSpace(searchText)
-         || n.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase)
-         || (!string.IsNullOrWhiteSpace(n.Description)
-             && n.Description.Contains(searchText, StringComparison.OrdinalIgnoreCase))
-         || n.Type.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+            (
+                string.IsNullOrWhiteSpace(searchText)
 
-         &&
+                || n.Title.Contains(
+                    searchText,
+                    StringComparison.OrdinalIgnoreCase)
 
-         (selectedFilter == "All"
-         || n.Type == selectedFilter)
-     );
+                || (
+                    !string.IsNullOrWhiteSpace(n.Description)
+                    && n.Description.Contains(
+                        searchText,
+                        StringComparison.OrdinalIgnoreCase)
+                )
+
+                || n.Type.Contains(
+                    searchText,
+                    StringComparison.OrdinalIgnoreCase)
+            )
+
+            &&
+
+            (
+                selectedFilter == "All"
+                || n.Type == selectedFilter
+            )
+        );
 
 
     private string GetIcon(string type)

@@ -1,7 +1,6 @@
 ﻿using ExpenseTracker.Core.Models;
 using ExpenseTracker.UI.Models;
 using System.Net.Http.Json;
-using static System.Net.WebRequestMethods;
 
 namespace ExpenseTracker.UI.Services;
 
@@ -19,20 +18,29 @@ public class ExpenseApiService
     {
         var client = _factory.CreateClient("Api");
 
-        await client.PutAsync(
+        var response = await client.PutAsync(
             $"api/Expenses/{id}/pay",
             null);
+
+        await EnsureSuccessAsync(response);
     }
+
 
     public async Task<List<Expense>> GetExpensesAsync()
     {
         var client = _factory.CreateClient("Api");
 
-        var expenses = await client.GetFromJsonAsync<List<Expense>>(
+        var response = await client.GetAsync(
             "api/expenses");
+
+        await EnsureSuccessAsync(response);
+
+        var expenses =
+            await response.Content.ReadFromJsonAsync<List<Expense>>();
 
         return expenses ?? new List<Expense>();
     }
+
 
     public async Task AddExpenseAsync(CreateExpenseDto dto)
     {
@@ -42,27 +50,48 @@ public class ExpenseApiService
             "api/Expenses",
             dto);
 
-        if (!response.IsSuccessStatusCode)
-        {
-            var error = await response.Content.ReadAsStringAsync();
-
-            throw new Exception(error);
-        }
+        await EnsureSuccessAsync(response);
     }
+
 
     public async Task UpdateAsync(Expense expense)
     {
         var client = _factory.CreateClient("Api");
 
-        await client.PutAsJsonAsync(
+        var response = await client.PutAsJsonAsync(
             $"api/expenses/{expense.Id}",
             expense);
+
+        await EnsureSuccessAsync(response);
     }
+
 
     public async Task DeleteAsync(int id)
     {
         var client = _factory.CreateClient("Api");
 
-        await client.DeleteAsync($"api/expenses/{id}");
+        var response = await client.DeleteAsync(
+            $"api/expenses/{id}");
+
+        await EnsureSuccessAsync(response);
+    }
+
+
+    private static async Task EnsureSuccessAsync(
+        HttpResponseMessage response)
+    {
+        if (response.IsSuccessStatusCode)
+            return;
+
+        var error =
+            await response.Content.ReadAsStringAsync();
+
+        if (string.IsNullOrWhiteSpace(error))
+        {
+            error =
+                $"Request failed with status code {(int)response.StatusCode}.";
+        }
+
+        throw new Exception(error);
     }
 }

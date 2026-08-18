@@ -1,4 +1,5 @@
 ﻿using ExpenseTracker.Core.Models;
+using System.Net.Http.Json;
 
 public class ReminderApiService
 {
@@ -10,57 +11,102 @@ public class ReminderApiService
         _http = factory.CreateClient("Api");
     }
 
+
     public async Task<List<Reminder>> GetAllAsync()
     {
-        var response = await _http.GetAsync("api/reminders");
+        var response =
+            await _http.GetAsync("api/reminders");
 
-        var content = await response.Content.ReadAsStringAsync();
+        await EnsureSuccessAsync(response);
 
-        Console.WriteLine(content);
-
-        response.EnsureSuccessStatusCode();
-
-        return await response.Content.ReadFromJsonAsync<List<Reminder>>() ?? new();
+        return await response.Content
+            .ReadFromJsonAsync<List<Reminder>>()
+            ?? new List<Reminder>();
     }
+
 
     public async Task<List<Reminder>> GetCompletedAsync()
     {
-        return await _http.GetFromJsonAsync<List<Reminder>>(
-            "api/reminders/completed") ?? new();
+        var response =
+            await _http.GetAsync("api/reminders/completed");
+
+        await EnsureSuccessAsync(response);
+
+        return await response.Content
+            .ReadFromJsonAsync<List<Reminder>>()
+            ?? new List<Reminder>();
     }
+
 
     public async Task TriggerAsync(int id)
     {
-        await _http.PutAsync($"api/reminders/{id}/trigger", null);
+        var response =
+            await _http.PutAsync(
+                $"api/reminders/{id}/trigger",
+                null);
+
+        await EnsureSuccessAsync(response);
     }
+
 
     public async Task CreateAsync(Reminder reminder)
     {
-        var response = await _http.PostAsJsonAsync(
-            "api/reminders",
-            reminder);
+        var response =
+            await _http.PostAsJsonAsync(
+                "api/reminders",
+                reminder);
 
-        response.EnsureSuccessStatusCode();
+        await EnsureSuccessAsync(response);
     }
+
 
     public async Task DeleteAsync(int id)
     {
-        await _http.DeleteAsync($"api/reminders/{id}");
+        var response =
+            await _http.DeleteAsync(
+                $"api/reminders/{id}");
+
+        await EnsureSuccessAsync(response);
     }
 
 
     public async Task MarkAsReadAsync(int id)
     {
-        await _http.PutAsync($"api/reminders/{id}/read", null);
+        var response =
+            await _http.PutAsync(
+                $"api/reminders/{id}/read",
+                null);
+
+        await EnsureSuccessAsync(response);
     }
 
 
     public async Task UpdateAsync(Reminder reminder)
     {
-        var response = await _http.PutAsJsonAsync(
-            $"api/reminders/{reminder.Id}",
-            reminder);
+        var response =
+            await _http.PutAsJsonAsync(
+                $"api/reminders/{reminder.Id}",
+                reminder);
 
-        response.EnsureSuccessStatusCode();
+        await EnsureSuccessAsync(response);
+    }
+
+
+    private static async Task EnsureSuccessAsync(
+        HttpResponseMessage response)
+    {
+        if (response.IsSuccessStatusCode)
+            return;
+
+        var error =
+            await response.Content.ReadAsStringAsync();
+
+        if (string.IsNullOrWhiteSpace(error))
+        {
+            error =
+                $"Request failed with status code {(int)response.StatusCode}.";
+        }
+
+        throw new Exception(error);
     }
 }

@@ -1,10 +1,34 @@
 ﻿@page "/reminders"
 @page "/reminders/{Id:int?}"
 
+@using ExpenseTracker.Core.Models
+@using ExpenseTracker.UI.Services
 
 @inject ReminderApiService ReminderService
 
-<h3>Reminders</h3>
+<h3 class="mb-4">
+    🔔 Reminders
+</h3>
+
+
+@if (!string.IsNullOrWhiteSpace(errorMessage))
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+
+        <strong>❌ Something went wrong.</strong>
+
+        <div class="mt-1">
+            @errorMessage
+        </div>
+
+        <button type="button"
+                class="btn-close"
+                aria-label="Close"
+                @onclick="ClearError">
+        </button>
+
+    </div>
+}
 
 
 @if (reminders == null)
@@ -13,56 +37,158 @@
 }
 else
 {
+    <!-- ========================= -->
+    <!-- ADD / EDIT REMINDER -->
+    <!-- ========================= -->
 
-    <h5>
-        @(editingReminderId == null
-            ? "Add Reminder"
-            : "Edit Reminder")
-</h5>
+    <EditForm Model="newReminder"
+              OnValidSubmit="@(editingReminderId == null ? AddReminder : SaveReminder)">
+
+        <div class="card p-4 shadow-sm mb-4">
+
+            <h5 class="mb-4">
+
+                @(editingReminderId == null
+                            ? "Add Reminder"
+                            : "Edit Reminder")
+
+        </h5>
 
 
-    <EditForm Model="newReminder" OnValidSubmit="@(editingReminderId == null ? AddReminder : SaveReminder)">
+            <!-- TITLE -->
 
-        <InputText @bind-Value="newReminder.Title" style="margin:10px 0px" />
+            <div class="mb-3">
 
-        <InputDate @bind-Value="@newReminder.ReminderDate" style="margin:10px 0px" />
+                <label class="form-label">
+                    Title *
+                </label>
 
-        <InputSelect @bind-Value="newReminder.Type" class="form-select" style="width:400px" >
+                <InputText class="form-control"
+                           placeholder="e.g. Doctor appointment"
+                           @bind-Value="newReminder.Title" />
 
-            <option value="">Select Type</option>
+            @if (showValidation &&
+                        string.IsNullOrWhiteSpace(newReminder.Title))
+                {
+                    <div class="text-danger small mt-1">
+                        Title is required.
+                    </div>
+                }
 
-            <option value="Task">
-                Task
-            </option>
+            </div>
 
-            <option value="Expense">
-                Expense
-            </option>
 
-            <option value="General">
-                General
-            </option>
+            <!-- DATE -->
 
-        </InputSelect>
+            <div class="mb-3">
 
-    @if (editingReminderId == null)
-        {
-            <button type="submit" class="btn btn-primary">
-                Add Reminder
-            </button>
-        }
-        else
-        {
-            <button type="submit" class="btn btn-warning">
-                Save Changes
-            </button>
-        }
+                <label class="form-label">
+                    Reminder Date *
+                </label>
+
+                <InputDate class="form-control"
+                           @bind-Value="newReminder.ReminderDate" />
+
+            </div>
+
+
+            <!-- TYPE -->
+
+            <div class="mb-3">
+
+                <label class="form-label">
+                    Type *
+                </label>
+
+                <InputSelect class="form-select"
+                             @bind-Value="newReminder.Type">
+
+                    <option value="">
+                        Select Type
+                    </option>
+
+                    <option value="Task">
+                        Task
+                    </option>
+
+                    <option value="Expense">
+                        Expense
+                    </option>
+
+                    <option value="General">
+                        General
+                    </option>
+
+                </InputSelect>
+
+                @if (showValidation &&
+                            string.IsNullOrWhiteSpace(newReminder.Type))
+                {
+                    <div class="text-danger small mt-1">
+                        Type is required.
+                    </div>
+                }
+
+            </div>
+
+
+            @if (showValidation && !IsReminderValid)
+            {
+                <div class="alert alert-danger mt-4 mb-0">
+
+                    Please correct the highlighted fields before saving.
+
+                </div>
+            }
+
+
+            <!-- BUTTONS -->
+
+            <div class="mt-4">
+
+                @if (editingReminderId == null)
+                {
+                    <button type="submit"
+                            class="btn btn-primary">
+
+                        ➕ Add Reminder
+
+                    </button>
+                }
+                else
+                {
+                    <div class="d-flex gap-2 flex-wrap">
+
+                        <button type="submit"
+                                class="btn btn-warning">
+
+                            💾 Save Changes
+
+                        </button>
+
+                        <button type="button"
+                                class="btn btn-secondary"
+                                @onclick="CancelEdit">
+
+                            Cancel
+
+                        </button>
+
+                    </div>
+                }
+
+            </div>
+
+        </div>
 
     </EditForm>
 
-    <br />
 
-    <div class="mb-3">
+    <!-- ========================= -->
+    <!-- SEARCH -->
+    <!-- ========================= -->
+
+    <div class="mb-4">
 
         <input class="form-control"
                placeholder="🔍 Search reminders..."
@@ -70,45 +196,341 @@ else
 
     </div>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Title</th>
-                <th>Date</th>
-                <th>Action</th>
-            </tr>
-        </thead>
 
-        <tbody>
+    <!-- ========================= -->
+    <!-- REMINDERS LIST -->
+    <!-- ========================= -->
+    @if (!FilteredReminders.Any())
+    {
+        <div class="alert alert-info">
+
+            No reminders found.
+
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+
             @foreach (var reminder in FilteredReminders)
             {
-                <tr>
-                    <td>@reminder.Title</td>
-                    <td>@reminder.ReminderDate.ToShortDateString()</td>
-                    <td>
-                        <button class="btn btn-success"
-                                @onclick="() => TriggerReminder(reminder.Id)">
-                            Complete
-                        </button>
-                        <button class="btn btn-warning btn-sm"
-                                @onclick="() => EditReminder(reminder)">
-                            Edit
-                        </button>
-                        <button class="btn btn-danger btn-sm"
-                                @onclick="() => DeleteReminder(reminder.Id)">
-                            Delete
-                        </button>
-                    </td>
-                </tr>
+                <div class="col-xl-4 col-lg-6">
+
+                    <div class="card p-4 shadow-sm h-100 d-flex flex-column">
+
+
+                        <!-- HEADER -->
+
+                        <div class="mb-3">
+
+                            <div class="d-flex justify-content-between align-items-start gap-2">
+
+                                <h5 class="fw-bold mb-0">
+
+                                    🔔 @reminder.Title
+
+                                </h5>
+
+
+                                @if (reminder.IsTriggered)
+                                {
+                                    <span class="badge bg-success">
+
+                                        Completed
+
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning text-dark">
+
+                                        Active
+
+                                    </span>
+                                }
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- TYPE -->
+
+                        <div class="mb-3">
+
+                            @if (reminder.Type == "Task")
+                            {
+                                <span class="badge bg-primary">
+
+                                    ✅ Task
+
+                                </span>
+                            }
+                            else if (reminder.Type == "Expense")
+                            {
+                                <span class="badge bg-danger">
+
+                                    💰 Expense
+
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">
+
+                                    📌 General
+
+                                </span>
+                            }
+
+                        </div>
+
+
+                        <!-- DATE -->
+
+                        <div class="mb-4">
+
+                            <p class="mb-0">
+
+                                <strong>
+                                    📅 Date:
+                                </strong>
+
+                                @reminder.ReminderDate.ToString("dd MMM yyyy")
+
+                            </p>
+
+                        </div>
+
+
+                        <!-- ACTIONS -->
+
+                        <div class="mt-auto">
+
+                            <button class="btn btn-outline-primary btn-sm w-100 mb-2"
+                                    @onclick="() => ViewReminderDetails(reminder)">
+
+                                👁️ View Details
+
+                            </button>
+
+
+                            @if (!reminder.IsTriggered)
+                            {
+                                <div class="d-flex gap-2">
+
+                                    <button class="btn btn-success btn-sm flex-fill"
+                                            @onclick="() => TriggerReminder(reminder.Id)">
+
+                                        Complete
+
+                                    </button>
+
+
+                                    <button class="btn btn-warning btn-sm flex-fill"
+                                            @onclick="() => EditReminder(reminder)">
+
+                                        Edit
+
+                                    </button>
+
+
+                                    <button class="btn btn-danger btn-sm flex-fill"
+                                            @onclick="() => DeleteReminder(reminder.Id)">
+
+                                        Delete
+
+                                    </button>
+
+                                </div>
+                            }
+                            else
+                            {
+                                <button class="btn btn-danger btn-sm w-100"
+                                        @onclick="() => DeleteReminder(reminder.Id)">
+
+                                    Delete
+
+                                </button>
+                            }
+
+                        </div>
+
+                    </div>
+
+                </div>
             }
-        </tbody>
-    </table>
+
+        </div>
+    }
 }
+
+
+<!-- ========================= -->
+<!-- DETAILS MODAL -->
+<!-- ========================= -->
+@if (selectedReminder != null)
+{
+    <div class="modal d-block"
+         tabindex="-1"
+         role="dialog"
+         style="background-color: rgba(0,0,0,0.5);">
+
+        <div class="modal-dialog modal-dialog-centered"
+             role="document">
+
+            <div class="modal-content">
+
+
+                <!-- HEADER -->
+
+                <div class="modal-header">
+
+                    <h5 class="modal-title">
+
+                        🔔 @selectedReminder.Title
+
+                    </h5>
+
+                    <button type="button"
+                            class="btn-close"
+                            aria-label="Close"
+                            @onclick="CloseReminderDetails">
+                    </button>
+
+                </div>
+
+
+                <!-- BODY -->
+
+                <div class="modal-body">
+
+                    <div class="mb-3">
+
+                        <strong>
+                            Type:
+                        </strong>
+
+
+                        @if (selectedReminder.Type == "Task")
+                        {
+                            <span class="badge bg-primary ms-2">
+                                ✅ Task
+                            </span>
+                        }
+                        else if (selectedReminder.Type == "Expense")
+                        {
+                            <span class="badge bg-danger ms-2">
+                                💰 Expense
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary ms-2">
+                                📌 General
+                            </span>
+                        }
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <strong>
+                            📅 Reminder Date:
+                        </strong>
+
+                        @selectedReminder.ReminderDate.ToString("dd MMM yyyy")
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <strong>
+                            Status:
+                        </strong>
+
+                        @if (selectedReminder.IsTriggered)
+                        {
+                            <span class="badge bg-success ms-2">
+                                Completed
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-warning text-dark ms-2">
+                                Active
+                            </span>
+                        }
+
+                    </div>
+
+
+                    @if (selectedReminder.ReferenceId > 0)
+                    {
+                        <div class="mb-3">
+
+                            <strong>
+                                Reference ID:
+                            </strong>
+
+                            @selectedReminder.ReferenceId
+
+                        </div>
+                    }
+
+                </div>
+
+
+                <!-- FOOTER -->
+
+                <div class="modal-footer">
+
+                    <button type="button"
+                            class="btn btn-secondary"
+                            @onclick="CloseReminderDetails">
+
+                        Close
+
+                    </button>
+
+
+                    @if (!selectedReminder.IsTriggered)
+                    {
+                        <button type="button"
+                                class="btn btn-warning"
+                                @onclick="() => EditReminderFromDetails(selectedReminder)">
+
+                            ✏️ Edit
+
+                        </button>
+
+
+                        <button type="button"
+                                class="btn btn-success"
+                                @onclick="() => CompleteReminderFromDetails(selectedReminder.Id)">
+
+                            ✅ Complete
+
+                        </button>
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+}
+
 
 @code {
 
     [Parameter]
     public int? Id { get; set; }
+
 
     private string searchText = "";
 
@@ -116,104 +538,353 @@ else
 
     private Reminder? editingReminder;
 
+    private Reminder? selectedReminder;
+
     private List<Reminder>? reminders;
 
+    private string? errorMessage;
 
-    protected override async Task OnInitializedAsync()
-    {
-        reminders = await ReminderService.GetAllAsync();
+    private bool showValidation;
 
-        if (Id != null)
-        {
-            var reminder = reminders.FirstOrDefault(x => x.Id == Id);
-
-            if (reminder != null)
-            {
-                EditReminder(reminder);
-            }
-        }
-    }
-
-    private async Task TriggerReminder(int id)
-    {
-        await ReminderService.TriggerAsync(id);
-
-        reminders = await ReminderService.GetAllAsync();
-    }
 
     private Reminder newReminder = new()
     {
         ReminderDate = DateTime.Today
     };
 
+
+    // =========================
+    // INITIALIZATION
+    // =========================
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            ClearError();
+
+            reminders =
+                await ReminderService.GetAllAsync();
+
+
+            if (Id != null)
+            {
+                var reminder =
+                    reminders.FirstOrDefault(x => x.Id == Id);
+
+                if (reminder != null)
+                {
+                    EditReminder(reminder);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            SetError(ex);
+
+            reminders =
+                new List<Reminder>();
+        }
+    }
+
+
+    // =========================
+    // VALIDATION
+    // =========================
+
+    private bool IsReminderValid =>
+        !string.IsNullOrWhiteSpace(newReminder.Title)
+        && !string.IsNullOrWhiteSpace(newReminder.Type);
+
+
+    // =========================
+    // ADD
+    // =========================
+
     private async Task AddReminder()
     {
-        await ReminderService.CreateAsync(newReminder);
+        showValidation = true;
 
-        reminders = await ReminderService.GetAllAsync();
+        if (!IsReminderValid)
+            return;
 
-        newReminder = new Reminder
+
+        try
         {
-            ReminderDate = DateTime.Today
-        };
+            ClearError();
+
+            await ReminderService.CreateAsync(newReminder);
+
+
+            reminders =
+                await ReminderService.GetAllAsync();
+
+
+            showValidation = false;
+
+
+            newReminder =
+                new Reminder
+                {
+                    ReminderDate = DateTime.Today
+                };
+        }
+        catch (Exception ex)
+        {
+            SetError(ex);
+        }
     }
+
+
+    // =========================
+    // EDIT
+    // =========================
 
     private void EditReminder(Reminder reminder)
     {
-        editingReminder = reminder;
+        ClearError();
 
-        editingReminderId = reminder.Id;
+        editingReminder =
+            reminder;
 
-        newReminder = new Reminder
-        {
-            Id = reminder.Id,
-            Title = reminder.Title,
-            ReminderDate = reminder.ReminderDate,
-            Type = reminder.Type,
-            ReferenceId = reminder.ReferenceId,
-            IsTriggered = reminder.IsTriggered,
-            CreatedAt = reminder.CreatedAt
-        };
+        editingReminderId =
+            reminder.Id;
+
+
+        showValidation =
+            false;
+
+
+        newReminder =
+            new Reminder
+            {
+                Id = reminder.Id,
+                Title = reminder.Title,
+                ReminderDate = reminder.ReminderDate,
+                Type = reminder.Type,
+                ReferenceId = reminder.ReferenceId,
+                IsTriggered = reminder.IsTriggered,
+                CreatedAt = reminder.CreatedAt
+            };
     }
 
 
-    private async Task DeleteReminder(int id)
-    {
-        await ReminderService.DeleteAsync(id);
-
-        reminders = await ReminderService.GetAllAsync();
-    }
+    // =========================
+    // UPDATE
+    // =========================
 
     private async Task SaveReminder()
     {
+        showValidation = true;
+
+        if (!IsReminderValid)
+            return;
+
+
         if (editingReminder == null)
             return;
 
-        editingReminder.Title = newReminder.Title;
-        editingReminder.ReminderDate = newReminder.ReminderDate;
-        editingReminder.Type = newReminder.Type;
-        editingReminder.ReferenceId = newReminder.ReferenceId;
 
-        await ReminderService.UpdateAsync(editingReminder);
-
-        reminders = await ReminderService.GetAllAsync();
-
-        newReminder = new Reminder
+        try
         {
-            ReminderDate = DateTime.Today
-        };
+            ClearError();
 
-        editingReminder = null;
-        editingReminderId = null;
+
+            editingReminder.Title =
+                newReminder.Title;
+
+            editingReminder.ReminderDate =
+                newReminder.ReminderDate;
+
+            editingReminder.Type =
+                newReminder.Type;
+
+            editingReminder.ReferenceId =
+                newReminder.ReferenceId;
+
+
+            await ReminderService.UpdateAsync(
+                editingReminder);
+
+
+            reminders =
+                await ReminderService.GetAllAsync();
+
+
+            CancelEdit();
+        }
+        catch (Exception ex)
+        {
+            SetError(ex);
+        }
     }
 
+
+    // =========================
+    // CANCEL
+    // =========================
+
+    private void CancelEdit()
+    {
+        editingReminder =
+            null;
+
+        editingReminderId =
+            null;
+
+        showValidation =
+            false;
+
+
+        newReminder =
+            new Reminder
+            {
+                ReminderDate = DateTime.Today
+            };
+    }
+
+
+    // =========================
+    // COMPLETE
+    // =========================
+
+    private async Task TriggerReminder(int id)
+    {
+        try
+        {
+            ClearError();
+
+            await ReminderService.TriggerAsync(id);
+
+
+            reminders =
+                await ReminderService.GetAllAsync();
+
+
+            if (selectedReminder != null &&
+                selectedReminder.Id == id)
+            {
+                selectedReminder = null;
+            }
+        }
+        catch (Exception ex)
+        {
+            SetError(ex);
+        }
+    }
+
+
+    // =========================
+    // DELETE
+    // =========================
+
+    private async Task DeleteReminder(int id)
+    {
+        try
+        {
+            ClearError();
+
+            await ReminderService.DeleteAsync(id);
+
+
+            reminders =
+                await ReminderService.GetAllAsync();
+
+
+            if (selectedReminder != null &&
+                selectedReminder.Id == id)
+            {
+                selectedReminder = null;
+            }
+
+
+            if (editingReminderId == id)
+            {
+                CancelEdit();
+            }
+        }
+        catch (Exception ex)
+        {
+            SetError(ex);
+        }
+    }
+
+
+    // =========================
+    // DETAILS
+    // =========================
+
+    private void ViewReminderDetails(Reminder reminder)
+    {
+        ClearError();
+
+        selectedReminder =
+            reminder;
+    }
+
+
+    private void CloseReminderDetails()
+    {
+        selectedReminder =
+            null;
+    }
+
+
+    private void EditReminderFromDetails(Reminder reminder)
+    {
+        CloseReminderDetails();
+
+        EditReminder(reminder);
+    }
+
+
+    private async Task CompleteReminderFromDetails(int id)
+    {
+        await TriggerReminder(id);
+    }
+
+
+    // =========================
+    // ERROR HANDLING
+    // =========================
+
+    private void SetError(Exception ex)
+    {
+        errorMessage =
+            string.IsNullOrWhiteSpace(ex.Message)
+                ? "Unable to complete the operation. Please try again."
+                : ex.Message;
+    }
+
+
+    private void ClearError()
+    {
+        errorMessage =
+            null;
+    }
+
+
+    // =========================
+    // SEARCH
+    // =========================
+
     private IEnumerable<Reminder> FilteredReminders =>
-    reminders?
-        .Where(r =>
-            string.IsNullOrWhiteSpace(searchText)
-            || r.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase)
-            || (!string.IsNullOrWhiteSpace(r.Type)
-                && r.Type.Contains(searchText, StringComparison.OrdinalIgnoreCase)))
-    ?? Enumerable.Empty<Reminder>();
+        reminders?
+            .Where(r =>
+                string.IsNullOrWhiteSpace(searchText)
+
+                || r.Title.Contains(
+                    searchText,
+                    StringComparison.OrdinalIgnoreCase)
+
+                || (
+                    !string.IsNullOrWhiteSpace(r.Type)
+
+                    && r.Type.Contains(
+                        searchText,
+                        StringComparison.OrdinalIgnoreCase)
+                ))
+
+        ?? Enumerable.Empty<Reminder>();
 
 }

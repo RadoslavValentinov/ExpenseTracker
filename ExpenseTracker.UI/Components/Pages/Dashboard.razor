@@ -5,175 +5,436 @@
 @using ExpenseTracker.UI.Services
 @using System.Globalization
 
-
 @inject ExpenseApiService ExpenseService
 @inject TaskApiService TaskService
 @inject ReminderApiService ReminderService
 @inject NotificationService NotificationService
 
 
-<div class="dashboard-header">
+<div class="dashboard-header mb-4">
 
-    <h2 class="fw-bold">
+    <h2 class="fw-bold mb-1">
         Dashboard
     </h2>
 
-    <p class="text-muted">
+    <p class="text-muted mb-0">
         Overview of your expenses, tasks and reminders
     </p>
 
 </div>
 
 
-@if (expenses == null || tasks == null)
+@if (expenses == null || tasks == null || reminders == null)
 {
     <p>Loading...</p>
 }
 else
 {
-    <!-- STATS -->
+    <!-- ========================= -->
+    <!-- STATISTICS -->
+    <!-- ========================= -->
 
     <div class="row g-4 mb-4">
 
         <div class="col-lg-3 col-md-6">
+            <div class="card p-4 shadow-sm dashboard-card dashboard-primary h-100">
 
-            <div class="card p-4 shadow-sm dashboard-card dashboard-primary">
-
-                <p class="dashboard-title">
+                <p class="dashboard-title mb-2">
                     💰 Total Expenses
                 </p>
 
-                <h2 class="dashboard-stat">
-                    @expenses.Sum(x => x.Amount).ToString("C")
+                <h2 class="dashboard-stat mb-0">
+                    @TotalExpenses.ToString("C")
                 </h2>
 
             </div>
-
         </div>
 
+
         <div class="col-lg-3 col-md-6">
+            <div class="card p-4 shadow-sm dashboard-card dashboard-danger h-100">
 
-            <div class="card p-4 shadow-sm dashboard-card dashboard-danger">
-
-                <p class="dashboard-title">
+                <p class="dashboard-title mb-2">
                     ❌ Unpaid
                 </p>
 
-                <h2 class="dashboard-stat">
+                <h2 class="dashboard-stat mb-0">
                     @UnpaidAmount.ToString("C")
                 </h2>
 
             </div>
-
         </div>
 
+
         <div class="col-lg-3 col-md-6">
+            <div class="card p-4 shadow-sm dashboard-card dashboard-success h-100">
 
-            <div class="card p-4 shadow-sm dashboard-card dashboard-success">
-
-                <p class="dashboard-title">
+                <p class="dashboard-title mb-2">
                     💵 Paid
                 </p>
 
-                <h2 class="dashboard-stat">
+                <h2 class="dashboard-stat mb-0">
                     @PaidAmount.ToString("C")
                 </h2>
 
             </div>
-
         </div>
 
+
         <div class="col-lg-3 col-md-6">
+            <div class="card p-4 shadow-sm dashboard-card dashboard-secondary h-100">
 
-            <div class="card p-4 shadow-sm dashboard-card dashboard-secondary">
-
-                <p class="text-muted mb-2">
+                <p class="dashboard-title mb-2">
                     📋 Tasks
                 </p>
 
-                <h2 class="dashboard-stat">
-                    @tasks.Count
+                <h2 class="dashboard-stat mb-0">
+                    @TotalTasks
                 </h2>
 
             </div>
-
         </div>
 
+
         <div class="col-lg-3 col-md-6">
+            <div class="card p-4 shadow-sm dashboard-card dashboard-purple h-100">
 
-            <div class="card p-4 shadow-sm dashboard-card dashboard-purple">
-
-                <p class="text-muted mb-2">
+                <p class="dashboard-title mb-2">
                     🔔 Active Reminders
                 </p>
 
-                <h2 class="dashboard-stat">
-                    @(reminders?.Count ?? 0)
+                <h2 class="dashboard-stat mb-0">
+                    @ActiveReminders
                 </h2>
 
             </div>
-
         </div>
 
+
         <div class="col-lg-3 col-md-6">
+            <div class="card p-4 shadow-sm dashboard-card dashboard-success h-100">
 
-            <div class="card p-4 shadow-sm dashboard-card dashboard-success">
-
-                <p class="text-muted mb-2">
+                <p class="dashboard-title mb-2">
                     ✅ Completed
                 </p>
 
-                <h2 class="dashboard-stat">
-                    @tasks.Count(x => x.IsCompleted)
+                <h2 class="dashboard-stat mb-0">
+                    @CompletedTasks
                 </h2>
 
             </div>
-
         </div>
 
+
         <div class="col-lg-3 col-md-6">
+            <div class="card p-4 shadow-sm dashboard-card dashboard-warning h-100">
 
-            <div class="card p-4 shadow-sm dashboard-card dashboard-warning">
-
-                <p class="text-muted mb-2">
+                <p class="dashboard-title mb-2">
                     ⏳ Pending Tasks
                 </p>
 
-                <h2 class="dashboard-stat">
+                <h2 class="dashboard-stat mb-0">
                     @PendingTasks
                 </h2>
 
             </div>
-
         </div>
 
+
         <div class="col-lg-3 col-md-6">
+            <div class="card p-4 shadow-sm dashboard-card dashboard-info h-100">
 
-            <div class="card p-4 shadow-sm dashboard-card dashboard-info">
-
-                <p class="text-muted mb-2">
+                <p class="dashboard-title mb-2">
                     📅 Today's Reminders
                 </p>
 
-                <h2 class="dashboard-stat">
+                <h2 class="dashboard-stat mb-0">
                     @TodayReminders
                 </h2>
+
+            </div>
+        </div>
+
+
+        <div class="col-lg-3 col-md-6">
+            <div class="card p-4 shadow-sm dashboard-card dashboard-primary h-100">
+
+                <p class="dashboard-title mb-2">
+                    ⏰ Upcoming Reminders
+                </p>
+
+                <h2 class="dashboard-stat mb-0">
+                    @UpcomingReminders
+                </h2>
+
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- ========================= -->
+    <!-- TODAY / UPCOMING -->
+    <!-- ========================= -->
+
+    <div class="row g-4 mb-4">
+
+        <!-- TODAY -->
+
+        <div class="col-lg-6">
+
+            <div class="card p-4 h-100 dashboard-card">
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+
+                    <div>
+                        <h5 class="fw-bold mb-1">
+                            🔔 Today
+                        </h5>
+
+                        <p class="text-muted small mb-0">
+                            Things that need your attention today
+                        </p>
+                    </div>
+
+                    <span class="badge bg-primary">
+                        @TodayItemsCount
+                    </span>
+
+                </div>
+
+
+                @if (!TodayTasks.Any() &&
+                            !TodayExpenses.Any() &&
+                            !TodayRemindersList.Any())
+                {
+                    <div class="text-center py-4">
+
+                        <div class="fs-2 mb-2">
+                            🎉
+                        </div>
+
+                        <p class="text-muted mb-0">
+                            Nothing scheduled for today.
+                        </p>
+
+                    </div>
+                }
+                else
+                {
+
+                    @foreach (var task in TodayTasks)
+                    {
+                        <div class="dashboard-item">
+
+                            <div>
+
+                                <strong>
+                                    @task.Title
+                                </strong>
+
+                                <p class="text-muted small mb-0">
+                                    Task · @task.DueDate.ToShortDateString()
+                                </p>
+
+                            </div>
+
+                            @if (task.IsCompleted)
+                            {
+                                <span class="badge bg-success">
+                                    Done
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning text-dark">
+                                    Pending
+                                </span>
+                            }
+
+                        </div>
+                    }
+
+
+                    @foreach (var expense in TodayExpenses)
+                    {
+                        <div class="dashboard-item">
+
+                            <div>
+
+                                <strong>
+                                    @expense.Title
+                                </strong>
+
+                                <p class="text-muted small mb-0">
+                                    Expense · Due today
+                                </p>
+
+                            </div>
+
+                            <span class="fw-bold text-danger">
+                                @expense.Amount.ToString("C")
+                            </span>
+
+                        </div>
+                    }
+
+
+                    @foreach (var reminder in TodayRemindersList)
+                    {
+                        <div class="dashboard-item">
+
+                            <div>
+
+                                <strong>
+                                    @reminder.Title
+                                </strong>
+
+                                <p class="text-muted small mb-0">
+                                    Reminder
+                                </p>
+
+                            </div>
+
+                            <span class="badge bg-info text-dark">
+                                Reminder
+                            </span>
+
+                        </div>
+                    }
+
+                }
 
             </div>
 
         </div>
 
-        <div class="col-lg-3 col-md-6">
 
-            <div class="card p-4 shadow-sm dashboard-card dashboard-primary">
+        <!-- UPCOMING -->
 
-                <p class="text-muted mb-2">
-                    ⏰ Upcoming Reminders
-                </p>
+        <div class="col-lg-6">
 
-                <h2 class="dashboard-stat">
-                    @UpcomingReminders
-                </h2>
+            <div class="card p-4 h-100 dashboard-card">
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+
+                    <div>
+                        <h5 class="fw-bold mb-1">
+                            📅 Upcoming
+                        </h5>
+
+                        <p class="text-muted small mb-0">
+                            What's coming next
+                        </p>
+                    </div>
+
+                    <span class="badge bg-secondary">
+                        @UpcomingItemsCount
+                    </span>
+
+                </div>
+
+
+                @if (!UpcomingTasks.Any() &&
+                            !UpcomingExpenses.Any() &&
+                            !UpcomingRemindersList.Any())
+                {
+                    <div class="text-center py-4">
+
+                        <div class="fs-2 mb-2">
+                            👍
+                        </div>
+
+                        <p class="text-muted mb-0">
+                            Nothing upcoming.
+                        </p>
+
+                    </div>
+                }
+                else
+                {
+
+                    @foreach (var expense in UpcomingExpenses)
+                    {
+                        <div class="dashboard-item">
+
+                            <div>
+
+                                <strong>
+                                    @expense.Title
+                                </strong>
+
+                                <p class="text-muted small mb-0">
+                                    Due @expense.DueDate.ToShortDateString()
+                                </p>
+
+                            </div>
+
+                            <span class="fw-bold">
+                                @expense.Amount.ToString("C")
+                            </span>
+
+                        </div>
+                    }
+
+
+                    @foreach (var task in UpcomingTasks)
+                    {
+                        <div class="dashboard-item">
+
+                            <div>
+
+                                <strong>
+                                    @task.Title
+                                </strong>
+
+                                <p class="text-muted small mb-0">
+                                    Due @task.DueDate.ToShortDateString()
+                                </p>
+
+                            </div>
+
+                            @if (task.IsCompleted)
+                            {
+                                <span class="badge bg-success">
+                                    Done
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning text-dark">
+                                    Pending
+                                </span>
+                            }
+
+                        </div>
+                    }
+
+
+                    @foreach (var reminder in UpcomingRemindersList)
+                    {
+                        <div class="dashboard-item">
+
+                            <div>
+
+                                <strong>
+                                    @reminder.Title
+                                </strong>
+
+                                <p class="text-muted small mb-0">
+                                    @reminder.ReminderDate.ToShortDateString()
+                                </p>
+
+                            </div>
+
+                            <span class="badge bg-info text-dark">
+                                Reminder
+                            </span>
+
+                        </div>
+                    }
+
+                }
 
             </div>
 
@@ -181,19 +442,20 @@ else
 
     </div>
 
-    <!-- MAIN GRID -->
 
-    <div class="row g-4">
+    <!-- ========================= -->
+    <!-- RECENT TASKS / EXPENSES -->
+    <!-- ========================= -->
 
-        <!-- RECENT TASKS -->
+    <div class="row g-4 mb-4">
 
         <div class="col-lg-6">
 
             <div class="card p-4 h-100">
 
-                <div class="d-flex justify-content-between mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
 
-                    <h5 class="fw-bold">
+                    <h5 class="fw-bold mb-0">
                         Recent Tasks
                     </h5>
 
@@ -203,7 +465,10 @@ else
 
                 </div>
 
-                @foreach (var task in tasks.Take(5))
+
+                @foreach (var task in tasks
+                            .OrderByDescending(x => x.DueDate)
+                            .Take(5))
                 {
                     <div class="dashboard-item">
 
@@ -239,15 +504,14 @@ else
 
         </div>
 
-        <!-- UPCOMING EXPENSES -->
 
         <div class="col-lg-6">
 
             <div class="card p-4 h-100">
 
-                <div class="d-flex justify-content-between mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
 
-                    <h5 class="fw-bold">
+                    <h5 class="fw-bold mb-0">
                         Upcoming Expenses
                     </h5>
 
@@ -257,8 +521,10 @@ else
 
                 </div>
 
+
                 @foreach (var expense in expenses
                             .Where(x => !x.IsPaid)
+                            .OrderBy(x => x.DueDate)
                             .Take(5))
                 {
                     <div class="dashboard-item">
@@ -288,11 +554,16 @@ else
 
     </div>
 
-    <div class="row g-4 mt-3">
 
-        <div class="col-12">
+    <!-- ========================= -->
+    <!-- PROGRESS -->
+    <!-- ========================= -->
 
-            <div class="card p-4 dashboard-card">
+    <div class="row g-4 mb-4">
+
+        <div class="col-lg-6">
+
+            <div class="card p-4 dashboard-card h-100">
 
                 <h5 class="fw-bold mb-4">
                     📊 Task Progress
@@ -326,187 +597,35 @@ else
 
         </div>
 
-        <div class="row g-4 mt-3">
 
-            <div class="col-12">
+        <div class="col-lg-6">
 
-                <div class="card p-4 dashboard-card">
+            <div class="card p-4 dashboard-card h-100">
 
-                    <h5 class="fw-bold mb-4">
-                        💰 Expense Progress
-                    </h5>
+                <h5 class="fw-bold mb-4">
+                    💰 Expense Progress
+                </h5>
 
-                    <div class="d-flex justify-content-between mb-2">
+                <div class="d-flex justify-content-between mb-2">
 
-                        <span>
-                            Paid Expenses
-                        </span>
+                    <span>
+                        Paid Expenses
+                    </span>
 
-                        <strong>
-                            @PaidAmount.ToString("C") /
-                            @TotalExpenses.ToString("C")
-                        </strong>
-
-                    </div>
-
-                    <div class="progress" style="height:26px;">
-
-                        <div class="progress-bar bg-primary"
-                             role="progressbar"
-                             style="width:@($"{ExpenseProgress}%")">
-
-                            @ExpenseProgress%
-
-                        </div>
-
-                    </div>
+                    <strong>
+                        @PaidAmount.ToString("C") /
+                        @TotalExpenses.ToString("C")
+                    </strong>
 
                 </div>
 
-            </div>
+                <div class="progress" style="height:26px;">
 
-        </div>
+                    <div class="progress-bar bg-primary"
+                         role="progressbar"
+                         style="width:@($"{ExpenseProgress}%")">
 
-        <div class="row g-4 mt-3">
-
-            <div class="col-12">
-
-                <div class="card p-4 dashboard-card">
-
-                    <h5 class="fw-bold mb-4">
-                        🏆 Overall Progress
-                    </h5>
-
-                    <div class="mb-3">
-
-                        <div class="d-flex justify-content-between">
-                            <span>📋 Tasks</span>
-                            <strong>@CompletionPercentage%</strong>
-                        </div>
-
-                        <div class="progress mb-3">
-                            <div class="progress-bar bg-success"
-                                 style="width:@($"{CompletionPercentage}%")">
-                            </div>
-                        </div>
-
-                        <div class="d-flex justify-content-between">
-                            <span>💰 Expenses</span>
-                            <strong>@ExpenseProgress%</strong>
-                        </div>
-
-                        <div class="progress mb-3">
-                            <div class="progress-bar bg-primary"
-                                 style="width:@($"{ExpenseProgress}%")">
-                            </div>
-                        </div>
-
-                        <div class="d-flex justify-content-between">
-                            <span>🔔 Reminders</span>
-                            <strong>@ReminderProgress%</strong>
-                        </div>
-
-                        <div class="progress mb-4">
-                            <div class="progress-bar bg-warning"
-                                 style="width:@($"{ReminderProgress}%")">
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <hr />
-
-                    <div class="text-center">
-
-                        <h2 class="dashboard-stat">
-                            @OverallProgress%
-                        </h2>
-
-                        <p class="text-muted mb-0">
-                            Overall Completion
-                        </p>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-        <div class="row g-4 mt-3">
-
-            <div class="col-lg-6">
-
-                <div class="card p-4 dashboard-card">
-
-                    <h5 class="fw-bold mb-4">
-                        💸 Expense Distribution
-                    </h5>
-
-                    <div class="text-center">
-
-                        <svg width="220" height="220" viewBox="0 0 42 42">
-
-                            <circle cx="21"
-                                    cy="21"
-                                    r="15.915"
-                                    fill="transparent"
-                                    stroke="#eeeeee"
-                                    stroke-width="3">
-                            </circle>
-
-                            <circle cx="21"
-                                    cy="21"
-                                    r="15.915"
-                                    fill="transparent"
-                                    stroke="#198754"
-                                    stroke-width="3"
-                                    stroke-dasharray="@($"{PaidPercent.ToString(CultureInfo.InvariantCulture)} {100 - PaidPercent}")"
-                                    stroke-linecap="round"
-                                    transform="rotate(-90 21 21)">
-                            </circle>
-
-                            <text x="21"
-                                  y="22"
-                                  text-anchor="middle"
-                                  font-size="4"
-                                  font-weight="bold">
-
-                                @($"{PaidPercent:F0}%")
-
-                            </text>
-
-                        </svg>
-
-                    </div>
-
-                    <hr />
-
-                    <div class="d-flex justify-content-around">
-
-                        <div>
-
-                            <span class="badge bg-success">
-                                Paid
-                            </span>
-
-                            <p class="fw-bold mt-2">
-                                @PaidExpenses.ToString("C")
-                            </p>
-
-                        </div>
-
-                        <div>
-
-                            <span class="badge bg-danger">
-                                Unpaid
-                            </span>
-
-                            <p class="fw-bold mt-2">
-                                @UnpaidExpenses.ToString("C")
-                            </p>
-
-                        </div>
+                        @ExpenseProgress%
 
                     </div>
 
@@ -518,9 +637,210 @@ else
 
     </div>
 
-    <!-- QUICK LINKS -->
 
-    <div class="row g-4 mt-1">
+    <!-- ========================= -->
+    <!-- OVERALL PROGRESS -->
+    <!-- ========================= -->
+
+    <div class="row g-4 mb-4">
+
+        <div class="col-12">
+
+            <div class="card p-4 dashboard-card">
+
+                <h5 class="fw-bold mb-4">
+                    🏆 Overall Progress
+                </h5>
+
+
+                <div class="mb-3">
+
+                    <div class="d-flex justify-content-between">
+
+                        <span>
+                            📋 Tasks
+                        </span>
+
+                        <strong>
+                            @CompletionPercentage%
+                        </strong>
+
+                    </div>
+
+                    <div class="progress mb-3">
+
+                        <div class="progress-bar bg-success"
+                             style="width:@($"{CompletionPercentage}%")">
+                        </div>
+
+                    </div>
+
+
+                    <div class="d-flex justify-content-between">
+
+                        <span>
+                            💰 Expenses
+                        </span>
+
+                        <strong>
+                            @ExpenseProgress%
+                        </strong>
+
+                    </div>
+
+                    <div class="progress mb-3">
+
+                        <div class="progress-bar bg-primary"
+                             style="width:@($"{ExpenseProgress}%")">
+                        </div>
+
+                    </div>
+
+
+                    <div class="d-flex justify-content-between">
+
+                        <span>
+                            🔔 Reminders
+                        </span>
+
+                        <strong>
+                            @ReminderProgress%
+                        </strong>
+
+                    </div>
+
+                    <div class="progress mb-4">
+
+                        <div class="progress-bar bg-warning"
+                             style="width:@($"{ReminderProgress}%")">
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <hr />
+
+
+                <div class="text-center">
+
+                    <h2 class="dashboard-stat">
+                        @OverallProgress%
+                    </h2>
+
+                    <p class="text-muted mb-0">
+                        Overall Completion
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================= -->
+    <!-- EXPENSE DISTRIBUTION -->
+    <!-- ========================= -->
+
+    <div class="row g-4 mb-4">
+
+        <div class="col-lg-6">
+
+            <div class="card p-4 dashboard-card h-100">
+
+                <h5 class="fw-bold mb-4">
+                    💸 Expense Distribution
+                </h5>
+
+
+                <div class="text-center">
+
+                    <svg width="220"
+                         height="220"
+                         viewBox="0 0 42 42">
+
+                        <circle cx="21"
+                                cy="21"
+                                r="15.915"
+                                fill="transparent"
+                                stroke="#eeeeee"
+                                stroke-width="3">
+                        </circle>
+
+                        <circle cx="21"
+                                cy="21"
+                                r="15.915"
+                                fill="transparent"
+                                stroke="#198754"
+                                stroke-width="3"
+                                stroke-dasharray="@($"{PaidPercent.ToString(CultureInfo.InvariantCulture)} {100 - PaidPercent}")"
+                                stroke-linecap="round"
+                                transform="rotate(-90 21 21)">
+                        </circle>
+
+                        <text x="21"
+                              y="22"
+                              text-anchor="middle"
+                              font-size="4"
+                              font-weight="bold">
+
+                            @($"{PaidPercent:F0}%")
+
+                        </text>
+
+                    </svg>
+
+                </div>
+
+
+                <hr />
+
+
+                <div class="d-flex justify-content-around text-center">
+
+                    <div>
+
+                        <span class="badge bg-success">
+                            Paid
+                        </span>
+
+                        <p class="fw-bold mt-2 mb-0">
+                            @PaidExpenses.ToString("C")
+                        </p>
+
+                    </div>
+
+
+                    <div>
+
+                        <span class="badge bg-danger">
+                            Unpaid
+                        </span>
+
+                        <p class="fw-bold mt-2 mb-0">
+                            @UnpaidExpenses.ToString("C")
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================= -->
+    <!-- QUICK LINKS -->
+    <!-- ========================= -->
+
+    <div class="row g-4">
 
         <div class="col-12">
 
@@ -534,22 +854,33 @@ else
 
                     <a class="btn btn-primary quick-link-btn"
                        href="/expenses">
+
                         💰 Expenses
+
                     </a>
+
 
                     <a class="btn btn-primary quick-link-btn"
                        href="/tasks">
+
                         ✅ Tasks
+
                     </a>
+
 
                     <a class="btn btn-primary quick-link-btn"
                        href="/reminders">
+
                         🔔 Active Reminders
+
                     </a>
+
 
                     <a class="btn btn-primary quick-link-btn"
                        href="/completed-reminders">
+
                         ✔️ Completed Reminders
+
                     </a>
 
                 </div>
@@ -560,6 +891,7 @@ else
 
     </div>
 }
+
 
 @code {
 
@@ -572,79 +904,200 @@ else
     private List<NotificationItem> notifications = new();
 
 
+    protected override async Task OnInitializedAsync()
+    {
+        expenses =
+            await ExpenseService.GetExpensesAsync();
+
+        tasks =
+            await TaskService.GetTasksAsync();
+
+        reminders =
+            await ReminderService.GetAllAsync();
+
+        notifications =
+            await NotificationService.GetNotificationsAsync();
+    }
+
+
+    // =========================
+    // EXPENSES
+    // =========================
+
+    private decimal TotalExpenses =>
+        expenses?.Sum(x => x.Amount) ?? 0;
+
+
     private decimal PaidExpenses =>
-    expenses?
-        .Where(x => x.IsPaid)
-        .Sum(x => x.Amount) ?? 0;
+        expenses?
+            .Where(x => x.IsPaid)
+            .Sum(x => x.Amount) ?? 0;
+
 
     private decimal UnpaidExpenses =>
         expenses?
             .Where(x => !x.IsPaid)
             .Sum(x => x.Amount) ?? 0;
 
+
+    private decimal PaidAmount =>
+        expenses?
+            .Where(x => x.IsPaid)
+            .Sum(x => x.Amount) ?? 0;
+
+
     private decimal UnpaidAmount =>
         expenses?
             .Where(x => !x.IsPaid)
             .Sum(x => x.Amount) ?? 0;
 
-    protected override async Task OnInitializedAsync()
-    {
-        expenses = await ExpenseService.GetExpensesAsync();
-
-        tasks = await TaskService.GetTasksAsync();
-
-        reminders = await ReminderService.GetAllAsync();
-
-        notifications = await NotificationService.GetNotificationsAsync();
-    }
-
-    private decimal PaidAmount =>
-    expenses?
-        .Where(x => x.IsPaid)
-        .Sum(x => x.Amount) ?? 0;
-
-    private decimal TotalExpenses =>
-    expenses?.Sum(x => x.Amount) ?? 0;
 
     private int ExpenseProgress =>
         TotalExpenses == 0
             ? 0
             : (int)((PaidAmount / TotalExpenses) * 100);
 
+
     private double PaidPercent =>
-    TotalExpenses == 0
-        ? 0
-        : (double)(PaidAmount / TotalExpenses * 100);
+        TotalExpenses == 0
+            ? 0
+            : (double)(PaidAmount / TotalExpenses * 100);
 
-    private int ReminderProgress =>
-    reminders == null || reminders.Count == 0
-        ? 100
-        : (reminders.Count(r => r.IsTriggered) * 100) / reminders.Count;
 
-    private int OverallProgress =>
-        (CompletionPercentage + ExpenseProgress + ReminderProgress) / 3;
+    // =========================
+    // TASKS
+    // =========================
+
+    private int TotalTasks =>
+        tasks?.Count ?? 0;
+
+
+    private int CompletedTasks =>
+        tasks?.Count(x => x.IsCompleted) ?? 0;
+
 
     private int PendingTasks =>
         tasks?
             .Count(x => !x.IsCompleted) ?? 0;
 
-    private int TodayReminders =>
-        reminders?
-            .Count(x => x.ReminderDate.Date == DateTime.Today) ?? 0;
-
-    private int UpcomingReminders =>
-        reminders?
-            .Count(x => x.ReminderDate.Date > DateTime.Today) ?? 0;
-
-    private int CompletedTasks =>
-    tasks?.Count(x => x.IsCompleted) ?? 0;
-
-    private int TotalTasks =>
-        tasks?.Count ?? 0;
 
     private int CompletionPercentage =>
         TotalTasks == 0
             ? 0
             : (CompletedTasks * 100) / TotalTasks;
+
+
+    // =========================
+    // REMINDERS
+    // =========================
+
+    private int ActiveReminders =>
+        reminders?
+            .Count(r => !r.IsRead) ?? 0;
+
+
+    private int TodayReminders =>
+        reminders?
+            .Count(r =>
+                r.ReminderDate.Date == DateTime.Today &&
+                !r.IsRead) ?? 0;
+
+
+    private int UpcomingReminders =>
+        reminders?
+            .Count(r =>
+                r.ReminderDate.Date > DateTime.Today &&
+                !r.IsRead) ?? 0;
+
+
+    private int ReminderProgress =>
+        reminders == null || reminders.Count == 0
+            ? 100
+            : (reminders.Count(r => r.IsTriggered) * 100)
+                / reminders.Count;
+
+
+    // =========================
+    // OVERALL
+    // =========================
+
+    private int OverallProgress =>
+        (CompletionPercentage +
+         ExpenseProgress +
+         ReminderProgress) / 3;
+
+
+    // =========================
+    // TODAY
+    // =========================
+
+    private IEnumerable<TaskItem> TodayTasks =>
+        tasks?
+            .Where(x =>
+                !x.IsCompleted &&
+                x.DueDate.Date == DateTime.Today)
+            ?? Enumerable.Empty<TaskItem>();
+
+
+    private IEnumerable<Expense> TodayExpenses =>
+        expenses?
+            .Where(x =>
+                !x.IsPaid &&
+                x.DueDate.Date == DateTime.Today)
+            ?? Enumerable.Empty<Expense>();
+
+
+    private IEnumerable<Reminder> TodayRemindersList =>
+        reminders?
+            .Where(x =>
+                !x.IsRead &&
+                x.ReminderDate.Date == DateTime.Today)
+            ?? Enumerable.Empty<Reminder>();
+
+
+    private int TodayItemsCount =>
+        TodayTasks.Count() +
+        TodayExpenses.Count() +
+        TodayRemindersList.Count();
+
+
+    // =========================
+    // UPCOMING
+    // =========================
+
+    private IEnumerable<TaskItem> UpcomingTasks =>
+        tasks?
+            .Where(x =>
+                !x.IsCompleted &&
+                x.DueDate.Date > DateTime.Today)
+            .OrderBy(x => x.DueDate)
+            .Take(5)
+            ?? Enumerable.Empty<TaskItem>();
+
+
+    private IEnumerable<Expense> UpcomingExpenses =>
+        expenses?
+            .Where(x =>
+                !x.IsPaid &&
+                x.DueDate.Date > DateTime.Today)
+            .OrderBy(x => x.DueDate)
+            .Take(5)
+            ?? Enumerable.Empty<Expense>();
+
+
+    private IEnumerable<Reminder> UpcomingRemindersList =>
+        reminders?
+            .Where(x =>
+                !x.IsRead &&
+                x.ReminderDate.Date > DateTime.Today)
+            .OrderBy(x => x.ReminderDate)
+            .Take(5)
+            ?? Enumerable.Empty<Reminder>();
+
+
+    private int UpcomingItemsCount =>
+        UpcomingTasks.Count() +
+        UpcomingExpenses.Count() +
+        UpcomingRemindersList.Count();
 
 }

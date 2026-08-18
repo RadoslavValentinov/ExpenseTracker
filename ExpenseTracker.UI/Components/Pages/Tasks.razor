@@ -1,105 +1,204 @@
 ﻿@page "/tasks"
 @page "/tasks/{Id:int?}"
 
-
 @using ExpenseTracker.Core.Models
 @using ExpenseTracker.UI.Models
 @using ExpenseTracker.UI.Services
+@using System.ComponentModel.DataAnnotations
 
 @inject TaskApiService TaskService
 
-<h3>Tasks</h3>
+<h3 class="mb-4">
+    📋 Tasks
+</h3>
+
+
+@if (!string.IsNullOrWhiteSpace(errorMessage))
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+
+        <strong>❌ Something went wrong.</strong>
+
+        <div class="mt-1">
+            @errorMessage
+        </div>
+
+        <button type="button"
+                class="btn-close"
+                aria-label="Close"
+                @onclick="ClearError">
+        </button>
+
+    </div>
+}
+
+
+<!-- ========================= -->
+<!-- ADD / EDIT TASK -->
+<!-- ========================= -->
 
 <EditForm Model="newTask"
           OnValidSubmit="@(editingTaskId == null ? AddTask : SaveTask)">
 
-    <h5>
-        @(editingTaskId == null
-                ? "Add Task"
-                : "Edit Task")
-    </h5>
+    <DataAnnotationsValidator />
 
-    <div class="mb-3">
+    <div class="card p-4 shadow-sm mb-4">
 
-        <input class="form-control"
-               placeholder="Title"
-               @bind="newTask.Title" />
+        <h5 class="mb-4">
+
+            @(editingTaskId == null
+                        ? "Add Task"
+                        : "Edit Task")
+
+        </h5>
+
+
+        <!-- TITLE -->
+
+        <div class="mb-3">
+
+            <label class="form-label">
+                Title *
+            </label>
+
+            <input class="form-control"
+                   placeholder="e.g. Clean the house"
+                   @bind="newTask.Title" />
+
+            <ValidationMessage For="@(() => newTask.Title)" />
+
+        </div>
+
+
+        <!-- DESCRIPTION -->
+
+        <div class="mb-3">
+
+            <label class="form-label">
+                Description
+            </label>
+
+            <textarea class="form-control"
+                      rows="4"
+                      placeholder="Describe what needs to be done..."
+                      @bind="newTask.Description">
+            </textarea>
+
+        </div>
+
+
+        <!-- DUE DATE -->
+
+        <div class="mb-3">
+
+            <label class="form-label">
+                Due Date *
+            </label>
+
+            <input class="form-control"
+                   type="datetime-local"
+                   @bind="newTask.DueDate" />
+
+            <ValidationMessage For="@(() => newTask.DueDate)" />
+
+        </div>
+
+
+        <!-- REMINDER -->
+
+        <div class="mb-3">
+
+            <label class="form-label">
+                Reminder Time
+            </label>
+
+            <input class="form-control"
+                   type="datetime-local"
+                   @bind="newTask.ReminderTime" />
+
+        </div>
+
+
+        <!-- PRIORITY -->
+
+        <div class="mb-3">
+
+            <label class="form-label">
+                Priority
+            </label>
+
+            <select class="form-select"
+                    @bind="newTask.Priority">
+
+                <option value="0">
+                    Low
+                </option>
+
+                <option value="1">
+                    Medium
+                </option>
+
+                <option value="2">
+                    High
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <!-- FORM VALIDATION -->
+
+        <ValidationSummary />
+
+
+        <!-- SUBMIT -->
+        @if (editingTaskId == null)
+        {
+            <button type="submit"
+                    class="btn btn-primary px-4">
+
+                ➕ Add Task
+
+            </button>
+        }
+        else
+        {
+            <div class="d-flex gap-2 flex-wrap">
+
+                <button type="submit"
+                        class="btn btn-warning px-4">
+
+                    💾 Save Changes
+
+                </button>
+
+                <button type="button"
+                        class="btn btn-secondary px-4"
+                        @onclick="CancelEdit">
+
+                    Cancel
+
+                </button>
+
+            </div>
+        }
 
     </div>
-
-    <div class="mb-3">
-
-        <textarea class="form-control"
-                  placeholder="Description"
-                  @bind="newTask.Description">
-        </textarea>
-
-    </div>
-
-    <div class="mb-3">
-
-        <label>Due Date</label>
-
-        <input class="form-control"
-               type="datetime-local"
-               @bind="newTask.DueDate" />
-
-    </div>
-
-    <div class="mb-3">
-
-        <label>Reminder Time</label>
-
-        <input class="form-control"
-               type="datetime-local"
-               @bind="newTask.ReminderTime" />
-
-    </div>
-
-    <div class="mb-3">
-
-        <label>Priority</label>
-
-        <select class="form-select"
-                @bind="newTask.Priority">
-
-            <option value="0">Low</option>
-            <option value="1">Medium</option>
-            <option value="2">High</option>
-
-        </select>
-
-    </div>
-
-
-    @if (editingTaskId == null)
-    {
-        <button type="submit"
-                class="btn btn-primary px-4">
-            ➕ Add Task
-        </button>
-    }
-    else
-    {
-        <button type="submit"
-                class="btn btn-warning px-4">
-            💾 Save Changes
-        </button>
-    }
 
 </EditForm>
 
 
-
-
+<!-- ========================= -->
+<!-- SEARCH -->
+<!-- ========================= -->
 @if (tasks == null)
 {
     <p>Loading...</p>
 }
 else
 {
-    <br />
-    <div id="addM" class="mb-3">
+    <div class="mb-4">
 
         <input class="form-control"
                placeholder="🔍 Search tasks..."
@@ -107,108 +206,350 @@ else
 
     </div>
 
-    <div class="row g-4">
 
-        @foreach (var task in FilteredTasks)
-        {
-            <div class="col-xl-4 col-lg-6">
+    @if (!FilteredTasks.Any())
+    {
+        <div class="alert alert-info">
+            No tasks found.
+        </div>
+    }
+    else
+    {
+        <!-- ========================= -->
+        <!-- TASK CARDS -->
+        <!-- ========================= -->
 
-                <div class="card p-4  shadow-sm task-card">
+        <div class="row g-4">
 
-                    <div class="mb-3">
+            @foreach (var task in FilteredTasks)
+            {
+                <div class="col-xl-4 col-lg-6">
 
-                        <div class="d-flex justify-content-between align-items-start">
+                    <div class="card p-4 shadow-sm task-card h-100 d-flex flex-column">
 
-                            <h5 class="fw-bold  task-description mt-2">
-                                @task.Title
-                            </h5>
 
-                            @if (task.Priority == 2)
+                        <!-- HEADER -->
+
+                        <div class="mb-3">
+
+                            <div class="d-flex justify-content-between align-items-start gap-2">
+
+                                <h5 class="fw-bold mt-2 mb-0">
+
+                                    @task.Title
+
+                                </h5>
+
+
+                                @if (task.Priority == 2)
+                                {
+                                    <span class="badge bg-danger">
+                                        High
+                                    </span>
+                                }
+                                else if (task.Priority == 1)
+                                {
+                                    <span class="badge bg-warning text-dark">
+                                        Medium
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success">
+                                        Low
+                                    </span>
+                                }
+
+                            </div>
+
+
+                            <!-- SHORT DESCRIPTION -->
+                            @if (!string.IsNullOrWhiteSpace(task.Description))
                             {
-                                <span class="badge bg-danger">
-                                    High
-                                </span>
-                            }
-                            else if (task.Priority == 1)
-                            {
-                                <span class="badge bg-warning text-dark">
-                                    Medium
-                                </span>
+                                <p class="text-muted task-description mt-3 mb-0">
+
+                                    @GetShortDescription(task.Description)
+
+                                </p>
                             }
                             else
                             {
-                                <span class="badge bg-success">
-                                    Low
+                                <p class="text-muted fst-italic mt-3 mb-0">
+
+                                    No description
+
+                                </p>
+                            }
+
+                        </div>
+
+
+                        <!-- INFORMATION -->
+
+                        <div class="mb-3">
+
+                            <p class="mb-2">
+
+                                <strong>
+                                    Due:
+                                </strong>
+
+                                @task.DueDate.ToShortDateString()
+
+                            </p>
+
+
+                            @if (task.ReminderTime.HasValue)
+                            {
+                                <span class="badge bg-primary">
+
+                                    🔔 @task.ReminderTime.Value.ToShortTimeString()
+
                                 </span>
                             }
 
                         </div>
 
-                        <p class="text-muted task-description mt-2">
-                            @task.Description
-                        </p>
 
-                    </div>
+                        <!-- ACTIONS -->
 
-                    <div class="mb-3">
+                        <div class="mt-auto">
 
-                        <p class="mb-2">
-                            <strong>Due:</strong>
-                            @task.DueDate.ToShortDateString()
-                        </p>
+                            <!-- VIEW DETAILS -->
 
-                        @if (task.ReminderTime.HasValue)
-                        {
-                            <span class="badge bg-primary">
-                                🔔 @task.ReminderTime.Value.ToShortTimeString()
-                            </span>
-                        }
+                            <button class="btn btn-outline-primary btn-sm w-100 mb-2"
+                                    @onclick="() => ViewTaskDetails(task)">
 
-                    </div>
+                                👁️ View Details
 
-                    <div class="mt-auto">
-
-                        @if (task.IsCompleted)
-                        {
-                            <span class="badge bg-success mb-2 p-2 w-100 d-block text-center">
-                                ✅ Completed
-                            </span>
-                            <button class="badge btn-danger p-2 w-100 d-block text-center"
-                                    @onclick="() => DeleteTask(task.Id)">
-                                Delete
                             </button>
-                        }
-                        else
-                        {
-                            <div class="d-flex gap-2">
 
-                                <button class="btn btn-success flex-fill"
-                                        @onclick="() => CompleteTask(task.Id)">
-                                    Complete
-                                </button>
 
-                                <button class="btn btn-warning flex-fill"
-                                        @onclick="() => EditTask(task)">
-                                    Edit
-                                </button>
+                            @if (task.IsCompleted)
+                            {
+                                <span class="badge bg-success mb-2 p-2 w-100 d-block text-center">
 
-                                <button class="btn btn-danger flex-fill"
+                                    ✅ Completed
+
+                                </span>
+
+
+                                <button class="btn btn-danger btn-sm w-100"
                                         @onclick="() => DeleteTask(task.Id)">
-                                    Delete
-                                </button>
 
-                            </div>
-                        }
+                                    Delete
+
+                                </button>
+                            }
+                            else
+                            {
+                                <div class="d-flex gap-2">
+
+                                    <button class="btn btn-success btn-sm flex-fill"
+                                            @onclick="() => CompleteTask(task.Id)">
+
+                                        Complete
+
+                                    </button>
+
+
+                                    <button class="btn btn-warning btn-sm flex-fill"
+                                            @onclick="() => EditTask(task)">
+
+                                        Edit
+
+                                    </button>
+
+
+                                    <button class="btn btn-danger btn-sm flex-fill"
+                                            @onclick="() => DeleteTask(task.Id)">
+
+                                        Delete
+
+                                    </button>
+
+                                </div>
+                            }
+
+                        </div>
 
                     </div>
 
                 </div>
+            }
+
+        </div>
+    }
+}
+
+
+<!-- ========================= -->
+<!-- TASK DETAILS MODAL -->
+<!-- ========================= -->
+@if (selectedTask != null)
+{
+    <div class="modal d-block"
+         tabindex="-1"
+         role="dialog"
+         style="background-color: rgba(0,0,0,0.5);">
+
+        <div class="modal-dialog modal-dialog-centered modal-lg"
+             role="document">
+
+            <div class="modal-content">
+
+
+                <!-- HEADER -->
+
+                <div class="modal-header">
+
+                    <h5 class="modal-title">
+
+                        📋 @selectedTask.Title
+
+                    </h5>
+
+                    <button type="button"
+                            class="btn-close"
+                            aria-label="Close"
+                            @onclick="CloseTaskDetails">
+                    </button>
+
+                </div>
+
+
+                <!-- BODY -->
+
+                <div class="modal-body">
+
+                    <!-- PRIORITY -->
+
+                    <div class="mb-3">
+
+                        <strong>
+                            Priority:
+                        </strong>
+
+                        @if (selectedTask.Priority == 2)
+                        {
+                            <span class="badge bg-danger ms-2">
+                                High
+                            </span>
+                        }
+                        else if (selectedTask.Priority == 1)
+                        {
+                            <span class="badge bg-warning text-dark ms-2">
+                                Medium
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success ms-2">
+                                Low
+                            </span>
+                        }
+
+                    </div>
+
+
+                    <!-- DUE DATE -->
+
+                    <div class="mb-3">
+
+                        <strong>
+                            📅 Due:
+                        </strong>
+
+                        @selectedTask.DueDate.ToString("dd MMM yyyy HH:mm")
+
+                    </div>
+
+
+                    <!-- REMINDER -->
+                    @if (selectedTask.ReminderTime.HasValue)
+                    {
+                        <div class="mb-3">
+
+                            <strong>
+                                🔔 Reminder:
+                            </strong>
+
+                            @selectedTask.ReminderTime.Value.ToString("dd MMM yyyy HH:mm")
+
+                        </div>
+                    }
+
+
+                    <hr />
+
+
+                    <!-- DESCRIPTION -->
+
+                    <h6 class="fw-bold mb-2">
+                        Description
+                    </h6>
+
+
+                    @if (!string.IsNullOrWhiteSpace(selectedTask.Description))
+                    {
+                        <div class="border rounded p-3"
+                             style="white-space: pre-wrap; max-height: 400px; overflow-y: auto;">
+
+                            @selectedTask.Description
+
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted fst-italic">
+
+                            No description available.
+
+                        </p>
+                    }
+
+                </div>
+
+
+                <!-- FOOTER -->
+
+                <div class="modal-footer">
+
+                    <button type="button"
+                            class="btn btn-secondary"
+                            @onclick="CloseTaskDetails">
+
+                        Close
+
+                    </button>
+
+
+                    @if (!selectedTask.IsCompleted)
+                    {
+                        <button type="button"
+                                class="btn btn-warning"
+                                @onclick="() => EditTaskFromDetails(selectedTask)">
+
+                            ✏️ Edit
+
+                        </button>
+
+                        <button type="button"
+                                class="btn btn-success"
+                                @onclick="() => CompleteTaskFromDetails(selectedTask.Id)">
+
+                            ✅ Complete
+
+                        </button>
+                    }
+
+                </div>
 
             </div>
-        }
+
+        </div>
 
     </div>
-
 }
 
 
@@ -217,100 +558,391 @@ else
     [Parameter]
     public int? Id { get; set; }
 
+
     private string searchText = "";
+
 
     private List<TaskItem>? tasks;
 
+
     private int? editingTaskId;
+
 
     private TaskItem? editingTask;
 
-    private CreateTaskDto newTask = new();
 
+    private TaskItem? selectedTask;
+
+
+    private string? errorMessage;
+
+
+    private CreateTaskDto newTask = new()
+    {
+        DueDate = DateTime.Now
+    };
+
+
+    // =========================
+    // INITIALIZATION
+    // =========================
 
     protected override async Task OnInitializedAsync()
     {
-
-        tasks = await TaskService.GetTasksAsync();
-
-        if (Id != null)
+        try
         {
-            var task = tasks!.FirstOrDefault(x => x.Id == Id);
+            ClearError();
 
-            if (task != null)
+            tasks =
+                await TaskService.GetTasksAsync();
+
+
+            if (Id != null)
             {
-                EditTask(task);
+                var task =
+                    tasks!.FirstOrDefault(x => x.Id == Id);
+
+                if (task != null)
+                {
+                    EditTask(task);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            SetError(ex);
+
+            tasks = new List<TaskItem>();
         }
     }
 
+
+    // =========================
+    // ADD
+    // =========================
+
     private async Task AddTask()
     {
-        await TaskService.AddTaskAsync(newTask);
+        if (!ValidateTask())
+            return;
 
-        tasks = await TaskService.GetTasksAsync();
 
-        newTask = new CreateTaskDto();
+        try
+        {
+            ClearError();
+
+            await TaskService.AddTaskAsync(newTask);
+
+
+            tasks =
+                await TaskService.GetTasksAsync();
+
+
+            newTask =
+                new CreateTaskDto
+                {
+                    DueDate = DateTime.Now
+                };
+        }
+        catch (Exception ex)
+        {
+            SetError(ex);
+        }
     }
+
+
+    // =========================
+    // COMPLETE
+    // =========================
 
     private async Task CompleteTask(int id)
     {
-        await TaskService.CompleteTaskAsync(id);
+        try
+        {
+            ClearError();
 
-        tasks = await TaskService.GetTasksAsync();
+            await TaskService.CompleteTaskAsync(id);
+
+
+            tasks =
+                await TaskService.GetTasksAsync();
+
+
+            if (selectedTask != null &&
+                selectedTask.Id == id)
+            {
+                selectedTask = null;
+            }
+        }
+        catch (Exception ex)
+        {
+            SetError(ex);
+        }
     }
+
+
+    // =========================
+    // EDIT
+    // =========================
 
     private void EditTask(TaskItem task)
     {
-        editingTask = task;
+        ClearError();
 
-        editingTaskId = task.Id;
+        editingTask =
+            task;
 
-        newTask = new CreateTaskDto
-        {
-            Title = task.Title,
-            Description = task.Description,
-            DueDate = task.DueDate,
-            ReminderTime = task.ReminderTime,
-            Priority = task.Priority
-        };
+        editingTaskId =
+            task.Id;
+
+
+        newTask =
+            new CreateTaskDto
+            {
+                Title = task.Title,
+                Description = task.Description,
+                DueDate = task.DueDate,
+                ReminderTime = task.ReminderTime,
+                Priority = task.Priority
+            };
     }
+
+
+    // =========================
+    // DELETE
+    // =========================
 
     private async Task DeleteTask(int id)
     {
-        await TaskService.DeleteAsync(id);
+        try
+        {
+            ClearError();
 
-        tasks = await TaskService.GetTasksAsync();
+            await TaskService.DeleteAsync(id);
+
+
+            tasks =
+                await TaskService.GetTasksAsync();
+
+
+            if (selectedTask != null &&
+                selectedTask.Id == id)
+            {
+                selectedTask = null;
+            }
+
+
+            if (editingTaskId == id)
+            {
+                CancelEdit();
+            }
+        }
+        catch (Exception ex)
+        {
+            SetError(ex);
+        }
     }
+
+
+    // =========================
+    // SAVE
+    // =========================
 
     private async Task SaveTask()
     {
         if (editingTask == null)
             return;
 
-        editingTask.Title = newTask.Title;
-        editingTask.Description = newTask.Description;
-        editingTask.DueDate = newTask.DueDate;
-        editingTask.Priority = newTask.Priority;
-        editingTask.ReminderTime = newTask.ReminderTime;
 
-        await TaskService.UpdateAsync(editingTask);
+        if (!ValidateTask())
+            return;
 
-        tasks = await TaskService.GetTasksAsync();
 
-        editingTask = null;
-        editingTaskId = null;
+        try
+        {
+            ClearError();
 
-        newTask = new CreateTaskDto();
+
+            editingTask.Title =
+                newTask.Title;
+
+            editingTask.Description =
+                newTask.Description;
+
+            editingTask.DueDate =
+                newTask.DueDate;
+
+            editingTask.Priority =
+                newTask.Priority;
+
+            editingTask.ReminderTime =
+                newTask.ReminderTime;
+
+
+            await TaskService.UpdateAsync(editingTask);
+
+
+            tasks =
+                await TaskService.GetTasksAsync();
+
+
+            editingTask =
+                null;
+
+            editingTaskId =
+                null;
+
+
+            newTask =
+                new CreateTaskDto
+                {
+                    DueDate = DateTime.Now
+                };
+        }
+        catch (Exception ex)
+        {
+            SetError(ex);
+        }
     }
 
+
+    // =========================
+    // CANCEL EDIT
+    // =========================
+
+    private void CancelEdit()
+    {
+        ClearError();
+
+        editingTask =
+            null;
+
+        editingTaskId =
+            null;
+
+
+        newTask =
+            new CreateTaskDto
+            {
+                DueDate = DateTime.Now
+            };
+    }
+
+
+    // =========================
+    // DETAILS
+    // =========================
+
+    private void ViewTaskDetails(TaskItem task)
+    {
+        ClearError();
+
+        selectedTask =
+            task;
+    }
+
+
+    private void CloseTaskDetails()
+    {
+        selectedTask =
+            null;
+    }
+
+
+    private void EditTaskFromDetails(TaskItem task)
+    {
+        CloseTaskDetails();
+
+        EditTask(task);
+    }
+
+
+    private async Task CompleteTaskFromDetails(int id)
+    {
+        await CompleteTask(id);
+    }
+
+
+    // =========================
+    // DESCRIPTION
+    // =========================
+
+    private string GetShortDescription(string? description)
+    {
+        if (string.IsNullOrWhiteSpace(description))
+            return "";
+
+
+        const int maxLength = 120;
+
+
+        if (description.Length <= maxLength)
+            return description;
+
+
+        return description[..maxLength] + "...";
+    }
+
+
+    // =========================
+    // VALIDATION
+    // =========================
+
+    private bool ValidateTask()
+    {
+        if (string.IsNullOrWhiteSpace(newTask.Title))
+            return false;
+
+
+        if (newTask.DueDate == default)
+            return false;
+
+
+        return true;
+    }
+
+
+    // =========================
+    // ERROR HANDLING
+    // =========================
+
+    private void SetError(Exception ex)
+    {
+        errorMessage =
+            string.IsNullOrWhiteSpace(ex.Message)
+                ? "Unable to complete the operation. Please try again."
+                : ex.Message;
+    }
+
+
+    private void ClearError()
+    {
+        errorMessage =
+            null;
+    }
+
+
+    // =========================
+    // SEARCH
+    // =========================
+
     private IEnumerable<TaskItem> FilteredTasks =>
-    tasks?
-        .Where(t =>
-            string.IsNullOrWhiteSpace(searchText)
-            || t.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase)
-            || (!string.IsNullOrWhiteSpace(t.Description)
-                && t.Description.Contains(searchText, StringComparison.OrdinalIgnoreCase)))
-    ?? Enumerable.Empty<TaskItem>();
+        tasks?
+            .Where(t =>
+                string.IsNullOrWhiteSpace(searchText)
+
+                || t.Title.Contains(
+                    searchText,
+                    StringComparison.OrdinalIgnoreCase)
+
+                || (
+                    !string.IsNullOrWhiteSpace(t.Description)
+
+                    && t.Description.Contains(
+                        searchText,
+                        StringComparison.OrdinalIgnoreCase)
+                ))
+
+        ?? Enumerable.Empty<TaskItem>();
 
 }

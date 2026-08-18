@@ -12,40 +12,57 @@ public class RecurringExpenseApiService
         _factory = factory;
     }
 
+
     public async Task<List<RecurringExpense>> GetAllAsync()
     {
         var client = _factory.CreateClient("Api");
 
-        return await client.GetFromJsonAsync<List<RecurringExpense>>(
-            "api/RecurringExpenses")
+        var response = await client.GetAsync(
+            "api/RecurringExpenses");
+
+        await EnsureSuccessAsync(response);
+
+        return await response.Content
+            .ReadFromJsonAsync<List<RecurringExpense>>()
             ?? new List<RecurringExpense>();
     }
 
-    public async Task AddAsync(RecurringExpense recurringExpense)
+
+    public async Task AddAsync(
+        RecurringExpense recurringExpense)
     {
         var client = _factory.CreateClient("Api");
 
-        await client.PostAsJsonAsync(
+        var response = await client.PostAsJsonAsync(
             "api/RecurringExpenses",
             recurringExpense);
+
+        await EnsureSuccessAsync(response);
     }
+
 
     public async Task GenerateAsync(int id)
     {
         var client = _factory.CreateClient("Api");
 
-        await client.PostAsync(
+        var response = await client.PostAsync(
             $"api/RecurringExpenses/{id}/generate",
             null);
+
+        await EnsureSuccessAsync(response);
     }
 
-    public async Task UpdateAsync(RecurringExpense recurringExpense)
+
+    public async Task UpdateAsync(
+        RecurringExpense recurringExpense)
     {
         var client = _factory.CreateClient("Api");
 
-        await client.PutAsJsonAsync(
+        var response = await client.PutAsJsonAsync(
             $"api/RecurringExpenses/{recurringExpense.Id}",
-             recurringExpense);
+            recurringExpense);
+
+        await EnsureSuccessAsync(response);
     }
 
 
@@ -53,7 +70,28 @@ public class RecurringExpenseApiService
     {
         var client = _factory.CreateClient("Api");
 
-        await client.DeleteAsync(
+        var response = await client.DeleteAsync(
             $"api/RecurringExpenses/{id}");
+
+        await EnsureSuccessAsync(response);
+    }
+
+
+    private static async Task EnsureSuccessAsync(
+        HttpResponseMessage response)
+    {
+        if (response.IsSuccessStatusCode)
+            return;
+
+        var error =
+            await response.Content.ReadAsStringAsync();
+
+        if (string.IsNullOrWhiteSpace(error))
+        {
+            error =
+                $"Request failed with status code {(int)response.StatusCode}.";
+        }
+
+        throw new Exception(error);
     }
 }

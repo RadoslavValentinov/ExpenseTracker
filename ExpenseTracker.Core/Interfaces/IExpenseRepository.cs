@@ -1,21 +1,29 @@
 ﻿using ExpenseTracker.Core.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace ExpenseTracker.Core.Interfaces
+namespace ExpenseTracker.Core.Interfaces;
+
+public interface IExpenseRepository
 {
-    public interface IExpenseRepository
-    {
-        Task AddAsync(Expense expense);
-        Task<List<Expense>> GetAllAsync();
-        Task<Expense?> GetByIdAsync(int id);
-        Task UpdateAsync(Expense expense);
-        Task DeleteAsync(int id);
-        Task<List<Expense>> GetByMonthAsync(int month);
-        Task MarkAsPaidAsync(int id);
+    Task AddAsync(Expense expense);
 
-    }
+    Task<List<Expense>> GetAllAsync(
+        string userId);
+
+    Task<Expense?> GetByIdAsync(
+        int id,
+        string userId);
+
+    Task UpdateAsync(Expense expense);
+
+    Task DeleteAsync(
+        int id,
+        string userId);
+
+    Task<List<Expense>> GetByMonthAsync(
+        int month,
+        string userId);
+
+    Task MarkAsPaidAsync(
+        int id,
+        string userId);
 }

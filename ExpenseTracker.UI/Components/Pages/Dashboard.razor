@@ -9,6 +9,7 @@
 @inject TaskApiService TaskService
 @inject ReminderApiService ReminderService
 @inject NotificationService NotificationService
+@inject NavigationManager NavigationManager
 
 
 <div class="dashboard-header mb-4">
@@ -37,6 +38,7 @@ else
     <div class="row g-4 mb-4">
 
         <div class="col-lg-3 col-md-6">
+
             <div class="card p-4 shadow-sm dashboard-card dashboard-primary h-100">
 
                 <p class="dashboard-title mb-2">
@@ -48,10 +50,12 @@ else
                 </h2>
 
             </div>
+
         </div>
 
 
         <div class="col-lg-3 col-md-6">
+
             <div class="card p-4 shadow-sm dashboard-card dashboard-danger h-100">
 
                 <p class="dashboard-title mb-2">
@@ -63,10 +67,12 @@ else
                 </h2>
 
             </div>
+
         </div>
 
 
         <div class="col-lg-3 col-md-6">
+
             <div class="card p-4 shadow-sm dashboard-card dashboard-success h-100">
 
                 <p class="dashboard-title mb-2">
@@ -78,10 +84,12 @@ else
                 </h2>
 
             </div>
+
         </div>
 
 
         <div class="col-lg-3 col-md-6">
+
             <div class="card p-4 shadow-sm dashboard-card dashboard-secondary h-100">
 
                 <p class="dashboard-title mb-2">
@@ -93,10 +101,12 @@ else
                 </h2>
 
             </div>
+
         </div>
 
 
         <div class="col-lg-3 col-md-6">
+
             <div class="card p-4 shadow-sm dashboard-card dashboard-purple h-100">
 
                 <p class="dashboard-title mb-2">
@@ -108,10 +118,12 @@ else
                 </h2>
 
             </div>
+
         </div>
 
 
         <div class="col-lg-3 col-md-6">
+
             <div class="card p-4 shadow-sm dashboard-card dashboard-success h-100">
 
                 <p class="dashboard-title mb-2">
@@ -123,10 +135,12 @@ else
                 </h2>
 
             </div>
+
         </div>
 
 
         <div class="col-lg-3 col-md-6">
+
             <div class="card p-4 shadow-sm dashboard-card dashboard-warning h-100">
 
                 <p class="dashboard-title mb-2">
@@ -138,10 +152,12 @@ else
                 </h2>
 
             </div>
+
         </div>
 
 
         <div class="col-lg-3 col-md-6">
+
             <div class="card p-4 shadow-sm dashboard-card dashboard-info h-100">
 
                 <p class="dashboard-title mb-2">
@@ -153,10 +169,12 @@ else
                 </h2>
 
             </div>
+
         </div>
 
 
         <div class="col-lg-3 col-md-6">
+
             <div class="card p-4 shadow-sm dashboard-card dashboard-primary h-100">
 
                 <p class="dashboard-title mb-2">
@@ -168,6 +186,7 @@ else
                 </h2>
 
             </div>
+
         </div>
 
     </div>
@@ -188,6 +207,7 @@ else
                 <div class="d-flex justify-content-between align-items-center mb-4">
 
                     <div>
+
                         <h5 class="fw-bold mb-1">
                             🔔 Today
                         </h5>
@@ -195,6 +215,7 @@ else
                         <p class="text-muted small mb-0">
                             Things that need your attention today
                         </p>
+
                     </div>
 
                     <span class="badge bg-primary">
@@ -222,7 +243,6 @@ else
                 }
                 else
                 {
-
                     @foreach (var task in TodayTasks)
                     {
                         <div class="dashboard-item">
@@ -319,6 +339,7 @@ else
                 <div class="d-flex justify-content-between align-items-center mb-4">
 
                     <div>
+
                         <h5 class="fw-bold mb-1">
                             📅 Upcoming
                         </h5>
@@ -326,6 +347,7 @@ else
                         <p class="text-muted small mb-0">
                             What's coming next
                         </p>
+
                     </div>
 
                     <span class="badge bg-secondary">
@@ -353,7 +375,6 @@ else
                 }
                 else
                 {
-
                     @foreach (var expense in UpcomingExpenses)
                     {
                         <div class="dashboard-item">
@@ -435,6 +456,200 @@ else
                     }
 
                 }
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================= -->
+    <!-- OVERDUE -->
+    <!-- ========================= -->
+
+    <div class="row g-4 mb-4">
+
+        <div class="col-12">
+
+            <div class="card p-4 dashboard-card">
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+
+                    <div>
+
+                        <h5 class="fw-bold mb-1">
+                            🔴 Overdue
+                        </h5>
+
+                        <p class="text-muted small mb-0">
+                            Things that are past their due date
+                        </p>
+
+                    </div>
+
+                    <span class="badge bg-danger">
+                        @OverdueItemsCount
+                    </span>
+
+                </div>
+
+
+                @if (OverdueItemsCount == 0)
+                {
+                    <div class="text-center py-4">
+
+                        <div class="fs-2 mb-2">
+                            🎉
+                        </div>
+
+                        <p class="text-muted mb-0">
+                            Nothing is overdue.
+                        </p>
+
+                    </div>
+                }
+                else
+                {
+                    <!-- OVERDUE TASKS -->
+                    @foreach (var task in OverdueTasks)
+                    {
+                        <div class="dashboard-item overdue-item"
+                             @onclick="() => OpenTask(task.Id)"
+                             style="cursor:pointer;">
+
+                            <div class="overdue-content">
+
+                                <strong class="overdue-title">
+                                    📋 @task.Title
+                                </strong>
+
+                                <p class="text-muted small mb-0">
+                                    Task · Due @task.DueDate.ToShortDateString()
+                                </p>
+
+                            </div>
+
+
+                            @if (task.Priority == 2)
+                            {
+                                <span class="badge bg-danger">
+                                    High
+                                </span>
+                            }
+                            else if (task.Priority == 1)
+                            {
+                                <span class="badge bg-warning text-dark">
+                                    Medium
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success">
+                                    Low
+                                </span>
+                            }
+
+                        </div>
+                    }
+
+
+                    <!-- OVERDUE EXPENSES -->
+                    @foreach (var expense in OverdueExpenses)
+                    {
+                        <div class="dashboard-item overdue-item">
+
+                            <div class="overdue-content">
+
+                                <strong class="overdue-title">
+                                    💰 @expense.Title
+                                </strong>
+
+                                <p class="text-muted small mb-0">
+                                    Expense · Due @expense.DueDate.ToShortDateString()
+                                </p>
+
+                            </div>
+
+                            <span class="fw-bold text-danger">
+                                @expense.Amount.ToString("C")
+                            </span>
+
+                        </div>
+                    }
+
+
+                    <!-- OVERDUE REMINDERS -->
+                    @foreach (var reminder in OverdueReminders)
+                    {
+                        <div class="dashboard-item overdue-item">
+
+                            <div class="overdue-content">
+
+                                <strong class="overdue-title">
+                                    🔔 @reminder.Title
+                                </strong>
+
+                                <p class="text-muted small mb-0">
+                                    Reminder · Due @reminder.ReminderDate.ToShortDateString()
+                                </p>
+
+                            </div>
+
+                            <span class="badge bg-danger">
+                                Overdue
+                            </span>
+
+                        </div>
+                    }
+
+                }
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================= -->
+    <!-- QUICK ACTIONS -->
+    <!-- ========================= -->
+
+    <div class="row g-4 mb-4">
+
+        <div class="col-12">
+
+            <div class="card p-4 dashboard-card">
+
+                <h5 class="fw-bold mb-3">
+                    ⚡ Quick Actions
+                </h5>
+
+                <div class="d-flex flex-wrap gap-3">
+
+                    <a class="btn btn-primary quick-link-btn"
+                       href="/expenses">
+
+                        ➕ Add Expense
+
+                    </a>
+
+                    <a class="btn btn-primary quick-link-btn"
+                       href="/tasks">
+
+                        ➕ Add Task
+
+                    </a>
+
+                    <a class="btn btn-primary quick-link-btn"
+                       href="/reminders">
+
+                        🔔 Add Reminder
+
+                    </a>
+
+                </div>
 
             </div>
 
@@ -1062,6 +1277,52 @@ else
 
 
     // =========================
+    // OVERDUE
+    // =========================
+
+    private IEnumerable<TaskItem> OverdueTasks =>
+        tasks?
+            .Where(x =>
+                !x.IsCompleted &&
+                x.DueDate.Date < DateTime.Today)
+            .OrderBy(x => x.DueDate)
+            .Take(5)
+            ?? Enumerable.Empty<TaskItem>();
+
+
+    private IEnumerable<Expense> OverdueExpenses =>
+        expenses?
+            .Where(x =>
+                !x.IsPaid &&
+                x.DueDate.Date < DateTime.Today)
+            .OrderBy(x => x.DueDate)
+            .Take(5)
+            ?? Enumerable.Empty<Expense>();
+
+
+    private IEnumerable<Reminder> OverdueReminders =>
+        reminders?
+            .Where(x =>
+                !x.IsRead &&
+                x.ReminderDate.Date < DateTime.Today)
+            .OrderBy(x => x.ReminderDate)
+            .Take(5)
+            ?? Enumerable.Empty<Reminder>();
+
+
+    private int OverdueItemsCount =>
+        OverdueTasks.Count() +
+        OverdueExpenses.Count() +
+        OverdueReminders.Count();
+
+
+    private void OpenTask(int id)
+    {
+        NavigationManager.NavigateTo($"/tasks/{id}");
+    }
+
+
+    // =========================
     // UPCOMING
     // =========================
 
@@ -1101,3 +1362,31 @@ else
         UpcomingRemindersList.Count();
 
 }
+
+<style>
+
+    .overdue-item {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .overdue-content {
+        flex: 1;
+        min-width: 0;
+        max-width: 100%;
+        overflow: hidden;
+    }
+
+    .overdue-title,
+    .overdue-description {
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    .overdue-item > .badge,
+    .overdue-item > .fw-bold {
+        flex-shrink: 0;
+        margin-left: 15px;
+    }
+
+</style>

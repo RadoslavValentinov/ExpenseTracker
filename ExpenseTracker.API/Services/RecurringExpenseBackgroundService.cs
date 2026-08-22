@@ -19,19 +19,21 @@ public class RecurringExpenseBackgroundService : BackgroundService
         {
             try
             {
-                using var scope = _scopeFactory.CreateScope();
+                using var scope =
+                    _scopeFactory.CreateScope();
 
                 var recurringService =
                     scope.ServiceProvider
                         .GetRequiredService<IRecurringExpenseService>();
 
                 var recurringExpenses =
-                    await recurringService.GetActiveAsync();
+                    await recurringService
+                        .GetActiveForBackgroundAsync();
 
                 foreach (var recurring in recurringExpenses)
                 {
-                    await recurringService.GenerateExpenseAsync(
-                        recurring.Id);
+                    await recurringService
+                        .GenerateExpenseAsync(recurring.Id);
                 }
             }
             catch (Exception ex)
@@ -40,7 +42,9 @@ public class RecurringExpenseBackgroundService : BackgroundService
                     $"Recurring expense generation error: {ex.Message}");
             }
 
-               await Task.Delay(TimeSpan.FromHours(24), stoppingToken);
+            await Task.Delay(
+                TimeSpan.FromHours(24),
+                stoppingToken);
         }
     }
 }

@@ -16,8 +16,13 @@ public class TaskService : ITaskService
         _reminderService = reminderService;
     }
 
-    public async Task AddTaskAsync(TaskItem task)
+
+    public async Task AddTaskAsync(
+        TaskItem task,
+        string userId)
     {
+        task.UserId = userId;
+
         await _repository.AddAsync(task);
 
         if (task.ReminderTime.HasValue)
@@ -34,14 +39,22 @@ public class TaskService : ITaskService
         }
     }
 
-    public async Task<List<TaskItem>> GetTasksAsync()
+
+    public async Task<List<TaskItem>> GetTasksAsync(
+        string userId)
     {
-        return await _repository.GetAllAsync();
+        return await _repository.GetAllAsync(userId);
     }
 
-    public async Task CompleteTaskAsync(int id)
+
+    public async Task CompleteTaskAsync(
+        int id,
+        string userId)
     {
-        var task = await _repository.GetByIdAsync(id);
+        var task =
+            await _repository.GetByIdAsync(
+                id,
+                userId);
 
         if (task == null)
             return;
@@ -51,15 +64,38 @@ public class TaskService : ITaskService
         await _repository.UpdateAsync(task);
     }
 
-    public async Task UpdateAsync(TaskItem task)
+
+    public async Task UpdateAsync(
+        TaskItem task,
+        string userId)
     {
-        await _repository.UpdateAsync(task);
+        var existingTask =
+            await _repository.GetByIdAsync(
+                task.Id,
+                userId);
+
+        if (existingTask == null)
+            return;
+
+        existingTask.Title = task.Title;
+        existingTask.Description = task.Description;
+        existingTask.DueDate = task.DueDate;
+        existingTask.Priority = task.Priority;
+        existingTask.ReminderTime = task.ReminderTime;
+        existingTask.IsCompleted = task.IsCompleted;
+        existingTask.HasReminder = task.HasReminder;
+        existingTask.RepeatMonthly = task.RepeatMonthly;
+
+        await _repository.UpdateAsync(existingTask);
     }
 
-    public async Task DeleteAsync(int id)
+
+    public async Task DeleteAsync(
+        int id,
+        string userId)
     {
-        await _repository.DeleteAsync(id);
+        await _repository.DeleteAsync(
+            id,
+            userId);
     }
 }
-
-

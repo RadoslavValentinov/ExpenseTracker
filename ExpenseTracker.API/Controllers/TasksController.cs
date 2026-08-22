@@ -1,24 +1,42 @@
 ﻿using ExpenseTracker.API.DTOs;
 using ExpenseTracker.Core.Interfaces;
 using ExpenseTracker.Core.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace ExpenseTracker.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class TasksController : ControllerBase
 {
     private readonly ITaskService _service;
 
-    public TasksController(ITaskService service)
+    public TasksController(
+        ITaskService service)
     {
         _service = service;
     }
 
-    [HttpPost]
-    public async Task<IActionResult> Create(CreateTaskDto dto)
+
+    private string? GetUserId()
     {
+        return User.FindFirstValue(
+            ClaimTypes.NameIdentifier);
+    }
+
+
+    [HttpPost]
+    public async Task<IActionResult> Create(
+        CreateTaskDto dto)
+    {
+        var userId = GetUserId();
+
+        if (string.IsNullOrWhiteSpace(userId))
+            return Unauthorized();
+
         var task = new TaskItem
         {
             Title = dto.Title,
@@ -29,46 +47,81 @@ public class TasksController : ControllerBase
             IsCompleted = false
         };
 
-        await _service.AddTaskAsync(task);
+        await _service.AddTaskAsync(
+            task,
+            userId);
 
         return Ok();
     }
+
 
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var tasks = await _service.GetTasksAsync();
+        var userId = GetUserId();
+
+        if (string.IsNullOrWhiteSpace(userId))
+            return Unauthorized();
+
+        var tasks =
+            await _service.GetTasksAsync(
+                userId);
 
         return Ok(tasks);
     }
 
+
     [HttpPut("{id}/complete")]
-    public async Task<IActionResult> Complete(int id)
+    public async Task<IActionResult> Complete(
+        int id)
     {
-        await _service.CompleteTaskAsync(id);
+        var userId = GetUserId();
+
+        if (string.IsNullOrWhiteSpace(userId))
+            return Unauthorized();
+
+        await _service.CompleteTaskAsync(
+            id,
+            userId);
 
         return Ok();
     }
+
 
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(
-    int id,
-    TaskItem task)
+        int id,
+        TaskItem task)
     {
+        var userId = GetUserId();
+
+        if (string.IsNullOrWhiteSpace(userId))
+            return Unauthorized();
+
         if (id != task.Id)
             return BadRequest();
 
-        await _service.UpdateAsync(task);
+        await _service.UpdateAsync(
+            task,
+            userId);
 
         return Ok();
     }
+
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
+    public async Task<IActionResult> Delete(
+        int id)
     {
-        await _service.DeleteAsync(id);
+        var userId = GetUserId();
+
+        if (string.IsNullOrWhiteSpace(userId))
+            return Unauthorized();
+
+        await _service.DeleteAsync(
+            id,
+            userId);
 
         return Ok();
     }
-
 }

@@ -1,25 +1,42 @@
 ﻿using ExpenseTracker.API.DTOs;
 using ExpenseTracker.Core.Interfaces;
 using ExpenseTracker.Core.Models;
-using ExpenseTracker.Core.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace ExpenseTracker.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class ExpensesController : ControllerBase
 {
     private readonly IExpenseService _service;
 
-    public ExpensesController(IExpenseService service)
+    public ExpensesController(
+        IExpenseService service)
     {
         _service = service;
     }
 
-    [HttpPost]
-    public async Task<IActionResult> AddExpense(CreateExpenseDto dto)
+
+    private string? GetUserId()
     {
+        return User.FindFirstValue(
+            ClaimTypes.NameIdentifier);
+    }
+
+
+    [HttpPost]
+    public async Task<IActionResult> AddExpense(
+        CreateExpenseDto dto)
+    {
+        var userId = GetUserId();
+
+        if (string.IsNullOrWhiteSpace(userId))
+            return Unauthorized();
+
         var expense = new Expense
         {
             Title = dto.Title,
@@ -29,61 +46,127 @@ public class ExpensesController : ControllerBase
             IsPaid = false
         };
 
-        await _service.AddExpenseAsync(expense);
+        await _service.AddExpenseAsync(
+            expense,
+            userId);
 
         return Ok();
     }
 
+
     [HttpGet]
     public async Task<IActionResult> GetExpenses()
     {
-        var expenses = await _service.GetExpensesAsync();
+        var userId = GetUserId();
+
+        if (string.IsNullOrWhiteSpace(userId))
+            return Unauthorized();
+
+        var expenses =
+            await _service.GetExpensesAsync(
+                userId);
+
         return Ok(expenses);
     }
 
 
     [HttpPut("{id}/pay")]
-    public async Task<IActionResult> MarkAsPaid(int id)
+    public async Task<IActionResult> MarkAsPaid(
+        int id)
     {
-        var expense = await _service.GetExpensesAsync();
+        var userId = GetUserId();
 
-        var existing = expense.FirstOrDefault(e => e.Id == id);
+        if (string.IsNullOrWhiteSpace(userId))
+            return Unauthorized();
 
-        if (existing == null)
-            return NotFound($"Expense with ID {id} not found");
+        var existing =
+            await _service.GetExpensesAsync(
+                userId);
 
-        await _service.MarkAsPaidAsync(id);
+        var expense =
+            existing.FirstOrDefault(x =>
+                x.Id == id);
+
+        if (expense == null)
+            return NotFound(
+                $"Expense with ID {id} not found");
+
+        await _service.MarkAsPaidAsync(
+            id,
+            userId);
 
         return Ok();
     }
 
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
+    public async Task<IActionResult> Delete(
+        int id)
     {
-        await _service.DeleteAsync(id);
+        var userId = GetUserId();
+
+        if (string.IsNullOrWhiteSpace(userId))
+            return Unauthorized();
+
+        var existing =
+            await _service.GetExpensesAsync(
+                userId);
+
+        if (!existing.Any(x => x.Id == id))
+            return NotFound(
+                $"Expense with ID {id} not found");
+
+        await _service.DeleteAsync(
+            id,
+            userId);
 
         return Ok();
     }
+
 
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(
-      int id,
-      Expense expense)
+        int id,
+        Expense expense)
     {
+        var userId = GetUserId();
+
+        if (string.IsNullOrWhiteSpace(userId))
+            return Unauthorized();
+
         if (id != expense.Id)
             return BadRequest();
 
-        await _service.UpdateAsync(expense);
+        var existing =
+            await _service.GetExpensesAsync(
+                userId);
+
+        if (!existing.Any(x => x.Id == id))
+            return NotFound(
+                $"Expense with ID {id} not found");
+
+        await _service.UpdateAsync(
+            expense,
+            userId);
 
         return Ok();
     }
 
+
     [HttpGet("month/{month}")]
-    public async Task<IActionResult> GetByMonth(int month)
+    public async Task<IActionResult> GetByMonth(
+        int month)
     {
-        var result = await _service.GetByMonthAsync(month);
+        var userId = GetUserId();
+
+        if (string.IsNullOrWhiteSpace(userId))
+            return Unauthorized();
+
+        var result =
+            await _service.GetByMonthAsync(
+                month,
+                userId);
+
         return Ok(result);
     }
-
 }

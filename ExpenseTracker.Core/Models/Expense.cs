@@ -1,25 +1,23 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace ExpenseTracker.Core.Models
+namespace ExpenseTracker.Core.Models;
+
+public class Expense
 {
-    public class Expense
-    {
-        public int Id { get; set; }
+    public int Id { get; set; }
 
-        public string Title { get; set; } = null!;
+    public string UserId { get; set; } = string.Empty;
 
-        public decimal Amount { get; set; }
+    public string Title { get; set; } = null!;
 
-        public DateTime DueDate { get; set; }
+    public decimal Amount { get; set; }
 
-        public bool IsPaid { get; set; } = false;
+    public DateTime DueDate { get; set; }
 
-        public string? Category { get; set; }
+    public bool IsPaid { get; set; } = false;
 
-        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
-    }
+    public string? Category { get; set; }
+
+    public DateTime CreatedDate { get; set; }
+        = DateTime.UtcNow;
 }

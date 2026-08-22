@@ -5,9 +5,26 @@ namespace ExpenseTracker.Core.Interfaces;
 public interface IRecurringExpenseRepository
 {
     Task AddAsync(RecurringExpense recurringExpense);
-    Task<List<RecurringExpense>> GetAllAsync();
-    Task<List<RecurringExpense>> GetActiveAsync();
-    Task UpdateAsync(RecurringExpense recurringExpense);
-    Task<RecurringExpense?> GetByIdAsync(int id);
-    Task DeleteAsync(int id);
+
+    Task<RecurringExpense?> GetByIdForBackgroundAsync(
+    int id);
+
+    Task<List<RecurringExpense>> GetAllAsync(
+        string userId);
+
+    Task<List<RecurringExpense>> GetActiveAsync(
+        string userId);
+
+    Task UpdateAsync(
+        RecurringExpense recurringExpense);
+
+    Task<RecurringExpense?> GetByIdAsync(
+        int id,
+        string userId);
+
+    Task DeleteAsync(
+        int id,
+        string userId);
+
+    Task<List<RecurringExpense>> GetActiveForBackgroundAsync();
 }

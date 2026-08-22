@@ -9,52 +9,95 @@ public class RecurringExpenseRepository : IRecurringExpenseRepository
 {
     private readonly AppDbContext _context;
 
-    public RecurringExpenseRepository(AppDbContext context)
+    public RecurringExpenseRepository(
+        AppDbContext context)
     {
         _context = context;
     }
 
-    public async Task AddAsync(RecurringExpense recurringExpense)
+
+    public async Task AddAsync(
+        RecurringExpense recurringExpense)
     {
-        await _context.RecurringExpenses.AddAsync(recurringExpense);
+        await _context.RecurringExpenses.AddAsync(
+            recurringExpense);
+
         await _context.SaveChangesAsync();
     }
 
-    public async Task<List<RecurringExpense>> GetAllAsync()
-    {
-        return await _context.RecurringExpenses.ToListAsync();
-    }
 
-    public async Task<List<RecurringExpense>> GetActiveAsync()
+    public async Task<List<RecurringExpense>> GetAllAsync(
+        string userId)
     {
         return await _context.RecurringExpenses
-            .Where(r => r.IsActive)
+            .Where(x => x.UserId == userId)
             .ToListAsync();
     }
 
-    public async Task<RecurringExpense?> GetByIdAsync(int id)
+
+    public async Task<List<RecurringExpense>> GetActiveAsync(
+        string userId)
     {
         return await _context.RecurringExpenses
-            .FirstOrDefaultAsync(r => r.Id == id);
+            .Where(x =>
+                x.UserId == userId &&
+                x.IsActive)
+            .ToListAsync();
     }
 
-    public async Task UpdateAsync(RecurringExpense recurringExpense)
+
+    public async Task<RecurringExpense?> GetByIdAsync(
+        int id,
+        string userId)
     {
-        _context.RecurringExpenses.Update(recurringExpense);
+        return await _context.RecurringExpenses
+            .FirstOrDefaultAsync(x =>
+                x.Id == id &&
+                x.UserId == userId);
+    }
+
+
+    public async Task UpdateAsync(
+        RecurringExpense recurringExpense)
+    {
+        _context.RecurringExpenses.Update(
+            recurringExpense);
+
         await _context.SaveChangesAsync();
     }
 
-    public async Task DeleteAsync(int id)
+
+    public async Task DeleteAsync(
+        int id,
+        string userId)
     {
         var recurringExpense =
-            await _context.RecurringExpenses.FindAsync(id);
+            await _context.RecurringExpenses
+                .FirstOrDefaultAsync(x =>
+                    x.Id == id &&
+                    x.UserId == userId);
 
         if (recurringExpense == null)
             return;
 
-        _context.RecurringExpenses.Remove(recurringExpense);
+        _context.RecurringExpenses.Remove(
+            recurringExpense);
 
         await _context.SaveChangesAsync();
+    }
+
+    public async Task<RecurringExpense?> GetByIdForBackgroundAsync(
+    int id)
+    {
+        return await _context.RecurringExpenses
+            .FirstOrDefaultAsync(x => x.Id == id);
+    }
+
+    public async Task<List<RecurringExpense>> GetActiveForBackgroundAsync()
+    {
+        return await _context.RecurringExpenses
+            .Where(x => x.IsActive)
+            .ToListAsync();
     }
 
 }

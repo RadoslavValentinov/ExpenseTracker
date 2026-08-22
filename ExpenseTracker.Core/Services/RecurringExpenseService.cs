@@ -19,24 +19,83 @@ public class RecurringExpenseService : IRecurringExpenseService
         _expenseService = expenseService;
     }
 
-    public Task AddAsync(RecurringExpense recurringExpense)
+
+    public async Task AddAsync(
+        RecurringExpense recurringExpense,
+        string userId)
     {
-        return _repository.AddAsync(recurringExpense);
+        recurringExpense.UserId = userId;
+
+        await _repository.AddAsync(
+            recurringExpense);
     }
 
-    public Task<List<RecurringExpense>> GetAllAsync()
+
+    public Task<List<RecurringExpense>> GetAllAsync(
+        string userId)
     {
-        return _repository.GetAllAsync();
+        return _repository.GetAllAsync(
+            userId);
     }
 
-    public async Task GenerateExpenseAsync(int id)
+
+    public Task<List<RecurringExpense>> GetActiveAsync(
+        string userId)
+    {
+        return _repository.GetActiveAsync(
+            userId);
+    }
+
+
+    public async Task<RecurringExpense?> GetByIdAsync(
+        int id,
+        string userId)
+    {
+        return await _repository.GetByIdAsync(
+            id,
+            userId);
+    }
+
+
+    public async Task UpdateAsync(
+        RecurringExpense recurringExpense,
+        string userId)
+    {
+        var existing =
+            await _repository.GetByIdAsync(
+                recurringExpense.Id,
+                userId);
+
+        if (existing == null)
+            return;
+
+        existing.Title =
+            recurringExpense.Title;
+
+        existing.Amount =
+            recurringExpense.Amount;
+
+        existing.DayOfMonth =
+            recurringExpense.DayOfMonth;
+
+        existing.IsActive =
+            recurringExpense.IsActive;
+
+        await _repository.UpdateAsync(
+            existing);
+    }
+
+
+    public async Task GenerateExpenseAsync(
+        int id)
     {
         await _generationLock.WaitAsync();
 
         try
         {
             var recurringExpense =
-                await _repository.GetByIdAsync(id);
+                await FindRecurringExpenseForGeneration(
+                    id);
 
             if (recurringExpense == null)
                 return;
@@ -44,10 +103,11 @@ public class RecurringExpenseService : IRecurringExpenseService
             if (!recurringExpense.IsActive)
                 return;
 
-            var today = DateTime.Now.Date;
+            var today =
+                DateTime.Now.Date;
 
-            // If this recurring expense was already
-            // generated for the current month, stop.
+
+            // Already generated for current month
             if (recurringExpense.LastGeneratedDate.HasValue &&
                 recurringExpense.LastGeneratedDate.Value.Year == today.Year &&
                 recurringExpense.LastGeneratedDate.Value.Month == today.Month)
@@ -55,45 +115,54 @@ public class RecurringExpenseService : IRecurringExpenseService
                 return;
             }
 
-            // Calculate the actual due day for the current month.
-            // Example:
-            // DayOfMonth = 31
-            // February -> 28/29
+
+            // Calculate actual day for current month
             var day = Math.Min(
                 recurringExpense.DayOfMonth,
                 DateTime.DaysInMonth(
                     today.Year,
                     today.Month));
 
-            // If we haven't reached the due day yet,
-            // do not generate the expense.
+
+            // Not reached yet
             if (today.Day < day)
                 return;
 
-            // The expense keeps the planned due date,
-            // even if we generate it later because the
-            // application was offline.
+
+            // Planned due date
             var dueDate = new DateTime(
                 today.Year,
                 today.Month,
                 day);
 
+
             var expense = new Expense
             {
+                UserId = recurringExpense.UserId,
+
                 Title = recurringExpense.Title,
+
                 Amount = recurringExpense.Amount,
+
                 DueDate = dueDate,
+
                 IsPaid = false,
+
                 Category = "Recurring"
             };
 
-            await _expenseService.AddExpenseAsync(expense);
 
-            // Remember that this month's expense
-            // has already been generated.
-            recurringExpense.LastGeneratedDate = DateTime.UtcNow;
+            await _expenseService.AddExpenseAsync(
+                expense,
+                recurringExpense.UserId);
 
-            await _repository.UpdateAsync(recurringExpense);
+
+            // Remember generation
+            recurringExpense.LastGeneratedDate =
+                DateTime.UtcNow;
+
+            await _repository.UpdateAsync(
+                recurringExpense);
         }
         finally
         {
@@ -101,24 +170,32 @@ public class RecurringExpenseService : IRecurringExpenseService
         }
     }
 
-    public Task<List<RecurringExpense>> GetActiveAsync()
-    {
-        return _repository.GetActiveAsync();
-    }
 
-    public Task<RecurringExpense?> GetByIdAsync(int id)
+    private async Task<RecurringExpense?> FindRecurringExpenseForGeneration(
+        int id)
     {
-        return _repository.GetByIdAsync(id);
-    }
+        // Background generation is not tied to a JWT user.
+        // The recurring expense itself contains the owner.
+        //
+        // We therefore need a repository-level lookup
+        // that does not depend on the current HTTP user.
 
-    public Task UpdateAsync(RecurringExpense recurringExpense)
-    {
-        return _repository.UpdateAsync(recurringExpense);
+        return await _repository.GetByIdForBackgroundAsync(id);
     }
 
 
-    public Task DeleteAsync(int id)
+    public Task DeleteAsync(
+        int id,
+        string userId)
     {
-        return _repository.DeleteAsync(id);
+        return _repository.DeleteAsync(
+            id,
+            userId);
     }
+
+    public Task<List<RecurringExpense>> GetActiveForBackgroundAsync()
+    {
+        return _repository.GetActiveForBackgroundAsync();
+    }
+
 }

@@ -4,6 +4,8 @@ public class RecurringExpense
 {
     public int Id { get; set; }
 
+    public string UserId { get; set; } = string.Empty;
+
     public string Title { get; set; } = null!;
 
     public decimal Amount { get; set; }
@@ -12,7 +14,8 @@ public class RecurringExpense
 
     public bool IsActive { get; set; } = true;
 
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; }
+        = DateTime.UtcNow;
 
     public DateTime? LastGeneratedDate { get; set; }
 }

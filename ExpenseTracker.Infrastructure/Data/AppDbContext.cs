@@ -1,10 +1,5 @@
 ﻿using ExpenseTracker.Core.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ExpenseTracker.Infrastructure.Data
 {
@@ -15,10 +10,12 @@ namespace ExpenseTracker.Infrastructure.Data
         {
         }
 
-        public DbSet<Expense> Expenses => Set<Expense>();
-        public DbSet<TaskItem> Tasks => Set<TaskItem>();
-        public DbSet<Reminder> Reminders => Set<Reminder>();
-        public DbSet<RecurringExpense> RecurringExpenses => Set<RecurringExpense>();
+        public DbSet<Expense> Expenses { get; set; } = null!;
 
+        public DbSet<TaskItem> Tasks { get; set; } = null!;
+
+        public DbSet<Reminder> Reminders { get; set; } = null!;
+
+        public DbSet<RecurringExpense> RecurringExpenses { get; set; } = null!;
     }
 }

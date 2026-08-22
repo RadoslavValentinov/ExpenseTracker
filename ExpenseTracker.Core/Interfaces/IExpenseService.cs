@@ -4,10 +4,26 @@ namespace ExpenseTracker.Core.Interfaces;
 
 public interface IExpenseService
 {
-    Task AddExpenseAsync(Expense expense);
-    Task<List<Expense>> GetExpensesAsync();
-    Task MarkAsPaidAsync(int id);
-    Task DeleteAsync(int id);
-    Task UpdateAsync(Expense expense);
-    Task<List<Expense>> GetByMonthAsync(int month);
+    Task AddExpenseAsync(
+        Expense expense,
+        string userId);
+
+    Task<List<Expense>> GetExpensesAsync(
+        string userId);
+
+    Task MarkAsPaidAsync(
+        int id,
+        string userId);
+
+    Task DeleteAsync(
+        int id,
+        string userId);
+
+    Task UpdateAsync(
+        Expense expense,
+        string userId);
+
+    Task<List<Expense>> GetByMonthAsync(
+        int month,
+        string userId);
 }

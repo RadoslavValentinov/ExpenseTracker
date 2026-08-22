@@ -16,9 +16,15 @@ public class ExpenseService : IExpenseService
         _reminderService = reminderService;
     }
 
-    public async Task AddExpenseAsync(Expense expense)
+
+    public async Task AddExpenseAsync(
+        Expense expense,
+        string userId)
     {
+        expense.UserId = userId;
+
         await _repository.AddAsync(expense);
+
         if (expense.DueDate > DateTime.MinValue)
         {
             var reminder = new Reminder
@@ -33,34 +39,63 @@ public class ExpenseService : IExpenseService
         }
     }
 
-    public async Task<List<Expense>> GetExpensesAsync()
+
+    public async Task<List<Expense>> GetExpensesAsync(
+        string userId)
     {
-        return await _repository.GetAllAsync();
+        return await _repository.GetAllAsync(userId);
     }
 
 
-
-    public async Task MarkAsPaidAsync(int id)
+    public async Task MarkAsPaidAsync(
+        int id,
+        string userId)
     {
-        var expense = await _repository.GetByIdAsync(id);
-        if (expense == null) return;
-
-        expense.IsPaid = true;
-        await _repository.UpdateAsync(expense);
+        await _repository.MarkAsPaidAsync(
+            id,
+            userId);
     }
 
-    public async Task DeleteAsync(int id)
+
+    public async Task DeleteAsync(
+        int id,
+        string userId)
     {
-        await _repository.DeleteAsync(id);
+        await _repository.DeleteAsync(
+            id,
+            userId);
     }
 
-    public async Task UpdateAsync(Expense expense)
+
+    public async Task UpdateAsync(
+        Expense expense,
+        string userId)
     {
-        await _repository.UpdateAsync(expense);
+        var existingExpense =
+            await _repository.GetByIdAsync(
+                expense.Id,
+                userId);
+
+        if (existingExpense == null)
+            return;
+
+        existingExpense.Title = expense.Title;
+        existingExpense.Amount = expense.Amount;
+        existingExpense.DueDate = expense.DueDate;
+        existingExpense.Category = expense.Category;
+        existingExpense.IsPaid = expense.IsPaid;
+
+        await _repository.UpdateAsync(
+            existingExpense);
     }
 
-    public async Task<List<Expense>> GetByMonthAsync(int month)
+
+    public async Task<List<Expense>> GetByMonthAsync(
+        int month,
+        string userId)
     {
-        return await _repository.GetByMonthAsync(month);
+        return await _repository.GetByMonthAsync(
+            month,
+            userId);
     }
 }

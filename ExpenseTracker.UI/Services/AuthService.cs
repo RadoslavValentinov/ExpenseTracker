@@ -15,19 +15,17 @@ public class AuthService
         string email,
         string password)
     {
-        // IMPORTANT:
-        // Login must NOT use the authenticated API client,
-        // because there is no JWT yet.
+        var client =
+            _factory.CreateClient("AuthApi");
 
-        var client = _factory.CreateClient("AuthApi");
-
-        var response = await client.PostAsJsonAsync(
-            "api/Auth/login",
-            new
-            {
-                email,
-                password
-            });
+        var response =
+            await client.PostAsJsonAsync(
+                "api/Auth/login",
+                new
+                {
+                    email,
+                    password
+                });
 
         if (!response.IsSuccessStatusCode)
             return null;

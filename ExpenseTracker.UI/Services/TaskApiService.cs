@@ -1,25 +1,23 @@
 ﻿using ExpenseTracker.Core.Models;
 using ExpenseTracker.UI.Models;
-using System.Net.Http.Json;
 
 namespace ExpenseTracker.UI.Services;
 
 public class TaskApiService
 {
-    private readonly IHttpClientFactory _factory;
+    private readonly ApiHttpClient _api;
 
-    public TaskApiService(IHttpClientFactory factory)
+    public TaskApiService(ApiHttpClient api)
     {
-        _factory = factory;
+        _api = api;
     }
 
 
     public async Task<List<TaskItem>?> GetTasksAsync()
     {
-        var client = _factory.CreateClient("Api");
-
-        var response = await client.GetAsync(
-            "api/tasks");
+        var response =
+            await _api.GetAsync(
+                "api/tasks");
 
         await EnsureSuccessAsync(response);
 
@@ -28,48 +26,47 @@ public class TaskApiService
     }
 
 
-    public async Task AddTaskAsync(CreateTaskDto dto)
+    public async Task AddTaskAsync(
+        CreateTaskDto dto)
     {
-        var client = _factory.CreateClient("Api");
-
-        var response = await client.PostAsJsonAsync(
-            "api/tasks",
-            dto);
+        var response =
+            await _api.PostAsJsonAsync(
+                "api/tasks",
+                dto);
 
         await EnsureSuccessAsync(response);
     }
 
 
-    public async Task CompleteTaskAsync(int id)
+    public async Task CompleteTaskAsync(
+        int id)
     {
-        var client = _factory.CreateClient("Api");
-
-        var response = await client.PutAsync(
-            $"api/tasks/{id}/complete",
-            null);
+        var response =
+            await _api.PutAsync(
+                $"api/tasks/{id}/complete");
 
         await EnsureSuccessAsync(response);
     }
 
 
-    public async Task UpdateAsync(TaskItem task)
+    public async Task UpdateAsync(
+        TaskItem task)
     {
-        var client = _factory.CreateClient("Api");
-
-        var response = await client.PutAsJsonAsync(
-            $"api/tasks/{task.Id}",
-            task);
+        var response =
+            await _api.PutAsJsonAsync(
+                $"api/tasks/{task.Id}",
+                task);
 
         await EnsureSuccessAsync(response);
     }
 
 
-    public async Task DeleteAsync(int id)
+    public async Task DeleteAsync(
+        int id)
     {
-        var client = _factory.CreateClient("Api");
-
-        var response = await client.DeleteAsync(
-            $"api/tasks/{id}");
+        var response =
+            await _api.DeleteAsync(
+                $"api/tasks/{id}");
 
         await EnsureSuccessAsync(response);
     }
@@ -82,7 +79,8 @@ public class TaskApiService
             return;
 
         var error =
-            await response.Content.ReadAsStringAsync();
+            await response.Content
+                .ReadAsStringAsync();
 
         if (string.IsNullOrWhiteSpace(error))
         {

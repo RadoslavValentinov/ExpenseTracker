@@ -5,6 +5,7 @@
 @inject AuthService AuthService
 @inject AuthStateService AuthState
 @inject NavigationManager Navigation
+@inject JwtAuthenticationStateProvider AuthenticationStateProvider
 
 
 <div class="row justify-content-center">
@@ -90,9 +91,8 @@
 
         await AuthState.SetTokenAsync(
             result.Token);
+        AuthenticationStateProvider.NotifyAuthenticationStateChanged();
 
-        Navigation.NavigateTo(
-            "/",
-            forceLoad: true);
+        Navigation.NavigateTo("/");
     }
 }

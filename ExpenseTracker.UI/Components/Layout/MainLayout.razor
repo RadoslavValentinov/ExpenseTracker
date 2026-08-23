@@ -1,11 +1,10 @@
 ﻿@using ExpenseTracker.UI.Services
+
 @inherits LayoutComponentBase
 
 @inject NotificationService NotificationService
-@inject NavigationManager NavigationManager 
+@inject NavigationManager NavigationManager
 @inject AuthStateService AuthState
-
-
 
 
 <div class="app-layout">
@@ -22,81 +21,139 @@
 
         </div>
 
-        <nav class="sidebar-nav">
 
-            <NavLink href="/"
-                     class="nav-item">
+        @if (AuthState.IsAuthenticated)
+        {
+            <nav class="sidebar-nav">
 
-                📊 Dashboard
+                <a href="/"
+                   class="nav-item"
+                   data-enhance-nav="false">
 
-            </NavLink>
+                    📊 Dashboard
 
-            <NavLink href="/expenses"
-                     class="nav-item">
-
-                💰 Expenses
-
-            </NavLink>
-
-            <NavLink href="/tasks"
-                     class="nav-item">
-
-                ✅ Tasks
-
-            </NavLink>
-
-            <NavLink href="/recurring-expenses"
-                     class="nav-item">
-
-                🔄 Recurring Expenses
-
-            </NavLink>
-
-            <NavLink class="nav-item" href="/calendar">
-
-                📅 Calendar
-
-            </NavLink>
-
-            <NavLink href="/charts"
-                     class="nav-item">
-
-                📊 Charts
-
-            </NavLink>
+                </a>
 
 
-        </nav>
+                <a href="/expenses"
+                   class="nav-item"
+                   data-enhance-nav="false">
+
+                    💰 Expenses
+
+                </a>
+
+
+                <a href="/tasks"
+                   class="nav-item"
+                   data-enhance-nav="false">
+
+                    ✅ Tasks
+
+                </a>
+
+
+                <a href="/recurring-expenses"
+                   class="nav-item"
+                   data-enhance-nav="false">
+
+                    🔄 Recurring Expenses
+
+                </a>
+
+
+                <a href="/calendar"
+                   class="nav-item"
+                   data-enhance-nav="false">
+
+                    📅 Calendar
+
+                </a>
+
+
+                <a href="/charts"
+                   class="nav-item"
+                   data-enhance-nav="false">
+
+                    📊 Charts
+
+                </a>
+
+            </nav>
+        }
+        else
+        {
+            <nav class="sidebar-nav">
+
+                <a href="/login"
+                   class="nav-item"
+                   data-enhance-nav="false">
+
+                    🔐 Login
+
+                </a>
+
+
+                <a href="/register"
+                   class="nav-item"
+                   data-enhance-nav="false">
+
+                    📝 Register
+
+                </a>
+
+            </nav>
+        }
 
     </aside>
+
 
     <div class="main-content">
 
         <header class="topbar">
 
             <div class="topbar-left">
-                <p>Manage your finances and tasks</p>
+
+                <p>
+                    Manage your finances and tasks
+                </p>
+
             </div>
+
 
             <div class="topbar-right">
 
-                <button class="notification-btn"
-                        @onclick="OpenNotifications">
+                @if (AuthState.IsAuthenticated)
+                {
+                    <button class="notification-btn"
+                            @onclick="OpenNotifications">
 
-                    🔔
+                        🔔
 
-                    @if (notificationCount > 0)
-                    {
-                        <span class="notification-count">
-                            @(notificationCount > 99 ? "99+" : notificationCount.ToString())
-                        </span>
-                    }
+                        @if (notificationCount > 0)
+                        {
+                            <span class="notification-count">
+                                @(notificationCount > 99
+                                                        ? "99+"
+                                                        : notificationCount.ToString())
+                    </span>
+                                        }
 
-                </button>
+                    </button>
+
+
+                    <button class="btn btn-outline-secondary ms-2"
+                            @onclick="Logout">
+
+                        Logout
+
+                    </button>
+                }
 
             </div>
 
         </header>
+
 
         <main class="content-area">
 
@@ -113,15 +170,11 @@
 
     private int notificationCount;
 
-    protected override async Task OnInitializedAsync()
-    {
-        notificationCount = 0;
-    }
-
 
     private void OpenNotifications()
     {
-        NavigationManager.NavigateTo("/notifications");
+        NavigationManager.NavigateTo(
+            "/notifications");
     }
 
 

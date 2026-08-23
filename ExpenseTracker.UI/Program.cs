@@ -1,7 +1,6 @@
 using ExpenseTracker.UI.Components;
 using ExpenseTracker.UI.Services;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
 internal class Program
 {
@@ -44,13 +43,15 @@ internal class Program
                     JwtAuthenticationStateProvider>());
 
 
-        builder.Services.AddTransient<AuthHttpMessageHandler>();
+        // =========================
+        // API CLIENT
+        // =========================
 
-        builder.Services.AddScoped<ProtectedLocalStorage>();
+        builder.Services.AddScoped<ApiHttpClient>();
 
 
         // =========================
-        // API SERVICES
+        // APPLICATION SERVICES
         // =========================
 
         builder.Services.AddScoped<ExpenseApiService>();
@@ -65,26 +66,16 @@ internal class Program
 
 
         // =========================
-        // AUTH HTTP CLIENT
+        // LOGIN HTTP CLIENT
         // =========================
 
-        builder.Services.AddHttpClient("AuthApi", client =>
-        {
-            client.BaseAddress =
-                new Uri("https://localhost:7135/");
-        });
-
-
-        // =========================
-        // AUTHENTICATED API CLIENT
-        // =========================
-
-        builder.Services.AddHttpClient("Api", client =>
-        {
-            client.BaseAddress =
-                new Uri("https://localhost:7135/");
-        })
-        .AddHttpMessageHandler<AuthHttpMessageHandler>();
+        builder.Services.AddHttpClient(
+            "AuthApi",
+            client =>
+            {
+                client.BaseAddress =
+                    new Uri("https://localhost:7135/");
+            });
 
 
         var app = builder.Build();

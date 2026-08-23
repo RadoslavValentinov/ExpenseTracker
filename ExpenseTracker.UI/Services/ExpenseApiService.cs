@@ -1,81 +1,70 @@
 ﻿using ExpenseTracker.Core.Models;
 using ExpenseTracker.UI.Models;
-using System.Net.Http.Json;
 
 namespace ExpenseTracker.UI.Services;
 
 public class ExpenseApiService
 {
-    private readonly IHttpClientFactory _factory;
+    private readonly ApiHttpClient _api;
 
-    public ExpenseApiService(IHttpClientFactory factory)
+    public ExpenseApiService(ApiHttpClient api)
     {
-        _factory = factory;
+        _api = api;
     }
-
 
     public async Task MarkAsPaidAsync(int id)
     {
-        var client = _factory.CreateClient("Api");
-
-        var response = await client.PutAsync(
-            $"api/Expenses/{id}/pay",
-            null);
+        var response =
+            await _api.PutAsync(
+                $"api/Expenses/{id}/pay");
 
         await EnsureSuccessAsync(response);
     }
 
-
     public async Task<List<Expense>> GetExpensesAsync()
     {
-        var client = _factory.CreateClient("Api");
-
-        var response = await client.GetAsync(
-            "api/expenses");
+        var response =
+            await _api.GetAsync("api/expenses");
 
         await EnsureSuccessAsync(response);
 
         var expenses =
-            await response.Content.ReadFromJsonAsync<List<Expense>>();
+            await response.Content
+                .ReadFromJsonAsync<List<Expense>>();
 
         return expenses ?? new List<Expense>();
     }
 
-
-    public async Task AddExpenseAsync(CreateExpenseDto dto)
+    public async Task AddExpenseAsync(
+        CreateExpenseDto dto)
     {
-        var client = _factory.CreateClient("Api");
-
-        var response = await client.PostAsJsonAsync(
-            "api/Expenses",
-            dto);
+        var response =
+            await _api.PostAsJsonAsync(
+                "api/Expenses",
+                dto);
 
         await EnsureSuccessAsync(response);
     }
 
-
-    public async Task UpdateAsync(Expense expense)
+    public async Task UpdateAsync(
+        Expense expense)
     {
-        var client = _factory.CreateClient("Api");
-
-        var response = await client.PutAsJsonAsync(
-            $"api/expenses/{expense.Id}",
-            expense);
+        var response =
+            await _api.PutAsJsonAsync(
+                $"api/expenses/{expense.Id}",
+                expense);
 
         await EnsureSuccessAsync(response);
     }
-
 
     public async Task DeleteAsync(int id)
     {
-        var client = _factory.CreateClient("Api");
-
-        var response = await client.DeleteAsync(
-            $"api/expenses/{id}");
+        var response =
+            await _api.DeleteAsync(
+                $"api/expenses/{id}");
 
         await EnsureSuccessAsync(response);
     }
-
 
     private static async Task EnsureSuccessAsync(
         HttpResponseMessage response)
@@ -84,7 +73,8 @@ public class ExpenseApiService
             return;
 
         var error =
-            await response.Content.ReadAsStringAsync();
+            await response.Content
+                .ReadAsStringAsync();
 
         if (string.IsNullOrWhiteSpace(error))
         {

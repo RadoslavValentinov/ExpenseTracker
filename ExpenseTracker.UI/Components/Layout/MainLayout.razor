@@ -3,6 +3,9 @@
 
 @inject NotificationService NotificationService
 @inject NavigationManager NavigationManager 
+@inject AuthStateService AuthState
+
+
 
 
 <div class="app-layout">
@@ -105,20 +108,32 @@
 
 </div>
 
+
 @code {
 
     private int notificationCount;
 
     protected override async Task OnInitializedAsync()
     {
-        var notifications = await NotificationService.GetNotificationsAsync();
-
-        notificationCount = notifications.Count;
+        notificationCount = 0;
     }
+
 
     private void OpenNotifications()
     {
         NavigationManager.NavigateTo("/notifications");
+    }
+
+
+    private async Task Logout()
+    {
+        await AuthState.LogoutAsync();
+
+        notificationCount = 0;
+
+        NavigationManager.NavigateTo(
+            "/login",
+            forceLoad: true);
     }
 
 }

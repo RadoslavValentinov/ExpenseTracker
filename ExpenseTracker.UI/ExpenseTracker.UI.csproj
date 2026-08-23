@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="ChartJs.Blazor.Fork" Version="2.0.2" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.7.3" />
   </ItemGroup>
 
   <ItemGroup>

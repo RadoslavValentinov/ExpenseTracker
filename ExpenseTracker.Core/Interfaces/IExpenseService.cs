@@ -11,15 +11,15 @@ public interface IExpenseService
     Task<List<Expense>> GetExpensesAsync(
         string userId);
 
-    Task MarkAsPaidAsync(
+    Task<bool> MarkAsPaidAsync(
         int id,
         string userId);
 
-    Task DeleteAsync(
+    Task<bool> DeleteAsync(
         int id,
         string userId);
 
-    Task UpdateAsync(
+    Task<bool> UpdateAsync(
         Expense expense,
         string userId);
 

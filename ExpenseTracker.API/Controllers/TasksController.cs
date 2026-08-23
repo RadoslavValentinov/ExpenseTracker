@@ -80,9 +80,13 @@ public class TasksController : ControllerBase
         if (string.IsNullOrWhiteSpace(userId))
             return Unauthorized();
 
-        await _service.CompleteTaskAsync(
-            id,
-            userId);
+        var completed =
+            await _service.CompleteTaskAsync(
+                id,
+                userId);
+
+        if (!completed)
+            return NotFound();
 
         return Ok();
     }
@@ -101,9 +105,13 @@ public class TasksController : ControllerBase
         if (id != task.Id)
             return BadRequest();
 
-        await _service.UpdateAsync(
-            task,
-            userId);
+        var updated =
+            await _service.UpdateAsync(
+                task,
+                userId);
+
+        if (!updated)
+            return NotFound();
 
         return Ok();
     }
@@ -118,9 +126,13 @@ public class TasksController : ControllerBase
         if (string.IsNullOrWhiteSpace(userId))
             return Unauthorized();
 
-        await _service.DeleteAsync(
-            id,
-            userId);
+        var deleted =
+            await _service.DeleteAsync(
+                id,
+                userId);
+
+        if (!deleted)
+            return NotFound();
 
         return Ok();
     }

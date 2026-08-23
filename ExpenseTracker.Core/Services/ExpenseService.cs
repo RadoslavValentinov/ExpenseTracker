@@ -35,7 +35,9 @@ public class ExpenseService : IExpenseService
                 ReferenceId = expense.Id
             };
 
-            await _reminderService.AddAsync(reminder);
+            await _reminderService.AddAsync(
+                reminder,
+                userId);
         }
     }
 
@@ -47,27 +49,50 @@ public class ExpenseService : IExpenseService
     }
 
 
-    public async Task MarkAsPaidAsync(
+    public async Task<bool> MarkAsPaidAsync(
         int id,
         string userId)
     {
+        var expense =
+            await _repository.GetByIdAsync(
+                id,
+                userId);
+
+        if (expense == null)
+            return false;
+
+        if (expense.IsPaid)
+            return true;
+
         await _repository.MarkAsPaidAsync(
             id,
             userId);
+
+        return true;
     }
 
 
-    public async Task DeleteAsync(
+    public async Task<bool> DeleteAsync(
         int id,
         string userId)
     {
+        var expense =
+            await _repository.GetByIdAsync(
+                id,
+                userId);
+
+        if (expense == null)
+            return false;
+
         await _repository.DeleteAsync(
             id,
             userId);
+
+        return true;
     }
 
 
-    public async Task UpdateAsync(
+    public async Task<bool> UpdateAsync(
         Expense expense,
         string userId)
     {
@@ -77,16 +102,27 @@ public class ExpenseService : IExpenseService
                 userId);
 
         if (existingExpense == null)
-            return;
+            return false;
 
-        existingExpense.Title = expense.Title;
-        existingExpense.Amount = expense.Amount;
-        existingExpense.DueDate = expense.DueDate;
-        existingExpense.Category = expense.Category;
-        existingExpense.IsPaid = expense.IsPaid;
+        existingExpense.Title =
+            expense.Title;
+
+        existingExpense.Amount =
+            expense.Amount;
+
+        existingExpense.DueDate =
+            expense.DueDate;
+
+        existingExpense.Category =
+            expense.Category;
+
+        existingExpense.IsPaid =
+            expense.IsPaid;
 
         await _repository.UpdateAsync(
             existingExpense);
+
+        return true;
     }
 
 

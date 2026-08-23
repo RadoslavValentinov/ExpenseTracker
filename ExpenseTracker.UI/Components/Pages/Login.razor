@@ -1,0 +1,98 @@
+﻿@page "/login"
+
+@using ExpenseTracker.UI.Services
+
+@inject AuthService AuthService
+@inject AuthStateService AuthState
+@inject NavigationManager Navigation
+
+
+<div class="row justify-content-center">
+
+    <div class="col-md-6 col-lg-4">
+
+        <div class="card shadow-sm p-4">
+
+            <h3 class="text-center mb-4">
+                Login
+            </h3>
+
+            <div class="mb-3">
+
+                <label class="form-label">
+                    Email
+                </label>
+
+                <input class="form-control"
+                       type="email"
+                       @bind="email" />
+
+            </div>
+
+            <div class="mb-3">
+
+                <label class="form-label">
+                    Password
+                </label>
+
+                <input class="form-control"
+                       type="password"
+                       @bind="password" />
+
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(errorMessage))
+            {
+                <div class="alert alert-danger">
+                    @errorMessage
+                </div>
+            }
+
+            <button class="btn btn-primary w-100"
+                    @onclick="HandleLogin">
+
+                Login
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+@code {
+
+    private string email = string.Empty;
+
+    private string password = string.Empty;
+
+    private string errorMessage = string.Empty;
+
+
+    private async Task HandleLogin()
+    {
+        errorMessage = string.Empty;
+
+        var result =
+            await AuthService.LoginAsync(
+                email,
+                password);
+
+        if (result == null)
+        {
+            errorMessage =
+                "Invalid email or password.";
+
+            return;
+        }
+
+        await AuthState.SetTokenAsync(
+            result.Token);
+
+        Navigation.NavigateTo(
+            "/",
+            forceLoad: true);
+    }
+}

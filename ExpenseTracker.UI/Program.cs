@@ -1,5 +1,7 @@
 using ExpenseTracker.UI.Components;
 using ExpenseTracker.UI.Services;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
 internal class Program
 {
@@ -7,36 +9,119 @@ internal class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        builder.Services.AddRazorComponents()
+
+        // =========================
+        // BLAZOR
+        // =========================
+
+        builder.Services
+            .AddRazorComponents()
             .AddInteractiveServerComponents();
 
+
+        // =========================
+        // BLAZOR AUTHORIZATION
+        // =========================
+
+        builder.Services.AddAuthorizationCore();
+
+        builder.Services.AddCascadingAuthenticationState();
+
+
+        // =========================
+        // AUTH SERVICES
+        // =========================
+
+        builder.Services.AddScoped<AuthService>();
+
+        builder.Services.AddScoped<AuthStateService>();
+
+        builder.Services.AddScoped<JwtAuthenticationStateProvider>();
+
+        builder.Services.AddScoped<AuthenticationStateProvider>(
+            provider =>
+                provider.GetRequiredService<
+                    JwtAuthenticationStateProvider>());
+
+
+        builder.Services.AddTransient<AuthHttpMessageHandler>();
+
+        builder.Services.AddScoped<ProtectedLocalStorage>();
+
+
+        // =========================
+        // API SERVICES
+        // =========================
+
         builder.Services.AddScoped<ExpenseApiService>();
+
         builder.Services.AddScoped<TaskApiService>();
+
         builder.Services.AddScoped<ReminderApiService>();
+
         builder.Services.AddScoped<NotificationService>();
+
         builder.Services.AddScoped<RecurringExpenseApiService>();
 
 
+        // =========================
+        // AUTH HTTP CLIENT
+        // =========================
+
+        builder.Services.AddHttpClient("AuthApi", client =>
+        {
+            client.BaseAddress =
+                new Uri("https://localhost:7135/");
+        });
+
+
+        // =========================
+        // AUTHENTICATED API CLIENT
+        // =========================
+
         builder.Services.AddHttpClient("Api", client =>
         {
-            client.BaseAddress = new Uri("https://localhost:7135/");
-        });
+            client.BaseAddress =
+                new Uri("https://localhost:7135/");
+        })
+        .AddHttpMessageHandler<AuthHttpMessageHandler>();
+
 
         var app = builder.Build();
 
+
+        // =========================
+        // ERROR HANDLING
+        // =========================
+
         if (!app.Environment.IsDevelopment())
         {
-            app.UseExceptionHandler("/Error", createScopeForErrors: true);
+            app.UseExceptionHandler(
+                "/Error",
+                createScopeForErrors: true);
+
             app.UseHsts();
         }
+
+
+        // =========================
+        // MIDDLEWARE
+        // =========================
 
         app.UseHttpsRedirection();
 
         app.UseStaticFiles();
+
         app.UseAntiforgery();
+
+
+        // =========================
+        // COMPONENTS
+        // =========================
 
         app.MapRazorComponents<App>()
             .AddInteractiveServerRenderMode();
+
 
         app.Run();
     }

@@ -35,7 +35,9 @@ public class TaskService : ITaskService
                 ReferenceId = task.Id
             };
 
-            await _reminderService.AddAsync(reminder);
+            await _reminderService.AddAsync(
+                reminder,
+                userId);
         }
     }
 
@@ -47,7 +49,7 @@ public class TaskService : ITaskService
     }
 
 
-    public async Task CompleteTaskAsync(
+    public async Task<bool> CompleteTaskAsync(
         int id,
         string userId)
     {
@@ -57,15 +59,17 @@ public class TaskService : ITaskService
                 userId);
 
         if (task == null)
-            return;
+            return false;
 
         task.IsCompleted = true;
 
         await _repository.UpdateAsync(task);
+
+        return true;
     }
 
 
-    public async Task UpdateAsync(
+    public async Task<bool> UpdateAsync(
         TaskItem task,
         string userId)
     {
@@ -75,27 +79,55 @@ public class TaskService : ITaskService
                 userId);
 
         if (existingTask == null)
-            return;
+            return false;
 
-        existingTask.Title = task.Title;
-        existingTask.Description = task.Description;
-        existingTask.DueDate = task.DueDate;
-        existingTask.Priority = task.Priority;
-        existingTask.ReminderTime = task.ReminderTime;
-        existingTask.IsCompleted = task.IsCompleted;
-        existingTask.HasReminder = task.HasReminder;
-        existingTask.RepeatMonthly = task.RepeatMonthly;
+        existingTask.Title =
+            task.Title;
 
-        await _repository.UpdateAsync(existingTask);
+        existingTask.Description =
+            task.Description;
+
+        existingTask.DueDate =
+            task.DueDate;
+
+        existingTask.Priority =
+            task.Priority;
+
+        existingTask.ReminderTime =
+            task.ReminderTime;
+
+        existingTask.IsCompleted =
+            task.IsCompleted;
+
+        existingTask.HasReminder =
+            task.HasReminder;
+
+        existingTask.RepeatMonthly =
+            task.RepeatMonthly;
+
+        await _repository.UpdateAsync(
+            existingTask);
+
+        return true;
     }
 
 
-    public async Task DeleteAsync(
+    public async Task<bool> DeleteAsync(
         int id,
         string userId)
     {
+        var task =
+            await _repository.GetByIdAsync(
+                id,
+                userId);
+
+        if (task == null)
+            return false;
+
         await _repository.DeleteAsync(
             id,
             userId);
+
+        return true;
     }
 }

@@ -79,21 +79,13 @@ public class ExpensesController : ControllerBase
         if (string.IsNullOrWhiteSpace(userId))
             return Unauthorized();
 
-        var existing =
-            await _service.GetExpensesAsync(
+        var paid =
+            await _service.MarkAsPaidAsync(
+                id,
                 userId);
 
-        var expense =
-            existing.FirstOrDefault(x =>
-                x.Id == id);
-
-        if (expense == null)
-            return NotFound(
-                $"Expense with ID {id} not found");
-
-        await _service.MarkAsPaidAsync(
-            id,
-            userId);
+        if (!paid)
+            return NotFound();
 
         return Ok();
     }
@@ -108,17 +100,13 @@ public class ExpensesController : ControllerBase
         if (string.IsNullOrWhiteSpace(userId))
             return Unauthorized();
 
-        var existing =
-            await _service.GetExpensesAsync(
+        var deleted =
+            await _service.DeleteAsync(
+                id,
                 userId);
 
-        if (!existing.Any(x => x.Id == id))
-            return NotFound(
-                $"Expense with ID {id} not found");
-
-        await _service.DeleteAsync(
-            id,
-            userId);
+        if (!deleted)
+            return NotFound();
 
         return Ok();
     }
@@ -137,17 +125,13 @@ public class ExpensesController : ControllerBase
         if (id != expense.Id)
             return BadRequest();
 
-        var existing =
-            await _service.GetExpensesAsync(
+        var updated =
+            await _service.UpdateAsync(
+                expense,
                 userId);
 
-        if (!existing.Any(x => x.Id == id))
-            return NotFound(
-                $"Expense with ID {id} not found");
-
-        await _service.UpdateAsync(
-            expense,
-            userId);
+        if (!updated)
+            return NotFound();
 
         return Ok();
     }

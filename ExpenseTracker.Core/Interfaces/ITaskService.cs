@@ -11,15 +11,15 @@ public interface ITaskService
     Task<List<TaskItem>> GetTasksAsync(
         string userId);
 
-    Task CompleteTaskAsync(
+    Task<bool> CompleteTaskAsync(
         int id,
         string userId);
 
-    Task UpdateAsync(
+    Task<bool> UpdateAsync(
         TaskItem task,
         string userId);
 
-    Task DeleteAsync(
+    Task<bool> DeleteAsync(
         int id,
         string userId);
 }

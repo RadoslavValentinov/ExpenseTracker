@@ -11,6 +11,7 @@
 @inject ReminderApiService ReminderService
 @inject NotificationService NotificationService
 @inject NavigationManager NavigationManager
+@inject AuthStateService AuthState
 
 
 <div class="dashboard-header mb-4">
@@ -1122,17 +1123,28 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        expenses =
-            await ExpenseService.GetExpensesAsync();
+        if (!AuthState.IsAuthenticated)
+            return;
 
-        tasks =
-            await TaskService.GetTasksAsync();
+        try
+        {
+            expenses =
+                await ExpenseService.GetExpensesAsync();
 
-        reminders =
-            await ReminderService.GetAllAsync();
+            tasks =
+                await TaskService.GetTasksAsync();
 
-        notifications =
-            await NotificationService.GetNotificationsAsync();
+            reminders =
+                await ReminderService.GetAllAsync();
+
+            notifications =
+                await NotificationService.GetNotificationsAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(
+                $"Dashboard loading error: {ex.Message}");
+        }
     }
 
 

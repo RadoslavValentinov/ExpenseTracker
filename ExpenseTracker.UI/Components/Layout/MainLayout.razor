@@ -85,18 +85,15 @@
         {
             <nav class="sidebar-nav">
 
-                <a href="/login"
-                   class="nav-item"
-                   data-enhance-nav="false">
+                <a href="https://localhost:7259/login"
+                   class="nav-item">
 
                     🔐 Login
 
                 </a>
 
-
-                <a href="/register"
-                   class="nav-item"
-                   data-enhance-nav="false">
+                <a href="https://localhost:7259/register"
+                   class="nav-item">
 
                     📝 Register
 
@@ -186,6 +183,20 @@
 
         NavigationManager.NavigateTo(
             "/login",
+            forceLoad: true);
+    }
+
+    private void OpenLogin()
+    {
+        NavigationManager.NavigateTo(
+            "/login",
+            forceLoad: true);
+    }
+
+    private void OpenRegister()
+    {
+        NavigationManager.NavigateTo(
+            "/register",
             forceLoad: true);
     }
 

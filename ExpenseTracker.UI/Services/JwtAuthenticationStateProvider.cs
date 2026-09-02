@@ -18,33 +18,41 @@ public class JwtAuthenticationStateProvider
         _authState = authState;
     }
 
+
     public override async Task<AuthenticationState>
         GetAuthenticationStateAsync()
     {
+        await _authState.InitializeAsync();
+
+        var token =
+            await _authState.GetTokenAsync();
+
+        if (string.IsNullOrWhiteSpace(token))
+        {
+            return new AuthenticationState(
+                Anonymous);
+        }
+
         try
         {
-            var token =
-                await _authState.GetTokenAsync();
+            var handler =
+                new JwtSecurityTokenHandler();
 
-            if (string.IsNullOrWhiteSpace(token))
-            {
-                return new AuthenticationState(Anonymous);
-            }
-
-            var handler = new JwtSecurityTokenHandler();
-
-            var jwt = handler.ReadJwtToken(token);
+            var jwt =
+                handler.ReadJwtToken(token);
 
             if (jwt.ValidTo <= DateTime.UtcNow)
             {
                 await _authState.LogoutAsync();
 
-                return new AuthenticationState(Anonymous);
+                return new AuthenticationState(
+                    Anonymous);
             }
 
-            var identity = new ClaimsIdentity(
-                jwt.Claims,
-                "Bearer");
+            var identity =
+                new ClaimsIdentity(
+                    jwt.Claims,
+                    "Bearer");
 
             var user =
                 new ClaimsPrincipal(identity);
@@ -53,9 +61,11 @@ public class JwtAuthenticationStateProvider
         }
         catch
         {
-            return new AuthenticationState(Anonymous);
+            return new AuthenticationState(
+                Anonymous);
         }
     }
+
 
     public void NotifyAuthenticationStateChanged()
     {

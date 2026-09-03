@@ -2,22 +2,32 @@
 
 @inherits LayoutComponentBase
 
-@inject NotificationService NotificationService
 @inject NavigationManager NavigationManager
 @inject AuthStateService AuthState
 
 
+
 <div class="app-layout">
+
+    <!-- =========================
+         SIDEBAR
+         ========================= -->
 
     <aside class="sidebar">
 
         <div class="logo-section">
 
-            <h2>ExpenseTracker</h2>
+            <div class="logo-text">
 
-            <p>
-                Personal Dashboard
-            </p>
+                <h2>
+                    ExpenseTracker
+                </h2>
+
+                <p>
+                    Personal Dashboard
+                </p>
+
+            </div>
 
         </div>
 
@@ -27,55 +37,71 @@
             <nav class="sidebar-nav">
 
                 <a href="/"
-                   class="nav-item"
+                   class="nav-item @(IsActive("/") ? "active" : "")"
                    data-enhance-nav="false">
 
-                    📊 Dashboard
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-label">Dashboard</span>
 
                 </a>
 
 
                 <a href="/expenses"
-                   class="nav-item"
+                   class="nav-item @(IsActive("/expenses") ? "active" : "")"
                    data-enhance-nav="false">
 
-                    💰 Expenses
+                    <span class="nav-icon">💰</span>
+                    <span class="nav-label">Expenses</span>
 
                 </a>
 
 
                 <a href="/tasks"
-                   class="nav-item"
+                   class="nav-item @(IsActive("/tasks") ? "active" : "")"
                    data-enhance-nav="false">
 
-                    ✅ Tasks
+                    <span class="nav-icon">✅</span>
+                    <span class="nav-label">Tasks</span>
 
                 </a>
 
 
                 <a href="/recurring-expenses"
-                   class="nav-item"
+                   class="nav-item @(IsActive("/recurring-expenses") ? "active" : "")"
                    data-enhance-nav="false">
 
-                    🔄 Recurring Expenses
+                    <span class="nav-icon">🔄</span>
+                    <span class="nav-label">Recurring Expenses</span>
 
                 </a>
 
 
                 <a href="/calendar"
-                   class="nav-item"
+                   class="nav-item @(IsActive("/calendar") ? "active" : "")"
                    data-enhance-nav="false">
 
-                    📅 Calendar
+                    <span class="nav-icon">📅</span>
+                    <span class="nav-label">Calendar</span>
 
                 </a>
 
 
                 <a href="/charts"
-                   class="nav-item"
+                   class="nav-item @(IsActive("/charts") ? "active" : "")"
                    data-enhance-nav="false">
 
-                    📊 Charts
+                    <span class="nav-icon">📈</span>
+                    <span class="nav-label">Charts</span>
+
+                </a>
+
+
+                <a href="/notifications"
+                   class="nav-item @(IsActive("/notifications") ? "active" : "")"
+                   data-enhance-nav="false">
+
+                    <span class="nav-icon">🔔</span>
+                    <span class="nav-label">Notifications</span>
 
                 </a>
 
@@ -85,17 +111,22 @@
         {
             <nav class="sidebar-nav">
 
-                <a href="https://localhost:7259/login"
-                   class="nav-item">
+                <a href="/login"
+                   class="nav-item @(IsActive("/login") ? "active" : "")"
+                   data-enhance-nav="false">
 
-                    🔐 Login
+                    <span class="nav-icon">🔐</span>
+                    <span class="nav-label">Login</span>
 
                 </a>
 
-                <a href="https://localhost:7259/register"
-                   class="nav-item">
 
-                    📝 Register
+                <a href="/register"
+                   class="nav-item @(IsActive("/register") ? "active" : "")"
+                   data-enhance-nav="false">
+
+                    <span class="nav-icon">📝</span>
+                    <span class="nav-label">Register</span>
 
                 </a>
 
@@ -105,15 +136,23 @@
     </aside>
 
 
+    <!-- =========================
+         MAIN CONTENT
+         ========================= -->
+
     <div class="main-content">
 
         <header class="topbar">
 
             <div class="topbar-left">
 
-                <p>
+                <div class="topbar-title">
+                    ExpenseTracker
+                </div>
+
+                <div class="topbar-subtitle">
                     Manage your finances and tasks
-                </p>
+                </div>
 
             </div>
 
@@ -122,27 +161,42 @@
 
                 @if (AuthState.IsAuthenticated)
                 {
-                    <button class="notification-btn"
-                            @onclick="OpenNotifications">
+                    <button type="button"
+                            class="notification-btn"
+                            @onclick="OpenNotifications"
+                            title="Notifications">
 
-                        🔔
+                        <span class="notification-icon-top">
+                            🔔
+                        </span>
+
 
                         @if (notificationCount > 0)
                         {
                             <span class="notification-count">
+
                                 @(notificationCount > 99
                                                         ? "99+"
                                                         : notificationCount.ToString())
+
                     </span>
                                         }
 
                     </button>
 
 
-                    <button class="btn btn-outline-secondary ms-2"
-                            @onclick="Logout">
+                    <button type="button"
+                            class="logout-button"
+                            @onclick="Logout"
+                            title="Logout">
 
-                        Logout
+                        <span class="logout-icon">
+                            ⎋
+                        </span>
+
+                        <span class="logout-text">
+                            Logout
+                        </span>
 
                     </button>
                 }
@@ -186,18 +240,26 @@
             forceLoad: true);
     }
 
-    private void OpenLogin()
-    {
-        NavigationManager.NavigateTo(
-            "/login",
-            forceLoad: true);
-    }
 
-    private void OpenRegister()
+    private bool IsActive(string path)
     {
-        NavigationManager.NavigateTo(
-            "/register",
-            forceLoad: true);
+        var currentPath =
+            NavigationManager.ToBaseRelativePath(
+                NavigationManager.Uri);
+
+        currentPath =
+            "/" + currentPath.Trim('/');
+
+
+        if (path == "/")
+        {
+            return currentPath == "/";
+        }
+
+
+        return currentPath.Equals(
+            path,
+            StringComparison.OrdinalIgnoreCase);
     }
 
 }

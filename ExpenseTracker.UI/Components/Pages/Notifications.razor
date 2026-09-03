@@ -4,167 +4,286 @@
 @using ExpenseTracker.UI.Services
 
 @inject NotificationService NotificationService
-@inject ReminderApiService ReminderApiService
 @inject TaskApiService TaskApiService
 @inject ExpenseApiService ExpenseApiService
 @inject NavigationManager NavigationManager
 
-<h3 class="mb-4">
-    🔔 Notifications
-</h3>
+<div class="notifications-page">
 
+    <!-- HEADER -->
+    <div class="notifications-page-header">
 
-<div class="notifications-toolbar">
+        <div>
+            <h2 class="page-title">
+                🔔 Notifications
+            </h2>
 
-    <input class="form-control notification-search"
-           placeholder="🔍 Search notifications..."
-           @bind="searchText" />
+            <p class="page-subtitle">
+                Всичко важно за твоите разходи, задачи и напомняния
+            </p>
+        </div>
 
-</div>
+        <div class="notification-summary">
+            <span class="summary-count">
+                @FilteredNotifications.Count()
+            </span>
 
+            <span class="summary-label">
+                notifications
+            </span>
+        </div>
 
-<div class="notification-filters">
-
-    <button class="@(selectedFilter == "All" ? "active-filter" : "")"
-            @onclick='() => SetFilter("All")'>
-        All
-    </button>
-
-    <button class="@(selectedFilter == "Expense" ? "active-filter" : "")"
-            @onclick='() => SetFilter("Expense")'>
-        💰 Expenses
-    </button>
-
-    <button class="@(selectedFilter == "Task" ? "active-filter" : "")"
-            @onclick='() => SetFilter("Task")'>
-        ✅ Tasks
-    </button>
-
-    <button class="@(selectedFilter == "Reminder" ? "active-filter" : "")"
-            @onclick='() => SetFilter("Reminder")'>
-        🔔 Reminders
-    </button>
-
-</div>
-
-
-@if (notifications == null)
-{
-    <p>Loading...</p>
-}
-else if (!FilteredNotifications.Any())
-{
-    <div class="alert alert-success mt-4">
-        🎉 You have no notifications.
     </div>
-}
-else
-{
-    <div class="notifications-container">
-
-        @foreach (var notification in FilteredNotifications)
-        {
-            <div class="notification-card">
-
-                <!-- HEADER -->
-
-                <div class="notification-header">
-
-                    <div class="notification-icon">
-                        @GetIcon(notification.Type)
-                    </div>
-
-                    <div class="notification-title">
-
-                        <h5 class="mb-1">
-                            @notification.Title
-                        </h5>
-
-                        <span class="notification-type">
-                            @notification.Type
-                        </span>
-
-                    </div>
-
-                </div>
 
 
-                <!-- DESCRIPTION -->
+    <!-- SEARCH -->
+    <div class="notification-toolbar-card">
 
-                <div class="notification-description">
+        <div class="notification-search-wrapper">
 
-                    @notification.Description
+            <span class="search-icon">
+                🔍
+            </span>
 
-                </div>
+            <input class="notification-search"
+                   placeholder="Search notifications..."
+                   @bind="searchText"
+                   @bind:event="oninput" />
 
+            @if (!string.IsNullOrWhiteSpace(searchText))
+            {
+                <button type="button"
+                        class="clear-search"
+                        @onclick="ClearSearch">
+                    ✕
+                </button>
+            }
 
-                <!-- FOOTER -->
+        </div>
 
-                <div class="notification-footer">
-
-                    <div class="notification-date">
-
-                        📅 @notification.Date.ToString("dd MMM yyyy")
-
-                    </div>
-
-
-                    <div class="notification-buttons d-flex gap-2">
-
-                        <button class="btn btn-primary btn-sm"
-                                @onclick="() => Open(notification)">
-
-                            Open
-
-                        </button>
+    </div>
 
 
-                        @if (notification.Type == "Reminder")
-                        {
-                            <button class="btn btn-outline-success btn-sm"
-                                    @onclick="() => MarkAsRead(notification)">
+    <!-- FILTERS -->
+    <div class="notification-filters-card">
 
-                                Mark as Read
+        <div class="notification-filters">
 
-                            </button>
-                        }
+            <button type="button"
+                    class="filter-button @(selectedFilter == "All" ? "active-filter" : "")"
+                    @onclick='() => SetFilter("All")'>
 
+                <span>📋</span>
+                <span>All</span>
 
-                        @if (notification.Type == "Task")
-                        {
-                            <button class="btn btn-outline-success btn-sm"
-                                    @onclick="() => CompleteTask(notification)">
-
-                                Complete
-
-                            </button>
-                        }
+            </button>
 
 
-                        @if (notification.Type == "Expense")
-                        {
-                            <button class="btn btn-success btn-sm"
-                                    @onclick="() => MarkAsPaid(notification)">
+            <button type="button"
+                    class="filter-button expense-filter @(selectedFilter == "Expense" ? "active-filter" : "")"
+                    @onclick='() => SetFilter("Expense")'>
 
-                                Mark as Paid
+                <span>💰</span>
+                <span>Expenses</span>
 
-                            </button>
-                        }
+            </button>
 
-                    </div>
 
-                </div>
+            <button type="button"
+                    class="filter-button task-filter @(selectedFilter == "Task" ? "active-filter" : "")"
+                    @onclick='() => SetFilter("Task")'>
 
+                <span>✅</span>
+                <span>Tasks</span>
+
+            </button>
+
+
+            <button type="button"
+                    class="filter-button reminder-filter @(selectedFilter == "Reminder" ? "active-filter" : "")"
+                    @onclick='() => SetFilter("Reminder")'>
+
+                <span>🔔</span>
+                <span>Reminders</span>
+
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- CONTENT -->
+    @if (notifications == null)
+    {
+        <div class="notifications-loading">
+
+            <div class="loading-icon">
+                🔔
             </div>
-        }
 
-    </div>
-}
+            <h4>
+                Loading notifications...
+            </h4>
+
+        </div>
+    }
+    else if (!FilteredNotifications.Any())
+    {
+        <div class="notifications-empty">
+
+            <div class="empty-icon">
+                🎉
+            </div>
+
+            <h4>
+                No notifications
+            </h4>
+
+            <p>
+                Няма известия, които да отговарят на текущия филтър.
+            </p>
+
+            @if (!string.IsNullOrWhiteSpace(searchText))
+            {
+                <button type="button"
+                        class="empty-action-button"
+                        @onclick="ClearSearch">
+                    Clear search
+                </button>
+            }
+
+        </div>
+    }
+    else
+    {
+        <div class="notifications-container">
+
+            @foreach (var notification in FilteredNotifications)
+            {
+                <div class="notification-card @GetNotificationCardClass(notification)">
+
+                    <!-- CARD TOP -->
+                    <div class="notification-card-top">
+
+                        <div class="notification-main">
+
+                            <div class="notification-icon @GetIconClass(notification.Type)">
+                                @GetIcon(notification.Type)
+                            </div>
+
+
+                            <div class="notification-title-area">
+
+                                <div class="notification-title-row">
+
+                                    <h4>
+                                        @notification.Title
+                                    </h4>
+
+                                    <span class="notification-type-badge @GetTypeBadgeClass(notification.Type)">
+                                        @GetTypeName(notification.Type)
+                                    </span>
+
+                                </div>
+
+
+                                @if (!string.IsNullOrWhiteSpace(notification.Description))
+                                {
+                                    <p class="notification-description">
+                                        @notification.Description
+                                    </p>
+                                }
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- CARD BOTTOM -->
+                    <div class="notification-card-bottom">
+
+                        <div class="notification-date">
+
+                            <span class="date-icon">
+                                📅
+                            </span>
+
+                            <span>
+                                @notification.Date.ToString("dd MMM yyyy")
+                            </span>
+
+                        </div>
+
+
+                        <div class="notification-buttons">
+
+                            <button type="button"
+                                    class="notification-action-button open-button"
+                                    @onclick="() => Open(notification)">
+
+                                <span>↗</span>
+                                <span>Open</span>
+
+                            </button>
+
+
+                            @if (notification.Type == "Reminder")
+                            {
+                                <button type="button"
+                                        class="notification-action-button success-button"
+                                        @onclick="() => MarkAsRead(notification)">
+
+                                    <span>✓</span>
+                                    <span>Mark as Read</span>
+
+                                </button>
+                            }
+
+
+                            @if (notification.Type == "Task")
+                            {
+                                <button type="button"
+                                        class="notification-action-button success-button"
+                                        @onclick="() => CompleteTask(notification)">
+
+                                    <span>✓</span>
+                                    <span>Complete</span>
+
+                                </button>
+                            }
+
+
+                            @if (notification.Type == "Expense")
+                            {
+                                <button type="button"
+                                        class="notification-action-button success-button"
+                                        @onclick="() => MarkAsPaid(notification)">
+
+                                    <span>✓</span>
+                                    <span>Mark as Paid</span>
+
+                                </button>
+                            }
+
+                        </div>
+
+                    </div>
+
+                </div>
+            }
+
+        </div>
+    }
+
+</div>
 
 
 @code {
 
-    private string searchText = "";
+    private string searchText = string.Empty;
 
     private string selectedFilter = "All";
 
@@ -184,37 +303,46 @@ else
     }
 
 
-    private async Task MarkAsRead(NotificationItem notification)
+    private async Task MarkAsRead(
+        NotificationItem notification)
     {
         if (notification.Type != "Reminder")
             return;
 
         await NotificationService.MarkAsReadAsync(notification);
 
-        notifications =
-            await NotificationService.GetNotificationsAsync();
+        await ReloadNotifications();
     }
 
 
-    private async Task CompleteTask(NotificationItem notification)
+    private async Task CompleteTask(
+        NotificationItem notification)
     {
         if (notification.Type != "Task")
             return;
 
-        await TaskApiService.CompleteTaskAsync(notification.Id);
+        await TaskApiService.CompleteTaskAsync(
+            notification.Id);
 
-        notifications =
-            await NotificationService.GetNotificationsAsync();
+        await ReloadNotifications();
     }
 
 
-    private async Task MarkAsPaid(NotificationItem notification)
+    private async Task MarkAsPaid(
+        NotificationItem notification)
     {
         if (notification.Type != "Expense")
             return;
 
-        await ExpenseApiService.MarkAsPaidAsync(notification.Id);
+        await ExpenseApiService.MarkAsPaidAsync(
+            notification.Id);
 
+        await ReloadNotifications();
+    }
+
+
+    private async Task ReloadNotifications()
+    {
         notifications =
             await NotificationService.GetNotificationsAsync();
     }
@@ -226,35 +354,43 @@ else
     }
 
 
+    private void ClearSearch()
+    {
+        searchText = string.Empty;
+    }
+
+
     private IEnumerable<NotificationItem> FilteredNotifications =>
-        notifications.Where(n =>
+        notifications
+            .Where(n =>
+                (
+                    string.IsNullOrWhiteSpace(searchText)
 
-            (
-                string.IsNullOrWhiteSpace(searchText)
+                    || n.Title.Contains(
+                        searchText,
+                        StringComparison.OrdinalIgnoreCase)
 
-                || n.Title.Contains(
-                    searchText,
-                    StringComparison.OrdinalIgnoreCase)
+                    || (
+                        !string.IsNullOrWhiteSpace(n.Description)
 
-                || (
-                    !string.IsNullOrWhiteSpace(n.Description)
-                    && n.Description.Contains(
+                        && n.Description.Contains(
+                            searchText,
+                            StringComparison.OrdinalIgnoreCase)
+                    )
+
+                    || n.Type.Contains(
                         searchText,
                         StringComparison.OrdinalIgnoreCase)
                 )
 
-                || n.Type.Contains(
-                    searchText,
-                    StringComparison.OrdinalIgnoreCase)
-            )
+                &&
 
-            &&
+                (
+                    selectedFilter == "All"
 
-            (
-                selectedFilter == "All"
-                || n.Type == selectedFilter
-            )
-        );
+                    || n.Type == selectedFilter
+                )
+            );
 
 
     private string GetIcon(string type)
@@ -265,6 +401,55 @@ else
             "Task" => "✅",
             "Reminder" => "🔔",
             _ => "📌"
+        };
+    }
+
+
+    private string GetIconClass(string type)
+    {
+        return type switch
+        {
+            "Expense" => "expense-icon",
+            "Task" => "task-icon",
+            "Reminder" => "reminder-icon",
+            _ => "default-icon"
+        };
+    }
+
+
+    private string GetTypeBadgeClass(string type)
+    {
+        return type switch
+        {
+            "Expense" => "expense-badge",
+            "Task" => "task-badge",
+            "Reminder" => "reminder-badge",
+            _ => "default-badge"
+        };
+    }
+
+
+    private string GetNotificationCardClass(
+        NotificationItem notification)
+    {
+        return notification.Type switch
+        {
+            "Expense" => "expense-notification",
+            "Task" => "task-notification",
+            "Reminder" => "reminder-notification",
+            _ => "default-notification"
+        };
+    }
+
+
+    private string GetTypeName(string type)
+    {
+        return type switch
+        {
+            "Expense" => "Expense",
+            "Task" => "Task",
+            "Reminder" => "Reminder",
+            _ => type
         };
     }
 

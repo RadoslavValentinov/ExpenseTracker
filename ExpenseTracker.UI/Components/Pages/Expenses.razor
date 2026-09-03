@@ -7,418 +7,554 @@
 
 @inject ExpenseApiService ExpenseService
 
-<h3 class="mb-4">
-    💰 Expenses
-</h3>
 
+<div class="expenses-page">
 
-@if (!string.IsNullOrWhiteSpace(errorMessage))
-{
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <!-- ============================== -->
+    <!-- HEADER -->
+    <!-- ============================== -->
 
-        <strong>❌ Something went wrong.</strong>
+    <div class="expenses-header">
 
-        <div class="mt-1">
-            @errorMessage
-        </div>
-
-        <button type="button"
-                class="btn-close"
-                aria-label="Close"
-                @onclick="ClearError">
-        </button>
-
-    </div>
-}
-
-
-<!-- ========================= -->
-<!-- STATISTICS -->
-<!-- ========================= -->
-
-<div class="row g-4 mb-4">
-
-    <div class="col-lg-3 col-md-6">
-
-        <div class="card p-4 h-100">
-
-            <p class="text-muted mb-2">
-                Total Expenses
-            </p>
-
-            <h2 class="fw-bold">
-                @TotalAmount.ToString("C")
+        <div>
+            <h2 class="page-title">
+                💰 Expenses
             </h2>
 
+            <p class="page-subtitle">
+                Manage your expenses and upcoming payments
+            </p>
         </div>
 
     </div>
 
 
-    <div class="col-lg-3 col-md-6">
+    <!-- ============================== -->
+    <!-- ERROR -->
+    <!-- ============================== -->
+    @if (!string.IsNullOrWhiteSpace(errorMessage))
+    {
+        <div class="alert alert-danger alert-dismissible fade show compact-alert"
+             role="alert">
 
-        <div class="card p-4 h-100">
+            <div>
+                <strong>❌ Something went wrong.</strong>
 
-            <p class="text-muted mb-2">
-                Paid
-            </p>
+                <div class="mt-1">
+                    @errorMessage
+                </div>
+            </div>
 
-            <h2 class="fw-bold text-success">
-                @PaidAmount.ToString("C")
-            </h2>
+            <button type="button"
+                    class="btn-close"
+                    aria-label="Close"
+                    @onclick="ClearError">
+            </button>
+
+        </div>
+    }
+
+
+    <!-- ============================== -->
+    <!-- STATISTICS -->
+    <!-- ============================== -->
+
+    <div class="row g-3 mb-3">
+
+        <!-- TOTAL -->
+        <div class="col-xl-3 col-md-6">
+
+            <div class="expense-stat-card">
+
+                <div class="expense-stat-icon total-icon">
+                    💰
+                </div>
+
+                <div class="expense-stat-content">
+
+                    <span>
+                        Total Expenses
+                    </span>
+
+                    <strong>
+                        @TotalAmount.ToString("C")
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- PAID -->
+        <div class="col-xl-3 col-md-6">
+
+            <div class="expense-stat-card">
+
+                <div class="expense-stat-icon paid-icon">
+                    ✅
+                </div>
+
+                <div class="expense-stat-content">
+
+                    <span>
+                        Paid
+                    </span>
+
+                    <strong class="text-success">
+                        @PaidAmount.ToString("C")
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- UNPAID -->
+        <div class="col-xl-3 col-md-6">
+
+            <div class="expense-stat-card">
+
+                <div class="expense-stat-icon unpaid-icon">
+                    ❌
+                </div>
+
+                <div class="expense-stat-content">
+
+                    <span>
+                        Unpaid
+                    </span>
+
+                    <strong class="text-danger">
+                        @UnpaidAmount.ToString("C")
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- UPCOMING -->
+        <div class="col-xl-3 col-md-6">
+
+            <div class="expense-stat-card">
+
+                <div class="expense-stat-icon upcoming-icon">
+                    📅
+                </div>
+
+                <div class="expense-stat-content">
+
+                    <span>
+                        Upcoming
+                    </span>
+
+                    <strong>
+                        @UpcomingCount
+                    </strong>
+
+                </div>
+
+            </div>
 
         </div>
 
     </div>
 
 
-    <div class="col-lg-3 col-md-6">
+    <!-- ============================== -->
+    <!-- ADD / EDIT -->
+    <!-- ============================== -->
 
-        <div class="card p-4 h-100">
+    <EditForm Model="newExpense"
+              OnValidSubmit="@(editingExpenseId == null ? AddExpense : SaveExpense)">
 
-            <p class="text-muted mb-2">
-                Unpaid
-            </p>
+        <div class="expense-form-card">
 
-            <h2 class="fw-bold text-danger">
-                @UnpaidAmount.ToString("C")
-            </h2>
+            <div class="form-header">
 
-        </div>
+                <div>
+                    <h4>
+                        @(editingExpenseId == null
+                                                ? "Add Expense"
+                                                : "Edit Expense")
+                    </h4>
 
-    </div>
-
-
-    <div class="col-lg-3 col-md-6">
-
-        <div class="card p-4 h-100">
-
-            <p class="text-muted mb-2">
-                Upcoming
-            </p>
-
-            <h2 class="fw-bold">
-                @UpcomingCount
-            </h2>
-
-        </div>
-
-    </div>
-
-</div>
-
-
-<!-- ========================= -->
-<!-- ADD / EDIT EXPENSE -->
-<!-- ========================= -->
-
-<EditForm Model="newExpense"
-          OnValidSubmit="@(editingExpenseId == null ? AddExpense : SaveExpense)">
-
-    <div class="card p-4 shadow-sm mb-4">
-
-        <div class="mb-4">
-
-            <h4 class="mb-1">
-
-                @(editingExpenseId == null
-                                ? "Add Expense"
-                                : "Edit Expense")
-
-            </h4>
-
-            <p class="text-muted mb-0">
-                Track your upcoming payments
-            </p>
-
-        </div>
-
-
-        <div class="row g-3">
-
-            <!-- TITLE -->
-
-            <div class="col-md-6">
-
-                <label class="form-label">
-                    Title *
-                </label>
-
-                <input class="form-control"
-                       placeholder="e.g. Internet"
-                       @bind="newExpense.Title" />
-
-                @if (showValidation &&
-                                string.IsNullOrWhiteSpace(newExpense.Title))
-                {
-                    <div class="text-danger small mt-1">
-                        Title is required.
-                    </div>
-                }
+                    <p>
+                        @(editingExpenseId == null
+                                                ? "Enter the details of your expense."
+                                                : "Update the selected expense.")
+                    </p>
+                </div>
 
             </div>
 
 
-            <!-- AMOUNT -->
+            <!-- FORM FIELDS -->
+            <div class="expense-form-grid">
 
-            <div class="col-md-6">
+                <!-- TITLE -->
+                <div class="form-field">
 
-                <label class="form-label">
-                    Amount *
-                </label>
+                    <label>
+                        Title <span>*</span>
+                    </label>
 
-                <input class="form-control"
-                       type="number"
-                       step="0.01"
-                       min="0.01"
-                       placeholder="e.g. 35.00"
-                       @bind="newExpense.Amount" />
+                    <input class="compact-input"
+                           placeholder="e.g. Internet"
+                           @bind="newExpense.Title" />
 
-                @if (showValidation &&
-                                newExpense.Amount <= 0)
-                {
-                    <div class="text-danger small mt-1">
-                        Amount must be greater than 0.
-                    </div>
-                }
+                    @if (showValidation &&
+                                        string.IsNullOrWhiteSpace(newExpense.Title))
+                    {
+                        <div class="field-error">
+                            Title is required.
+                        </div>
+                    }
+
+                </div>
+
+
+                <!-- AMOUNT -->
+                <div class="form-field">
+
+                    <label>
+                        Amount <span>*</span>
+                    </label>
+
+                    <input class="compact-input"
+                           type="number"
+                           step="0.01"
+                           min="0.01"
+                           placeholder="e.g. 35.00"
+                           @bind="newExpense.Amount" />
+
+                    @if (showValidation &&
+                                        newExpense.Amount <= 0)
+                    {
+                        <div class="field-error">
+                            Amount must be greater than 0.
+                        </div>
+                    }
+
+                </div>
+
+
+                <!-- DUE DATE -->
+                <div class="form-field">
+
+                    <label>
+                        Due Date <span>*</span>
+                    </label>
+
+                    <input class="compact-input"
+                           type="date"
+                           @bind="newExpense.DueDate" />
+
+                    @if (showValidation &&
+                                        newExpense.DueDate == default)
+                    {
+                        <div class="field-error">
+                            Due date is required.
+                        </div>
+                    }
+
+                </div>
+
+
+                <!-- CATEGORY -->
+                <div class="form-field">
+
+                    <label>
+                        Category
+                    </label>
+
+                    <input class="compact-input"
+                           placeholder="e.g. Utilities"
+                           @bind="newExpense.Category" />
+
+                </div>
 
             </div>
 
 
-            <!-- DUE DATE -->
-
-            <div class="col-md-6">
-
-                <label class="form-label">
-                    Due Date *
-                </label>
-
-                <input class="form-control"
-                       type="date"
-                       @bind="newExpense.DueDate" />
-
-                @if (showValidation &&
-                                newExpense.DueDate == default)
-                {
-                    <div class="text-danger small mt-1">
-                        Due date is required.
-                    </div>
-                }
-
-            </div>
-
-
-            <!-- CATEGORY -->
-
-            <div class="col-md-6">
-
-                <label class="form-label">
-                    Category
-                </label>
-
-                <input class="form-control"
-                       placeholder="e.g. Utilities"
-                       @bind="newExpense.Category" />
-
-            </div>
-
-        </div>
-
-
-        @if (showValidation && !IsExpenseValid)
-        {
-            <div class="alert alert-danger mt-4 mb-0">
-
-                Please correct the highlighted fields before saving.
-
-            </div>
-        }
-
-
-        <!-- BUTTONS -->
-
-        <div class="mt-4">
-
-            @if (editingExpenseId == null)
+            @if (showValidation && !IsExpenseValid)
             {
-                <button type="submit"
-                        class="btn btn-primary">
-
-                    ➕ Add Expense
-
-                </button>
+                <div class="validation-summary">
+                    Please correct the highlighted fields before saving.
+                </div>
             }
-            else
-            {
-                <div class="d-flex gap-2 flex-wrap">
 
+
+            <!-- BUTTONS -->
+            <div class="form-actions">
+
+                @if (editingExpenseId == null)
+                {
                     <button type="submit"
-                            class="btn btn-warning">
+                            class="btn btn-primary compact-button">
+
+                        ➕ Add Expense
+
+                    </button>
+                }
+                else
+                {
+                    <button type="submit"
+                            class="btn btn-warning compact-button">
 
                         💾 Save Changes
 
                     </button>
 
                     <button type="button"
-                            class="btn btn-secondary"
+                            class="btn btn-light border compact-button"
                             @onclick="CancelEdit">
 
                         Cancel
 
                     </button>
+                }
 
-                </div>
-            }
+            </div>
+
+        </div>
+
+    </EditForm>
+
+
+    <!-- ============================== -->
+    <!-- SEARCH -->
+    <!-- ============================== -->
+
+    <div class="search-card">
+
+        <div class="search-wrapper">
+
+            <span class="search-icon">
+                🔍
+            </span>
+
+            <input class="search-input"
+                   placeholder="Search expenses..."
+                   @bind="searchText" />
 
         </div>
 
     </div>
 
-</EditForm>
+
+    <!-- ============================== -->
+    <!-- EXPENSE TABLE -->
+    <!-- ============================== -->
+    @if (expenses == null)
+    {
+        <div class="loading-card">
+
+            <div class="spinner-border text-primary"
+                 role="status">
+            </div>
+
+            <span>
+                Loading expenses...
+            </span>
+
+        </div>
+    }
+    else if (!FilteredExpenses.Any())
+    {
+        <div class="empty-expenses-card">
+
+            <div class="empty-expenses-icon">
+                💸
+            </div>
+
+            <h5>
+                No expenses found
+            </h5>
+
+            <p>
+                Try another search or add a new expense.
+            </p>
+
+        </div>
+    }
+    else
+    {
+        <div class="expenses-table-card">
+
+            <div class="table-responsive">
+
+                <table class="expenses-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Title
+                            </th>
+
+                            <th>
+                                Amount
+                            </th>
+
+                            <th>
+                                Due Date
+                            </th>
+
+                            <th>
+                                Status
+                            </th>
+
+                            <th class="text-end">
+                                Actions
+                            </th>
+
+                        </tr>
+
+                    </thead>
 
 
-<!-- ========================= -->
-<!-- SEARCH -->
-<!-- ========================= -->
+                    <tbody>
 
-<div class="mb-3">
+                        @foreach (var expense in FilteredExpenses)
+                        {
+                            <tr>
 
-    <input class="form-control"
-           placeholder="🔍 Search expenses..."
-           @bind="searchText" />
+                                <!-- TITLE -->
+                                <td>
+
+                                    <div class="expense-title-cell">
+
+                                        <div class="expense-row-icon">
+                                            💰
+                                        </div>
+
+                                        <div>
+
+                                            <strong>
+                                                @expense.Title
+                                            </strong>
+
+                                            @if (!string.IsNullOrWhiteSpace(expense.Category))
+                                            {
+                                                <small>
+                                                    @expense.Category
+                                                </small>
+                                            }
+
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+
+                                <!-- AMOUNT -->
+                                <td>
+
+                                    <strong class="amount-value">
+                                        @expense.Amount.ToString("N2")
+                                    </strong>
+
+                                </td>
+
+
+                                <!-- DATE -->
+                                <td>
+
+                                    <span class="date-value">
+                                        @expense.DueDate.ToShortDateString()
+                                    </span>
+
+                                </td>
+
+
+                                <!-- STATUS -->
+                                <td>
+
+                                    @if (expense.IsPaid)
+                                    {
+                                        <span class="status-badge status-paid">
+                                            Paid
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="status-badge status-unpaid">
+                                            Unpaid
+                                        </span>
+                                    }
+
+                                </td>
+
+
+                                <!-- ACTIONS -->
+                                <td>
+
+                                    <div class="expense-actions">
+
+                                        @if (!expense.IsPaid)
+                                        {
+                                            <button class="action-btn action-pay"
+                                                    title="Mark as paid"
+                                                    @onclick="() => MarkAsPaid(expense.Id)">
+
+                                                ✓
+                                                <span>
+                                                    Pay
+                                                </span>
+
+                                            </button>
+                                        }
+
+
+                                        <button class="action-btn action-edit"
+                                                title="Edit expense"
+                                                @onclick="() => EditExpense(expense)">
+
+                                            ✏️
+                                            <span>
+                                                Edit
+                                            </span>
+
+                                        </button>
+
+
+                                        <button class="action-btn action-delete"
+                                                title="Delete expense"
+                                                @onclick="() => DeleteExpense(expense.Id)">
+
+                                            🗑
+                                            <span>
+                                                Delete
+                                            </span>
+
+                                        </button>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+    }
 
 </div>
-
-
-@if (expenses == null)
-{
-    <p>Loading...</p>
-}
-else if (!FilteredExpenses.Any())
-{
-    <div class="alert alert-info">
-
-        No expenses found.
-
-    </div>
-}
-else
-{
-    <div class="table-responsive">
-
-        <table class="expenses-table">
-
-            <thead>
-
-                <tr>
-
-                    <th>
-                        Title
-                    </th>
-
-                    <th>
-                        Amount
-                    </th>
-
-                    <th>
-                        Due Date
-                    </th>
-
-                    <th>
-                        Paid
-                    </th>
-
-                    <th>
-                        Actions
-                    </th>
-
-                </tr>
-
-            </thead>
-
-
-            <tbody>
-
-                @foreach (var expense in FilteredExpenses)
-                {
-                    <tr>
-
-                        <td>
-                            @expense.Title
-                        </td>
-
-
-                        <td>
-                            @expense.Amount.ToString("N2")
-                        </td>
-
-
-                        <td>
-                            @expense.DueDate.ToShortDateString()
-                        </td>
-
-
-                        <td>
-
-                            @if (expense.IsPaid)
-                            {
-                                <span class="badge bg-success">
-                                    Paid
-                                </span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-danger">
-                                    Unpaid
-                                </span>
-                            }
-
-                        </td>
-
-
-                        <td class="expense-actions">
-
-                            <div class="expense-buttons">
-
-                                @if (!expense.IsPaid)
-                                {
-                                    <button class="btn btn-success btn-sm"
-                                            @onclick="() => MarkAsPaid(expense.Id)">
-
-                                        Pay
-
-                                    </button>
-                                }
-
-
-                                <button class="btn btn-warning btn-sm"
-                                        @onclick="() => EditExpense(expense)">
-
-                                    Edit
-
-                                </button>
-
-
-                                <button class="btn btn-danger btn-sm"
-                                        @onclick="() => DeleteExpense(expense.Id)">
-
-                                    Delete
-
-                                </button>
-
-                            </div>
-
-                        </td>
-
-                    </tr>
-                }
-
-            </tbody>
-
-        </table>
-
-    </div>
-}
 
 
 @code {
@@ -585,9 +721,13 @@ else
                 new Expense
                 {
                     Id = editingExpenseId!.Value,
+
                     Title = newExpense.Title,
+
                     Amount = newExpense.Amount,
+
                     DueDate = newExpense.DueDate,
+
                     Category = newExpense.Category,
 
                     // Keep the current payment status.

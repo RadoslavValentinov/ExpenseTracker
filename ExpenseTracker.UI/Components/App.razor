@@ -27,11 +27,16 @@
 
     <Routes @rendermode="new InteractiveServerRenderMode(prerender: false)" />
 
-    <script src="_framework/blazor.web.js"></script>
+
+    <!-- Chart.js must be loaded BEFORE Blazor starts -->
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script src="/charts.js"></script>
 
+
+    <script src="_framework/blazor.web.js"></script>
+
 </body>
+
 </html>

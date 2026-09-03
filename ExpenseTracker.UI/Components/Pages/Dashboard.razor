@@ -1,6 +1,5 @@
 ﻿@page "/"
 
-
 @using ExpenseTracker.Core.Models
 @using ExpenseTracker.UI.Models
 @using ExpenseTracker.UI.Services
@@ -14,516 +13,643 @@
 @inject AuthStateService AuthState
 
 
-<div class="dashboard-header mb-4">
+<div class="dashboard-page">
 
-    <h2 class="fw-bold mb-1">
-        Dashboard
-    </h2>
+    <!-- ============================= -->
+    <!-- HEADER -->
+    <!-- ============================= -->
 
-    <p class="text-muted mb-0">
-        Overview of your expenses, tasks and reminders
-    </p>
+    <div class="dashboard-header mb-4">
 
-</div>
+        <div>
+            <h2 class="fw-bold mb-1">
+                Dashboard
+            </h2>
 
-
-@if (expenses == null || tasks == null || reminders == null)
-{
-    <p>Loading...</p>
-}
-else
-{
-    <!-- ========================= -->
-    <!-- STATISTICS -->
-    <!-- ========================= -->
-
-    <div class="row g-4 mb-4">
-
-        <div class="col-lg-3 col-md-6">
-
-            <div class="card p-4 shadow-sm dashboard-card dashboard-primary h-100">
-
-                <p class="dashboard-title mb-2">
-                    💰 Total Expenses
-                </p>
-
-                <h2 class="dashboard-stat mb-0">
-                    @TotalExpenses.ToString("C")
-                </h2>
-
-            </div>
-
+            <p class="text-muted mb-0">
+                Overview of your expenses, tasks and reminders
+            </p>
         </div>
 
-
-        <div class="col-lg-3 col-md-6">
-
-            <div class="card p-4 shadow-sm dashboard-card dashboard-danger h-100">
-
-                <p class="dashboard-title mb-2">
-                    ❌ Unpaid
-                </p>
-
-                <h2 class="dashboard-stat mb-0">
-                    @UnpaidAmount.ToString("C")
-                </h2>
-
-            </div>
-
-        </div>
-
-
-        <div class="col-lg-3 col-md-6">
-
-            <div class="card p-4 shadow-sm dashboard-card dashboard-success h-100">
-
-                <p class="dashboard-title mb-2">
-                    💵 Paid
-                </p>
-
-                <h2 class="dashboard-stat mb-0">
-                    @PaidAmount.ToString("C")
-                </h2>
-
-            </div>
-
-        </div>
-
-
-        <div class="col-lg-3 col-md-6">
-
-            <div class="card p-4 shadow-sm dashboard-card dashboard-secondary h-100">
-
-                <p class="dashboard-title mb-2">
-                    📋 Tasks
-                </p>
-
-                <h2 class="dashboard-stat mb-0">
-                    @TotalTasks
-                </h2>
-
-            </div>
-
-        </div>
-
-
-        <div class="col-lg-3 col-md-6">
-
-            <div class="card p-4 shadow-sm dashboard-card dashboard-purple h-100">
-
-                <p class="dashboard-title mb-2">
-                    🔔 Active Reminders
-                </p>
-
-                <h2 class="dashboard-stat mb-0">
-                    @ActiveReminders
-                </h2>
-
-            </div>
-
-        </div>
-
-
-        <div class="col-lg-3 col-md-6">
-
-            <div class="card p-4 shadow-sm dashboard-card dashboard-success h-100">
-
-                <p class="dashboard-title mb-2">
-                    ✅ Completed
-                </p>
-
-                <h2 class="dashboard-stat mb-0">
-                    @CompletedTasks
-                </h2>
-
-            </div>
-
-        </div>
-
-
-        <div class="col-lg-3 col-md-6">
-
-            <div class="card p-4 shadow-sm dashboard-card dashboard-warning h-100">
-
-                <p class="dashboard-title mb-2">
-                    ⏳ Pending Tasks
-                </p>
-
-                <h2 class="dashboard-stat mb-0">
-                    @PendingTasks
-                </h2>
-
-            </div>
-
-        </div>
-
-
-        <div class="col-lg-3 col-md-6">
-
-            <div class="card p-4 shadow-sm dashboard-card dashboard-info h-100">
-
-                <p class="dashboard-title mb-2">
-                    📅 Today's Reminders
-                </p>
-
-                <h2 class="dashboard-stat mb-0">
-                    @TodayReminders
-                </h2>
-
-            </div>
-
-        </div>
-
-
-        <div class="col-lg-3 col-md-6">
-
-            <div class="card p-4 shadow-sm dashboard-card dashboard-primary h-100">
-
-                <p class="dashboard-title mb-2">
-                    ⏰ Upcoming Reminders
-                </p>
-
-                <h2 class="dashboard-stat mb-0">
-                    @UpcomingReminders
-                </h2>
-
-            </div>
-
+        <div class="dashboard-date">
+            @DateTime.Today.ToString("dddd, dd MMMM yyyy")
         </div>
 
     </div>
 
 
-    <!-- ========================= -->
-    <!-- TODAY / UPCOMING -->
-    <!-- ========================= -->
+    @if (expenses == null || tasks == null || reminders == null)
+    {
+        <!-- ============================= -->
+        <!-- LOADING -->
+        <!-- ============================= -->
 
-    <div class="row g-4 mb-4">
+        <div class="dashboard-loading">
 
-        <!-- TODAY -->
+            <div class="spinner-border text-primary"
+                 role="status">
+            </div>
 
-        <div class="col-lg-6">
+            <p class="text-muted mt-3 mb-0">
+                Loading dashboard...
+            </p>
 
-            <div class="card p-4 h-100 dashboard-card">
+        </div>
+    }
+    else
+    {
+        <!-- ============================= -->
+        <!-- STATISTICS -->
+        <!-- ============================= -->
 
-                <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="row g-4 mb-4">
 
-                    <div>
+            <!-- TOTAL EXPENSES -->
+            <div class="col-xl-3 col-md-6">
 
-                        <h5 class="fw-bold mb-1">
-                            🔔 Today
-                        </h5>
+                <div class="dashboard-stat-card stat-primary">
 
-                        <p class="text-muted small mb-0">
-                            Things that need your attention today
-                        </p>
-
+                    <div class="stat-icon">
+                        💰
                     </div>
 
-                    <span class="badge bg-primary">
-                        @TodayItemsCount
-                    </span>
+                    <div class="stat-content">
+
+                        <span class="stat-label">
+                            Total Expenses
+                        </span>
+
+                        <strong class="stat-value">
+                            @TotalExpenses.ToString("C")
+                        </strong>
+
+                    </div>
 
                 </div>
 
+            </div>
 
-                @if (!TodayTasks.Any() &&
-                            !TodayExpenses.Any() &&
-                            !TodayRemindersList.Any())
-                {
-                    <div class="text-center py-4">
 
-                        <div class="fs-2 mb-2">
-                            🎉
-                        </div>
+            <!-- UNPAID -->
+            <div class="col-xl-3 col-md-6">
 
-                        <p class="text-muted mb-0">
-                            Nothing scheduled for today.
-                        </p>
+                <div class="dashboard-stat-card stat-danger">
+
+                    <div class="stat-icon">
+                        ❌
+                    </div>
+
+                    <div class="stat-content">
+
+                        <span class="stat-label">
+                            Unpaid
+                        </span>
+
+                        <strong class="stat-value">
+                            @UnpaidAmount.ToString("C")
+                        </strong>
 
                     </div>
-                }
-                else
-                {
-                    @foreach (var task in TodayTasks)
+
+                </div>
+
+            </div>
+
+
+            <!-- PAID -->
+            <div class="col-xl-3 col-md-6">
+
+                <div class="dashboard-stat-card stat-success">
+
+                    <div class="stat-icon">
+                        ✅
+                    </div>
+
+                    <div class="stat-content">
+
+                        <span class="stat-label">
+                            Paid
+                        </span>
+
+                        <strong class="stat-value">
+                            @PaidAmount.ToString("C")
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- PENDING TASKS -->
+            <div class="col-xl-3 col-md-6">
+
+                <div class="dashboard-stat-card stat-warning">
+
+                    <div class="stat-icon">
+                        📋
+                    </div>
+
+                    <div class="stat-content">
+
+                        <span class="stat-label">
+                            Pending Tasks
+                        </span>
+
+                        <strong class="stat-value">
+                            @PendingTasks
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ACTIVE REMINDERS -->
+            <div class="col-xl-3 col-md-6">
+
+                <div class="dashboard-stat-card stat-purple">
+
+                    <div class="stat-icon">
+                        🔔
+                    </div>
+
+                    <div class="stat-content">
+
+                        <span class="stat-label">
+                            Active Reminders
+                        </span>
+
+                        <strong class="stat-value">
+                            @ActiveReminders
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- COMPLETED TASKS -->
+            <div class="col-xl-3 col-md-6">
+
+                <div class="dashboard-stat-card stat-info">
+
+                    <div class="stat-icon">
+                        ✔️
+                    </div>
+
+                    <div class="stat-content">
+
+                        <span class="stat-label">
+                            Completed Tasks
+                        </span>
+
+                        <strong class="stat-value">
+                            @CompletedTasks
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- TODAY -->
+            <div class="col-xl-3 col-md-6">
+
+                <div class="dashboard-stat-card stat-secondary">
+
+                    <div class="stat-icon">
+                        📅
+                    </div>
+
+                    <div class="stat-content">
+
+                        <span class="stat-label">
+                            Today
+                        </span>
+
+                        <strong class="stat-value">
+                            @TodayItemsCount
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- OVERDUE -->
+            <div class="col-xl-3 col-md-6">
+
+                <div class="dashboard-stat-card stat-overdue">
+
+                    <div class="stat-icon">
+                        🔴
+                    </div>
+
+                    <div class="stat-content">
+
+                        <span class="stat-label">
+                            Overdue
+                        </span>
+
+                        <strong class="stat-value">
+                            @OverdueItemsCount
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ============================= -->
+        <!-- TODAY / UPCOMING -->
+        <!-- ============================= -->
+
+        <div class="row g-4 mb-4">
+
+            <!-- TODAY -->
+            <div class="col-xl-6">
+
+                <div class="dashboard-card h-100">
+
+                    <div class="card-header-custom">
+
+                        <div>
+                            <h5 class="fw-bold mb-1">
+                                🔔 Today
+                            </h5>
+
+                            <p class="text-muted small mb-0">
+                                Things that need your attention today
+                            </p>
+                        </div>
+
+                        <span class="section-count bg-primary">
+                            @TodayItemsCount
+                        </span>
+
+                    </div>
+
+
+                    @if (TodayItemsCount == 0)
                     {
-                        <div class="dashboard-item">
+                        <div class="empty-state">
 
-                            <div>
-
-                                <strong>
-                                    @task.Title
-                                </strong>
-
-                                <p class="text-muted small mb-0">
-                                    Task · @task.DueDate.ToShortDateString()
-                                </p>
-
+                            <div class="empty-icon">
+                                🎉
                             </div>
 
-                            @if (task.IsCompleted)
-                            {
-                                <span class="badge bg-success">
-                                    Done
-                                </span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-warning text-dark">
-                                    Pending
-                                </span>
-                            }
+                            <strong>
+                                Nothing scheduled for today
+                            </strong>
+
+                            <p class="text-muted small mb-0 mt-1">
+                                You are all caught up.
+                            </p>
 
                         </div>
                     }
-
-
-                    @foreach (var expense in TodayExpenses)
+                    else
                     {
-                        <div class="dashboard-item">
+                        @foreach (var task in TodayTasks)
+                        {
+                            <div class="dashboard-item">
 
-                            <div>
+                                <div class="item-left">
 
-                                <strong>
-                                    @expense.Title
-                                </strong>
+                                    <div class="item-icon task-icon">
+                                        📋
+                                    </div>
 
-                                <p class="text-muted small mb-0">
-                                    Expense · Due today
-                                </p>
+                                    <div>
+
+                                        <strong>
+                                            @task.Title
+                                        </strong>
+
+                                        <p class="text-muted small mb-0">
+                                            Task · @task.DueDate.ToShortDateString()
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+                                @if (task.IsCompleted)
+                                {
+                                    <span class="badge bg-success">
+                                        Done
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning text-dark">
+                                        Pending
+                                    </span>
+                                }
 
                             </div>
-
-                            <span class="fw-bold text-danger">
-                                @expense.Amount.ToString("C")
-                            </span>
-
-                        </div>
-                    }
+                        }
 
 
-                    @foreach (var reminder in TodayRemindersList)
-                    {
-                        <div class="dashboard-item">
+                        @foreach (var expense in TodayExpenses)
+                        {
+                            <div class="dashboard-item">
 
-                            <div>
+                                <div class="item-left">
 
-                                <strong>
-                                    @reminder.Title
-                                </strong>
+                                    <div class="item-icon expense-icon">
+                                        💰
+                                    </div>
 
-                                <p class="text-muted small mb-0">
+                                    <div>
+
+                                        <strong>
+                                            @expense.Title
+                                        </strong>
+
+                                        <p class="text-muted small mb-0">
+                                            Expense · Due today
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+                                <span class="fw-bold text-danger">
+                                    @expense.Amount.ToString("C")
+                                </span>
+
+                            </div>
+                        }
+
+
+                        @foreach (var reminder in TodayRemindersList)
+                        {
+                            <div class="dashboard-item">
+
+                                <div class="item-left">
+
+                                    <div class="item-icon reminder-icon">
+                                        🔔
+                                    </div>
+
+                                    <div>
+
+                                        <strong>
+                                            @reminder.Title
+                                        </strong>
+
+                                        <p class="text-muted small mb-0">
+                                            Reminder
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+                                <span class="badge bg-info text-dark">
                                     Reminder
-                                </p>
+                                </span>
 
                             </div>
+                        }
+                    }
 
-                            <span class="badge bg-info text-dark">
-                                Reminder
-                            </span>
+                </div>
+
+            </div>
+
+
+            <!-- UPCOMING -->
+            <div class="col-xl-6">
+
+                <div class="dashboard-card h-100">
+
+                    <div class="card-header-custom">
+
+                        <div>
+                            <h5 class="fw-bold mb-1">
+                                📅 Upcoming
+                            </h5>
+
+                            <p class="text-muted small mb-0">
+                                What's coming next
+                            </p>
+                        </div>
+
+                        <span class="section-count bg-secondary">
+                            @UpcomingItemsCount
+                        </span>
+
+                    </div>
+
+
+                    @if (UpcomingItemsCount == 0)
+                    {
+                        <div class="empty-state">
+
+                            <div class="empty-icon">
+                                👍
+                            </div>
+
+                            <strong>
+                                Nothing upcoming
+                            </strong>
+
+                            <p class="text-muted small mb-0 mt-1">
+                                There is nothing scheduled ahead.
+                            </p>
 
                         </div>
                     }
+                    else
+                    {
+                        @foreach (var expense in UpcomingExpenses)
+                        {
+                            <div class="dashboard-item">
 
-                }
+                                <div class="item-left">
+
+                                    <div class="item-icon expense-icon">
+                                        💰
+                                    </div>
+
+                                    <div>
+
+                                        <strong>
+                                            @expense.Title
+                                        </strong>
+
+                                        <p class="text-muted small mb-0">
+                                            Due @expense.DueDate.ToShortDateString()
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+                                <span class="fw-bold">
+                                    @expense.Amount.ToString("C")
+                                </span>
+
+                            </div>
+                        }
+
+
+                        @foreach (var task in UpcomingTasks)
+                        {
+                            <div class="dashboard-item">
+
+                                <div class="item-left">
+
+                                    <div class="item-icon task-icon">
+                                        📋
+                                    </div>
+
+                                    <div>
+
+                                        <strong>
+                                            @task.Title
+                                        </strong>
+
+                                        <p class="text-muted small mb-0">
+                                            Due @task.DueDate.ToShortDateString()
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+                                @if (task.IsCompleted)
+                                {
+                                    <span class="badge bg-success">
+                                        Done
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning text-dark">
+                                        Pending
+                                    </span>
+                                }
+
+                            </div>
+                        }
+
+
+                        @foreach (var reminder in UpcomingRemindersList)
+                        {
+                            <div class="dashboard-item">
+
+                                <div class="item-left">
+
+                                    <div class="item-icon reminder-icon">
+                                        🔔
+                                    </div>
+
+                                    <div>
+
+                                        <strong>
+                                            @reminder.Title
+                                        </strong>
+
+                                        <p class="text-muted small mb-0">
+                                            @reminder.ReminderDate.ToShortDateString()
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+                                <span class="badge bg-info text-dark">
+                                    Reminder
+                                </span>
+
+                            </div>
+                        }
+                    }
+
+                </div>
 
             </div>
 
         </div>
 
 
-        <!-- UPCOMING -->
+        <!-- ============================= -->
+        <!-- OVERDUE -->
+        <!-- ============================= -->
 
-        <div class="col-lg-6">
+        <div class="dashboard-card mb-4">
 
-            <div class="card p-4 h-100 dashboard-card">
+            <div class="card-header-custom">
 
-                <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h5 class="fw-bold mb-1">
+                        🔴 Overdue
+                    </h5>
 
-                    <div>
-
-                        <h5 class="fw-bold mb-1">
-                            📅 Upcoming
-                        </h5>
-
-                        <p class="text-muted small mb-0">
-                            What's coming next
-                        </p>
-
-                    </div>
-
-                    <span class="badge bg-secondary">
-                        @UpcomingItemsCount
-                    </span>
-
+                    <p class="text-muted small mb-0">
+                        Things that are past their due date
+                    </p>
                 </div>
 
+                <span class="section-count bg-danger">
+                    @OverdueItemsCount
+                </span>
 
-                @if (!UpcomingTasks.Any() &&
-                            !UpcomingExpenses.Any() &&
-                            !UpcomingRemindersList.Any())
-                {
-                    <div class="text-center py-4">
+            </div>
 
-                        <div class="fs-2 mb-2">
-                            👍
-                        </div>
 
-                        <p class="text-muted mb-0">
-                            Nothing upcoming.
-                        </p>
+            @if (OverdueItemsCount == 0)
+            {
+                <div class="empty-state">
 
+                    <div class="empty-icon">
+                        🎉
                     </div>
-                }
-                else
+
+                    <strong>
+                        Nothing is overdue
+                    </strong>
+
+                    <p class="text-muted small mb-0 mt-1">
+                        Everything is up to date.
+                    </p>
+
+                </div>
+            }
+            else
+            {
+                @foreach (var task in OverdueTasks)
                 {
-                    @foreach (var expense in UpcomingExpenses)
-                    {
-                        <div class="dashboard-item">
+                    <div class="dashboard-item overdue-row"
+                         @onclick="() => OpenTask(task.Id)">
 
-                            <div>
+                        <div class="item-left">
 
-                                <strong>
-                                    @expense.Title
-                                </strong>
-
-                                <p class="text-muted small mb-0">
-                                    Due @expense.DueDate.ToShortDateString()
-                                </p>
-
+                            <div class="item-icon overdue-icon">
+                                📋
                             </div>
-
-                            <span class="fw-bold">
-                                @expense.Amount.ToString("C")
-                            </span>
-
-                        </div>
-                    }
-
-
-                    @foreach (var task in UpcomingTasks)
-                    {
-                        <div class="dashboard-item">
 
                             <div>
 
                                 <strong>
                                     @task.Title
-                                </strong>
-
-                                <p class="text-muted small mb-0">
-                                    Due @task.DueDate.ToShortDateString()
-                                </p>
-
-                            </div>
-
-                            @if (task.IsCompleted)
-                            {
-                                <span class="badge bg-success">
-                                    Done
-                                </span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-warning text-dark">
-                                    Pending
-                                </span>
-                            }
-
-                        </div>
-                    }
-
-
-                    @foreach (var reminder in UpcomingRemindersList)
-                    {
-                        <div class="dashboard-item">
-
-                            <div>
-
-                                <strong>
-                                    @reminder.Title
-                                </strong>
-
-                                <p class="text-muted small mb-0">
-                                    @reminder.ReminderDate.ToShortDateString()
-                                </p>
-
-                            </div>
-
-                            <span class="badge bg-info text-dark">
-                                Reminder
-                            </span>
-
-                        </div>
-                    }
-
-                }
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- ========================= -->
-    <!-- OVERDUE -->
-    <!-- ========================= -->
-
-    <div class="row g-4 mb-4">
-
-        <div class="col-12">
-
-            <div class="card p-4 dashboard-card">
-
-                <div class="d-flex justify-content-between align-items-center mb-4">
-
-                    <div>
-
-                        <h5 class="fw-bold mb-1">
-                            🔴 Overdue
-                        </h5>
-
-                        <p class="text-muted small mb-0">
-                            Things that are past their due date
-                        </p>
-
-                    </div>
-
-                    <span class="badge bg-danger">
-                        @OverdueItemsCount
-                    </span>
-
-                </div>
-
-
-                @if (OverdueItemsCount == 0)
-                {
-                    <div class="text-center py-4">
-
-                        <div class="fs-2 mb-2">
-                            🎉
-                        </div>
-
-                        <p class="text-muted mb-0">
-                            Nothing is overdue.
-                        </p>
-
-                    </div>
-                }
-                else
-                {
-                    <!-- OVERDUE TASKS -->
-                    @foreach (var task in OverdueTasks)
-                    {
-                        <div class="dashboard-item overdue-item"
-                             @onclick="() => OpenTask(task.Id)"
-                             style="cursor:pointer;">
-
-                            <div class="overdue-content">
-
-                                <strong class="overdue-title">
-                                    📋 @task.Title
                                 </strong>
 
                                 <p class="text-muted small mb-0">
@@ -532,39 +658,45 @@ else
 
                             </div>
 
-
-                            @if (task.Priority == 2)
-                            {
-                                <span class="badge bg-danger">
-                                    High
-                                </span>
-                            }
-                            else if (task.Priority == 1)
-                            {
-                                <span class="badge bg-warning text-dark">
-                                    Medium
-                                </span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-success">
-                                    Low
-                                </span>
-                            }
-
                         </div>
-                    }
+
+                        @if (task.Priority == 2)
+                        {
+                            <span class="badge bg-danger">
+                                High
+                            </span>
+                        }
+                        else if (task.Priority == 1)
+                        {
+                            <span class="badge bg-warning text-dark">
+                                Medium
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">
+                                Low
+                            </span>
+                        }
+
+                    </div>
+                }
 
 
-                    <!-- OVERDUE EXPENSES -->
-                    @foreach (var expense in OverdueExpenses)
-                    {
-                        <div class="dashboard-item overdue-item">
+                @foreach (var expense in OverdueExpenses)
+                {
+                    <div class="dashboard-item overdue-row">
 
-                            <div class="overdue-content">
+                        <div class="item-left">
 
-                                <strong class="overdue-title">
-                                    💰 @expense.Title
+                            <div class="item-icon overdue-icon">
+                                💰
+                            </div>
+
+                            <div>
+
+                                <strong>
+                                    @expense.Title
                                 </strong>
 
                                 <p class="text-muted small mb-0">
@@ -573,23 +705,30 @@ else
 
                             </div>
 
-                            <span class="fw-bold text-danger">
-                                @expense.Amount.ToString("C")
-                            </span>
-
                         </div>
-                    }
+
+                        <span class="fw-bold text-danger">
+                            @expense.Amount.ToString("C")
+                        </span>
+
+                    </div>
+                }
 
 
-                    <!-- OVERDUE REMINDERS -->
-                    @foreach (var reminder in OverdueReminders)
-                    {
-                        <div class="dashboard-item overdue-item">
+                @foreach (var reminder in OverdueReminders)
+                {
+                    <div class="dashboard-item overdue-row">
 
-                            <div class="overdue-content">
+                        <div class="item-left">
 
-                                <strong class="overdue-title">
-                                    🔔 @reminder.Title
+                            <div class="item-icon overdue-icon">
+                                🔔
+                            </div>
+
+                            <div>
+
+                                <strong>
+                                    @reminder.Title
                                 </strong>
 
                                 <p class="text-muted small mb-0">
@@ -598,215 +737,272 @@ else
 
                             </div>
 
-                            <span class="badge bg-danger">
-                                Overdue
-                            </span>
+                        </div>
+
+                        <span class="badge bg-danger">
+                            Overdue
+                        </span>
+
+                    </div>
+                }
+            }
+
+        </div>
+
+
+        <!-- ============================= -->
+        <!-- QUICK ACTIONS -->
+        <!-- ============================= -->
+
+        <div class="dashboard-card mb-4">
+
+            <div class="card-header-custom">
+
+                <div>
+                    <h5 class="fw-bold mb-1">
+                        ⚡ Quick Actions
+                    </h5>
+
+                    <p class="text-muted small mb-0">
+                        Common actions
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="quick-actions">
+
+                <a class="quick-action primary"
+                   href="/expenses">
+
+                    <span class="quick-action-icon">
+                        💰
+                    </span>
+
+                    <span>
+                        Add Expense
+                    </span>
+
+                </a>
+
+
+                <a class="quick-action success"
+                   href="/tasks">
+
+                    <span class="quick-action-icon">
+                        ✅
+                    </span>
+
+                    <span>
+                        Add Task
+                    </span>
+
+                </a>
+
+
+                <a class="quick-action info"
+                   href="/reminders">
+
+                    <span class="quick-action-icon">
+                        🔔
+                    </span>
+
+                    <span>
+                        Add Reminder
+                    </span>
+
+                </a>
+
+
+                <a class="quick-action secondary"
+                   href="/recurring-expenses">
+
+                    <span class="quick-action-icon">
+                        🔄
+                    </span>
+
+                    <span>
+                        Recurring Expenses
+                    </span>
+
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <!-- ============================= -->
+        <!-- RECENT TASKS / EXPENSES -->
+        <!-- ============================= -->
+
+        <div class="row g-4 mb-4">
+
+            <!-- RECENT TASKS -->
+            <div class="col-xl-6">
+
+                <div class="dashboard-card h-100">
+
+                    <div class="card-header-custom">
+
+                        <div>
+                            <h5 class="fw-bold mb-1">
+                                Recent Tasks
+                            </h5>
+
+                            <p class="text-muted small mb-0">
+                                Your latest tasks
+                            </p>
+                        </div>
+
+                        <a href="/tasks"
+                           class="view-all-link">
+                            View All
+                        </a>
+
+                    </div>
+
+
+                    @if (!tasks.Any())
+                    {
+                        <div class="empty-state compact">
+
+                            <div class="empty-icon">
+                                📋
+                            </div>
+
+                            <p class="text-muted mb-0">
+                                No tasks yet.
+                            </p>
 
                         </div>
                     }
+                    else
+                    {
+                        @foreach (var task in tasks
+                                        .OrderByDescending(x => x.DueDate)
+                                        .Take(5))
+                        {
+                            <div class="dashboard-item">
 
-                }
+                                <div class="item-left">
 
-            </div>
+                                    <div class="item-icon task-icon">
+                                        📋
+                                    </div>
 
-        </div>
+                                    <div>
 
-    </div>
+                                        <strong>
+                                            @task.Title
+                                        </strong>
 
+                                        <p class="text-muted small mb-0">
+                                            @task.DueDate.ToShortDateString()
+                                        </p>
 
-    <!-- ========================= -->
-    <!-- QUICK ACTIONS -->
-    <!-- ========================= -->
+                                    </div>
 
-    <div class="row g-4 mb-4">
+                                </div>
 
-        <div class="col-12">
+                                @if (task.IsCompleted)
+                                {
+                                    <span class="badge bg-success">
+                                        Done
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning text-dark">
+                                        Pending
+                                    </span>
+                                }
 
-            <div class="card p-4 dashboard-card">
-
-                <h5 class="fw-bold mb-3">
-                    ⚡ Quick Actions
-                </h5>
-
-                <div class="d-flex flex-wrap gap-3">
-
-                    <a class="btn btn-primary quick-link-btn"
-                       href="/expenses">
-
-                        ➕ Add Expense
-
-                    </a>
-
-                    <a class="btn btn-primary quick-link-btn"
-                       href="/tasks">
-
-                        ➕ Add Task
-
-                    </a>
-
-                    <a class="btn btn-primary quick-link-btn"
-                       href="/reminders">
-
-                        🔔 Add Reminder
-
-                    </a>
+                            </div>
+                        }
+                    }
 
                 </div>
 
             </div>
 
-        </div>
 
-    </div>
+            <!-- UPCOMING EXPENSES -->
+            <div class="col-xl-6">
 
+                <div class="dashboard-card h-100">
 
-    <!-- ========================= -->
-    <!-- RECENT TASKS / EXPENSES -->
-    <!-- ========================= -->
-
-    <div class="row g-4 mb-4">
-
-        <div class="col-lg-6">
-
-            <div class="card p-4 h-100">
-
-                <div class="d-flex justify-content-between align-items-center mb-4">
-
-                    <h5 class="fw-bold mb-0">
-                        Recent Tasks
-                    </h5>
-
-                    <a href="/tasks">
-                        View All
-                    </a>
-
-                </div>
-
-
-                @foreach (var task in tasks
-                            .OrderByDescending(x => x.DueDate)
-                            .Take(5))
-                {
-                    <div class="dashboard-item">
+                    <div class="card-header-custom">
 
                         <div>
-
-                            <strong>
-                                @task.Title
-                            </strong>
+                            <h5 class="fw-bold mb-1">
+                                Upcoming Expenses
+                            </h5>
 
                             <p class="text-muted small mb-0">
-                                @task.DueDate.ToShortDateString()
+                                Unpaid expenses coming next
+                            </p>
+                        </div>
+
+                        <a href="/expenses"
+                           class="view-all-link">
+                            View All
+                        </a>
+
+                    </div>
+
+
+                    @if (!expenses.Any(x => !x.IsPaid))
+                    {
+                        <div class="empty-state compact">
+
+                            <div class="empty-icon">
+                                🎉
+                            </div>
+
+                            <p class="text-muted mb-0">
+                                No unpaid expenses.
                             </p>
 
                         </div>
-
-                        @if (task.IsCompleted)
+                    }
+                    else
+                    {
+                        @foreach (var expense in expenses
+                                        .Where(x => !x.IsPaid)
+                                        .OrderBy(x => x.DueDate)
+                                        .Take(5))
                         {
-                            <span class="badge bg-success">
-                                Done
-                            </span>
+                            <div class="dashboard-item">
+
+                                <div class="item-left">
+
+                                    <div class="item-icon expense-icon">
+                                        💰
+                                    </div>
+
+                                    <div>
+
+                                        <strong>
+                                            @expense.Title
+                                        </strong>
+
+                                        <p class="text-muted small mb-0">
+                                            @expense.DueDate.ToShortDateString()
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+                                <span class="fw-bold">
+                                    @expense.Amount.ToString("C")
+                                </span>
+
+                            </div>
                         }
-                        else
-                        {
-                            <span class="badge bg-warning text-dark">
-                                Pending
-                            </span>
-                        }
-
-                    </div>
-                }
-
-            </div>
-
-        </div>
-
-
-        <div class="col-lg-6">
-
-            <div class="card p-4 h-100">
-
-                <div class="d-flex justify-content-between align-items-center mb-4">
-
-                    <h5 class="fw-bold mb-0">
-                        Upcoming Expenses
-                    </h5>
-
-                    <a href="/expenses">
-                        View All
-                    </a>
-
-                </div>
-
-
-                @foreach (var expense in expenses
-                            .Where(x => !x.IsPaid)
-                            .OrderBy(x => x.DueDate)
-                            .Take(5))
-                {
-                    <div class="dashboard-item">
-
-                        <div>
-
-                            <strong>
-                                @expense.Title
-                            </strong>
-
-                            <p class="text-muted small mb-0">
-                                @expense.DueDate.ToShortDateString()
-                            </p>
-
-                        </div>
-
-                        <span class="fw-bold">
-                            @expense.Amount.ToString("C")
-                        </span>
-
-                    </div>
-                }
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- ========================= -->
-    <!-- PROGRESS -->
-    <!-- ========================= -->
-
-    <div class="row g-4 mb-4">
-
-        <div class="col-lg-6">
-
-            <div class="card p-4 dashboard-card h-100">
-
-                <h5 class="fw-bold mb-4">
-                    📊 Task Progress
-                </h5>
-
-                <div class="d-flex justify-content-between mb-2">
-
-                    <span>
-                        Completed Tasks
-                    </span>
-
-                    <strong>
-                        @CompletedTasks / @TotalTasks
-                    </strong>
-
-                </div>
-
-                <div class="progress" style="height:26px;">
-
-                    <div class="progress-bar bg-success"
-                         role="progressbar"
-                         style="width:@($"{CompletionPercentage}%")">
-
-                        @CompletionPercentage%
-
-                    </div>
+                    }
 
                 </div>
 
@@ -815,68 +1011,22 @@ else
         </div>
 
 
-        <div class="col-lg-6">
+        <!-- ============================= -->
+        <!-- PROGRESS -->
+        <!-- ============================= -->
 
-            <div class="card p-4 dashboard-card h-100">
+        <div class="row g-4 mb-4">
 
-                <h5 class="fw-bold mb-4">
-                    💰 Expense Progress
-                </h5>
+            <!-- TASK PROGRESS -->
+            <div class="col-xl-6">
 
-                <div class="d-flex justify-content-between mb-2">
+                <div class="dashboard-card h-100">
 
-                    <span>
-                        Paid Expenses
-                    </span>
+                    <div class="card-header-custom">
 
-                    <strong>
-                        @PaidAmount.ToString("C") /
-                        @TotalExpenses.ToString("C")
-                    </strong>
-
-                </div>
-
-                <div class="progress" style="height:26px;">
-
-                    <div class="progress-bar bg-primary"
-                         role="progressbar"
-                         style="width:@($"{ExpenseProgress}%")">
-
-                        @ExpenseProgress%
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- ========================= -->
-    <!-- OVERALL PROGRESS -->
-    <!-- ========================= -->
-
-    <div class="row g-4 mb-4">
-
-        <div class="col-12">
-
-            <div class="card p-4 dashboard-card">
-
-                <h5 class="fw-bold mb-4">
-                    🏆 Overall Progress
-                </h5>
-
-
-                <div class="mb-3">
-
-                    <div class="d-flex justify-content-between">
-
-                        <span>
-                            📋 Tasks
-                        </span>
+                        <h5 class="fw-bold mb-0">
+                            📊 Task Progress
+                        </h5>
 
                         <strong>
                             @CompletionPercentage%
@@ -884,20 +1034,51 @@ else
 
                     </div>
 
-                    <div class="progress mb-3">
 
-                        <div class="progress-bar bg-success"
-                             style="width:@($"{CompletionPercentage}%")">
+                    <div class="progress-info">
+
+                        <div class="d-flex justify-content-between mb-2">
+
+                            <span>
+                                Completed Tasks
+                            </span>
+
+                            <strong>
+                                @CompletedTasks / @TotalTasks
+                            </strong>
+
+                        </div>
+
+
+                        <div class="progress progress-large">
+
+                            <div class="progress-bar bg-success"
+                                 role="progressbar"
+                                 style="width:@($"{CompletionPercentage}%")">
+
+                                @CompletionPercentage%
+
+                            </div>
+
                         </div>
 
                     </div>
 
+                </div>
 
-                    <div class="d-flex justify-content-between">
+            </div>
 
-                        <span>
-                            💰 Expenses
-                        </span>
+
+            <!-- EXPENSE PROGRESS -->
+            <div class="col-xl-6">
+
+                <div class="dashboard-card h-100">
+
+                    <div class="card-header-custom">
+
+                        <h5 class="fw-bold mb-0">
+                            💰 Expense Progress
+                        </h5>
 
                         <strong>
                             @ExpenseProgress%
@@ -905,209 +1086,434 @@ else
 
                     </div>
 
-                    <div class="progress mb-3">
 
-                        <div class="progress-bar bg-primary"
-                             style="width:@($"{ExpenseProgress}%")">
+                    <div class="progress-info">
+
+                        <div class="d-flex justify-content-between mb-2">
+
+                            <span>
+                                Paid Expenses
+                            </span>
+
+                            <strong>
+                                @PaidAmount.ToString("C")
+                                /
+                                @TotalExpenses.ToString("C")
+                            </strong>
+
                         </div>
 
-                    </div>
 
+                        <div class="progress progress-large">
 
-                    <div class="d-flex justify-content-between">
+                            <div class="progress-bar bg-primary"
+                                 role="progressbar"
+                                 style="width:@($"{ExpenseProgress}%")">
 
-                        <span>
-                            🔔 Reminders
-                        </span>
+                                @ExpenseProgress%
 
-                        <strong>
-                            @ReminderProgress%
-                        </strong>
+                            </div>
 
-                    </div>
-
-                    <div class="progress mb-4">
-
-                        <div class="progress-bar bg-warning"
-                             style="width:@($"{ReminderProgress}%")">
                         </div>
 
                     </div>
 
                 </div>
 
+            </div>
 
-                <hr />
+        </div>
 
 
-                <div class="text-center">
+        <!-- ============================= -->
+        <!-- OVERALL / DISTRIBUTION -->
+        <!-- ============================= -->
 
-                    <h2 class="dashboard-stat">
-                        @OverallProgress%
-                    </h2>
+        <div class="row g-4 mb-4">
 
-                    <p class="text-muted mb-0">
-                        Overall Completion
+            <!-- OVERALL PROGRESS -->
+            <div class="col-xl-7">
+
+                <div class="dashboard-card h-100">
+
+                    <div class="card-header-custom">
+
+                        <div>
+                            <h5 class="fw-bold mb-1">
+                                🏆 Overall Progress
+                            </h5>
+
+                            <p class="text-muted small mb-0">
+                                Your overall activity progress
+                            </p>
+                        </div>
+
+                        <div class="overall-score">
+                            @OverallProgress%
+                        </div>
+
+                    </div>
+
+
+                    <div class="overall-progress-list">
+
+                        <!-- TASKS -->
+                        <div class="overall-progress-row">
+
+                            <div class="d-flex justify-content-between">
+
+                                <span>
+                                    📋 Tasks
+                                </span>
+
+                                <strong>
+                                    @CompletionPercentage%
+                                </strong>
+
+                            </div>
+
+                            <div class="progress">
+
+                                <div class="progress-bar bg-success"
+                                     style="width:@($"{CompletionPercentage}%")">
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- EXPENSES -->
+                        <div class="overall-progress-row">
+
+                            <div class="d-flex justify-content-between">
+
+                                <span>
+                                    💰 Expenses
+                                </span>
+
+                                <strong>
+                                    @ExpenseProgress%
+                                </strong>
+
+                            </div>
+
+                            <div class="progress">
+
+                                <div class="progress-bar bg-primary"
+                                     style="width:@($"{ExpenseProgress}%")">
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- REMINDERS -->
+                        <div class="overall-progress-row">
+
+                            <div class="d-flex justify-content-between">
+
+                                <span>
+                                    🔔 Reminders
+                                </span>
+
+                                <strong>
+                                    @ReminderProgress%
+                                </strong>
+
+                            </div>
+
+                            <div class="progress">
+
+                                <div class="progress-bar bg-warning"
+                                     style="width:@($"{ReminderProgress}%")">
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="overall-footer">
+
+                        <span>
+                            Overall Completion
+                        </span>
+
+                        <strong>
+                            @OverallProgress%
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- EXPENSE DISTRIBUTION -->
+            <div class="col-xl-5">
+
+                <div class="dashboard-card h-100">
+
+                    <div class="card-header-custom">
+
+                        <h5 class="fw-bold mb-0">
+                            💸 Expense Distribution
+                        </h5>
+
+                    </div>
+
+
+                    <div class="distribution-wrapper">
+
+                        <svg width="200"
+                             height="200"
+                             viewBox="0 0 42 42"
+                             class="expense-chart">
+
+                            <circle cx="21"
+                                    cy="21"
+                                    r="15.915"
+                                    fill="transparent"
+                                    stroke="#eeeeee"
+                                    stroke-width="3">
+                            </circle>
+
+                            <circle cx="21"
+                                    cy="21"
+                                    r="15.915"
+                                    fill="transparent"
+                                    stroke="#198754"
+                                    stroke-width="3"
+                                    stroke-dasharray="@($"{PaidPercent.ToString(CultureInfo.InvariantCulture)} {100 - PaidPercent}")"
+                                    stroke-linecap="round"
+                                    transform="rotate(-90 21 21)">
+                            </circle>
+
+                            <text x="21"
+                                  y="22"
+                                  text-anchor="middle"
+                                  font-size="4"
+                                  font-weight="bold">
+
+                                @($"{PaidPercent:F0}%")
+
+                            </text>
+
+                        </svg>
+
+                    </div>
+
+
+                    <div class="distribution-details">
+
+                        <div>
+
+                            <span class="distribution-label">
+
+                                <span class="legend-dot paid-dot"></span>
+
+                                Paid
+
+                            </span>
+
+                            <strong>
+                                @PaidExpenses.ToString("C")
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span class="distribution-label">
+
+                                <span class="legend-dot unpaid-dot"></span>
+
+                                Unpaid
+
+                            </span>
+
+                            <strong>
+                                @UnpaidExpenses.ToString("C")
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ============================= -->
+        <!-- QUICK LINKS -->
+        <!-- ============================= -->
+
+        <div class="dashboard-card">
+
+            <div class="card-header-custom">
+
+                <div>
+
+                    <h5 class="fw-bold mb-1">
+                        🔗 Quick Links
+                    </h5>
+
+                    <p class="text-muted small mb-0">
+                        Navigate to the main sections
                     </p>
 
                 </div>
 
             </div>
 
-        </div>
 
-    </div>
+            <div class="quick-links-grid">
 
+                <a href="/expenses"
+                   class="quick-link-card">
 
-    <!-- ========================= -->
-    <!-- EXPENSE DISTRIBUTION -->
-    <!-- ========================= -->
-
-    <div class="row g-4 mb-4">
-
-        <div class="col-lg-6">
-
-            <div class="card p-4 dashboard-card h-100">
-
-                <h5 class="fw-bold mb-4">
-                    💸 Expense Distribution
-                </h5>
-
-
-                <div class="text-center">
-
-                    <svg width="220"
-                         height="220"
-                         viewBox="0 0 42 42">
-
-                        <circle cx="21"
-                                cy="21"
-                                r="15.915"
-                                fill="transparent"
-                                stroke="#eeeeee"
-                                stroke-width="3">
-                        </circle>
-
-                        <circle cx="21"
-                                cy="21"
-                                r="15.915"
-                                fill="transparent"
-                                stroke="#198754"
-                                stroke-width="3"
-                                stroke-dasharray="@($"{PaidPercent.ToString(CultureInfo.InvariantCulture)} {100 - PaidPercent}")"
-                                stroke-linecap="round"
-                                transform="rotate(-90 21 21)">
-                        </circle>
-
-                        <text x="21"
-                              y="22"
-                              text-anchor="middle"
-                              font-size="4"
-                              font-weight="bold">
-
-                            @($"{PaidPercent:F0}%")
-
-                        </text>
-
-                    </svg>
-
-                </div>
-
-
-                <hr />
-
-
-                <div class="d-flex justify-content-around text-center">
+                    <span>
+                        💰
+                    </span>
 
                     <div>
 
-                        <span class="badge bg-success">
-                            Paid
-                        </span>
+                        <strong>
+                            Expenses
+                        </strong>
 
-                        <p class="fw-bold mt-2 mb-0">
-                            @PaidExpenses.ToString("C")
-                        </p>
+                        <small>
+                            Manage your expenses
+                        </small>
 
                     </div>
 
+                </a>
+
+
+                <a href="/tasks"
+                   class="quick-link-card">
+
+                    <span>
+                        ✅
+                    </span>
 
                     <div>
 
-                        <span class="badge bg-danger">
-                            Unpaid
-                        </span>
+                        <strong>
+                            Tasks
+                        </strong>
 
-                        <p class="fw-bold mt-2 mb-0">
-                            @UnpaidExpenses.ToString("C")
-                        </p>
+                        <small>
+                            Manage your tasks
+                        </small>
 
                     </div>
 
-                </div>
+                </a>
+
+
+                <a href="/reminders"
+                   class="quick-link-card">
+
+                    <span>
+                        🔔
+                    </span>
+
+                    <div>
+
+                        <strong>
+                            Reminders
+                        </strong>
+
+                        <small>
+                            Active reminders
+                        </small>
+
+                    </div>
+
+                </a>
+
+
+                <a href="/completed-reminders"
+                   class="quick-link-card">
+
+                    <span>
+                        ✔️
+                    </span>
+
+                    <div>
+
+                        <strong>
+                            Completed Reminders
+                        </strong>
+
+                        <small>
+                            View completed reminders
+                        </small>
+
+                    </div>
+
+                </a>
+
+
+                <a href="/recurring-expenses"
+                   class="quick-link-card">
+
+                    <span>
+                        🔄
+                    </span>
+
+                    <div>
+
+                        <strong>
+                            Recurring Expenses
+                        </strong>
+
+                        <small>
+                            Manage recurring payments
+                        </small>
+
+                    </div>
+
+                </a>
+
+
+                <a href="/calendar"
+                   class="quick-link-card">
+
+                    <span>
+                        📅
+                    </span>
+
+                    <div>
+
+                        <strong>
+                            Calendar
+                        </strong>
+
+                        <small>
+                            View your schedule
+                        </small>
+
+                    </div>
+
+                </a>
 
             </div>
 
         </div>
-
-    </div>
-
-
-    <!-- ========================= -->
-    <!-- QUICK LINKS -->
-    <!-- ========================= -->
-
-    <div class="row g-4">
-
-        <div class="col-12">
-
-            <div class="card p-4">
-
-                <h5 class="fw-bold mb-3">
-                    Quick Links
-                </h5>
-
-                <div class="d-flex flex-wrap gap-3">
-
-                    <a class="btn btn-primary quick-link-btn"
-                       href="/expenses">
-
-                        💰 Expenses
-
-                    </a>
-
-
-                    <a class="btn btn-primary quick-link-btn"
-                       href="/tasks">
-
-                        ✅ Tasks
-
-                    </a>
-
-
-                    <a class="btn btn-primary quick-link-btn"
-                       href="/reminders">
-
-                        🔔 Active Reminders
-
-                    </a>
-
-
-                    <a class="btn btn-primary quick-link-btn"
-                       href="/completed-reminders">
-
-                        ✔️ Completed Reminders
-
-                    </a>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-}
+    }
+</div>
 
 
 @code {
@@ -1120,6 +1526,10 @@ else
 
     private List<NotificationItem> notifications = new();
 
+
+    // =============================
+    // INITIALIZATION
+    // =============================
 
     protected override async Task OnInitializedAsync()
     {
@@ -1148,9 +1558,9 @@ else
     }
 
 
-    // =========================
+    // =============================
     // EXPENSES
-    // =========================
+    // =============================
 
     private decimal TotalExpenses =>
         expenses?.Sum(x => x.Amount) ?? 0;
@@ -1169,15 +1579,11 @@ else
 
 
     private decimal PaidAmount =>
-        expenses?
-            .Where(x => x.IsPaid)
-            .Sum(x => x.Amount) ?? 0;
+        PaidExpenses;
 
 
     private decimal UnpaidAmount =>
-        expenses?
-            .Where(x => !x.IsPaid)
-            .Sum(x => x.Amount) ?? 0;
+        UnpaidExpenses;
 
 
     private int ExpenseProgress =>
@@ -1192,9 +1598,9 @@ else
             : (double)(PaidAmount / TotalExpenses * 100);
 
 
-    // =========================
+    // =============================
     // TASKS
-    // =========================
+    // =============================
 
     private int TotalTasks =>
         tasks?.Count ?? 0;
@@ -1215,9 +1621,9 @@ else
             : (CompletedTasks * 100) / TotalTasks;
 
 
-    // =========================
+    // =============================
     // REMINDERS
-    // =========================
+    // =============================
 
     private int ActiveReminders =>
         reminders?
@@ -1245,9 +1651,9 @@ else
                 / reminders.Count;
 
 
-    // =========================
+    // =============================
     // OVERALL
-    // =========================
+    // =============================
 
     private int OverallProgress =>
         (CompletionPercentage +
@@ -1255,9 +1661,9 @@ else
          ReminderProgress) / 3;
 
 
-    // =========================
+    // =============================
     // TODAY
-    // =========================
+    // =============================
 
     private IEnumerable<TaskItem> TodayTasks =>
         tasks?
@@ -1289,9 +1695,9 @@ else
         TodayRemindersList.Count();
 
 
-    // =========================
+    // =============================
     // OVERDUE
-    // =========================
+    // =============================
 
     private IEnumerable<TaskItem> OverdueTasks =>
         tasks?
@@ -1335,9 +1741,9 @@ else
     }
 
 
-    // =========================
+    // =============================
     // UPCOMING
-    // =========================
+    // =============================
 
     private IEnumerable<TaskItem> UpcomingTasks =>
         tasks?
@@ -1375,31 +1781,3 @@ else
         UpcomingRemindersList.Count();
 
 }
-
-<style>
-
-    .overdue-item {
-        width: 100%;
-        min-width: 0;
-    }
-
-    .overdue-content {
-        flex: 1;
-        min-width: 0;
-        max-width: 100%;
-        overflow: hidden;
-    }
-
-    .overdue-title,
-    .overdue-description {
-        overflow-wrap: anywhere;
-        word-break: break-word;
-    }
-
-    .overdue-item > .badge,
-    .overdue-item > .fw-bold {
-        flex-shrink: 0;
-        margin-left: 15px;
-    }
-
-</style>

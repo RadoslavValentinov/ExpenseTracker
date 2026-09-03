@@ -1,0 +1,807 @@
+﻿/* ================================== */
+/* PAGE */
+/* ================================== */
+
+.reminders-page {
+    width: 100%;
+}
+
+
+/* ================================== */
+/* HEADER */
+/* ================================== */
+
+.reminders-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 22px;
+}
+
+.page-title {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+.page-subtitle {
+    margin: 5px 0 0;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+
+/* ================================== */
+/* ALERT */
+/* ================================== */
+
+.compact-alert {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 15px;
+    padding: 12px 15px;
+    margin-bottom: 16px;
+    border-radius: 12px;
+}
+
+
+/* ================================== */
+/* FORM CARD */
+/* ================================== */
+
+.reminder-form-card {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto 14px;
+    padding: 18px 20px;
+    background: #ffffff;
+    border: 1px solid #e9ecef;
+    border-radius: 16px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+    box-sizing: border-box;
+}
+
+
+/* ================================== */
+/* FORM HEADER */
+/* ================================== */
+
+.form-header {
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+    .form-header h4 {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 700;
+    }
+
+    .form-header p {
+        margin: 4px 0 0;
+        color: #6c757d;
+        font-size: 0.8rem;
+    }
+
+
+/* ================================== */
+/* FORM GRID */
+/* ================================== */
+
+.reminder-form-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.8fr) minmax(0, 1.25fr) minmax(0, 1.05fr);
+    gap: 12px;
+    align-items: start;
+    width: 100%;
+}
+
+
+/* ================================== */
+/* FORM FIELD */
+/* ================================== */
+
+.form-field {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+    .form-field label {
+        display: flex;
+        align-items: center;
+        height: 20px;
+        margin-bottom: 5px;
+        color: #495057;
+        font-size: 0.78rem;
+        font-weight: 600;
+        line-height: 1;
+    }
+
+
+    /* ================================== */
+    /* BLAZOR INPUTS */
+    /* ================================== */
+
+    /*
+   IMPORTANT:
+   InputText, InputDate and InputSelect are
+   Blazor components, so ::deep is required
+   inside a .razor.css file.
+*/
+
+    .form-field ::deep .compact-input {
+        width: 100%;
+        height: 38px;
+        min-height: 38px;
+        padding: 6px 10px;
+        margin: 0;
+        box-sizing: border-box;
+        border: 1px solid #ced4da;
+        border-radius: 9px;
+        background: #ffffff;
+        color: #212529;
+        font-family: inherit;
+        font-size: 0.84rem;
+        line-height: 1.2;
+        outline: none;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+
+
+    /* TEXT INPUT */
+
+    .form-field ::deep input.compact-input {
+        appearance: none;
+    }
+
+
+        /* DATE INPUT */
+
+        .form-field ::deep input.compact-input[type="date"] {
+            appearance: auto;
+            height: 38px;
+            min-height: 38px;
+        }
+
+
+    /* SELECT */
+
+    .form-field ::deep select.compact-input {
+        appearance: auto;
+        display: block;
+        width: 100%;
+        height: 38px;
+        min-height: 38px;
+        padding: 5px 32px 5px 10px;
+        border: 1px solid #ced4da;
+        border-radius: 9px;
+        background-color: #ffffff;
+        color: #212529;
+        font-family: inherit;
+        font-size: 0.84rem;
+        line-height: 1.2;
+        vertical-align: middle;
+        cursor: pointer;
+        box-sizing: border-box;
+    }
+
+
+    /* FOCUS */
+
+    .form-field ::deep .compact-input:focus {
+        border-color: #86b7fe;
+        background: #ffffff;
+        box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.10);
+        outline: none;
+    }
+
+
+/* ================================== */
+/* VALIDATION */
+/* ================================== */
+
+.field-error {
+    min-height: 17px;
+    margin-top: 4px;
+    color: #dc3545;
+    font-size: 0.72rem;
+    line-height: 1.2;
+}
+
+.validation-summary {
+    width: 100%;
+    max-width: 760px;
+    margin: 10px auto 0;
+    padding: 8px 11px;
+    border-radius: 8px;
+    background: #fff0f0;
+    color: #b02a37;
+    font-size: 0.78rem;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+
+/* ================================== */
+/* FORM BUTTONS */
+/* ================================== */
+
+.form-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 15px;
+}
+
+.compact-button {
+    min-height: 37px;
+    padding: 7px 17px;
+    border-radius: 50px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    white-space: nowrap;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+    .compact-button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 5px 12px rgba(0, 0, 0, 0.09);
+    }
+
+
+/* ================================== */
+/* SEARCH */
+/* ================================== */
+
+.search-card {
+    padding: 11px 14px;
+    margin-bottom: 14px;
+    background: #ffffff;
+    border: 1px solid #e9ecef;
+    border-radius: 13px;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.035);
+}
+
+.search-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-icon {
+    position: absolute;
+    left: 11px;
+    font-size: 0.95rem;
+    pointer-events: none;
+}
+
+.search-input {
+    width: 100%;
+    height: 37px;
+    padding: 6px 11px 6px 34px;
+    box-sizing: border-box;
+    border: 1px solid #dee2e6;
+    border-radius: 9px;
+    outline: none;
+    background: #f8f9fa;
+    color: #212529;
+    font-size: 0.86rem;
+    transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+
+    .search-input:focus {
+        background: #ffffff;
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.08);
+    }
+
+
+/* ================================== */
+/* REMINDER CARDS */
+/* ================================== */
+
+.reminder-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 17px;
+    box-sizing: border-box;
+    background: #ffffff;
+    border: 1px solid #e9ecef;
+    border-radius: 15px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+    .reminder-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07);
+    }
+
+
+/* ================================== */
+/* REMINDER CARD HEADER */
+/* ================================== */
+
+.reminder-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 13px;
+}
+
+.reminder-title-area {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    min-width: 0;
+    flex: 1;
+}
+
+.reminder-icon {
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: #eef8ff;
+    font-size: 1rem;
+}
+
+.reminder-title-content {
+    min-width: 0;
+}
+
+    .reminder-title-content h5 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 700;
+        line-height: 1.25;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    .reminder-title-content span {
+        display: block;
+        margin-top: 3px;
+        color: #6c757d;
+        font-size: 0.75rem;
+    }
+
+
+/* ================================== */
+/* STATUS */
+/* ================================== */
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 25px;
+    padding: 4px 8px;
+    border-radius: 50px;
+    font-size: 0.69rem;
+    font-weight: 700;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.status-active {
+    background: #fff3cd;
+    color: #997404;
+}
+
+.status-completed {
+    background: #d1e7dd;
+    color: #146c43;
+}
+
+
+/* ================================== */
+/* TYPE */
+/* ================================== */
+
+.reminder-type-row {
+    margin-bottom: 13px;
+}
+
+.type-badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 25px;
+    padding: 4px 9px;
+    border-radius: 50px;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.type-task {
+    background: #e7f1ff;
+    color: #0d6efd;
+}
+
+.type-expense {
+    background: #fdecec;
+    color: #b02a37;
+}
+
+.type-general {
+    background: #edf0f2;
+    color: #495057;
+}
+
+
+/* ================================== */
+/* INFO */
+/* ================================== */
+
+.reminder-info {
+    padding: 10px 0;
+    margin-bottom: 13px;
+    border-top: 1px solid #f0f0f0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.reminder-info-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 0.78rem;
+}
+
+    .reminder-info-row span {
+        color: #6c757d;
+    }
+
+    .reminder-info-row strong {
+        font-size: 0.77rem;
+    }
+
+
+/* ================================== */
+/* CARD ACTIONS */
+/* ================================== */
+
+.reminder-actions {
+    margin-top: auto;
+}
+
+.details-button {
+    width: 100%;
+    min-height: 34px;
+    margin-bottom: 8px;
+    padding: 6px 10px;
+    border: 1px solid #b6d4fe;
+    border-radius: 50px;
+    background: #eef4ff;
+    color: #0d6efd;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+    .details-button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(13, 110, 253, 0.12);
+    }
+
+.reminder-action-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+}
+
+.action-button {
+    min-height: 33px;
+    padding: 5px 7px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50px;
+    border: 1px solid transparent;
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+    .action-button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.07);
+    }
+
+.action-complete {
+    background: #e9f7ef;
+    border-color: #cfe9da;
+    color: #146c43;
+}
+
+.action-edit {
+    background: #fff4d6;
+    border-color: #f3df9f;
+    color: #7a5c00;
+}
+
+.action-delete {
+    background: #fdecec;
+    border-color: #f2caca;
+    color: #b02a37;
+}
+
+.full-width {
+    width: 100%;
+}
+
+
+/* ================================== */
+/* LOADING */
+/* ================================== */
+
+.loading-card {
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: #ffffff;
+    border: 1px solid #e9ecef;
+    border-radius: 16px;
+    color: #6c757d;
+    font-size: 0.85rem;
+}
+
+
+/* ================================== */
+/* EMPTY */
+/* ================================== */
+
+.empty-reminders-card {
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 25px;
+    text-align: center;
+    background: #ffffff;
+    border: 1px solid #e9ecef;
+    border-radius: 16px;
+}
+
+.empty-reminders-icon {
+    margin-bottom: 8px;
+    font-size: 2.4rem;
+}
+
+.empty-reminders-card h5 {
+    margin-bottom: 4px;
+    font-weight: 700;
+}
+
+.empty-reminders-card p {
+    margin: 0;
+    color: #6c757d;
+    font-size: 0.82rem;
+}
+
+
+/* ================================== */
+/* MODAL */
+/* ================================== */
+
+.reminder-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1050;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.reminder-modal {
+    width: min(700px, 100%);
+    max-height: calc(100vh - 40px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.2);
+}
+
+.reminder-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    padding: 16px 20px;
+    border-bottom: 1px solid #eeeeee;
+}
+
+.reminder-modal-title {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    min-width: 0;
+}
+
+.reminder-modal-icon {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: #eef8ff;
+}
+
+.reminder-modal-title h5 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.reminder-modal-title span {
+    display: block;
+    margin-top: 2px;
+    color: #6c757d;
+    font-size: 0.75rem;
+}
+
+.modal-close-button {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: #f1f3f5;
+    color: #495057;
+    font-size: 1.4rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.reminder-modal-body {
+    overflow-y: auto;
+    padding: 20px;
+}
+
+.details-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+.detail-box {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 12px;
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+}
+
+.detail-label {
+    color: #6c757d;
+    font-size: 0.73rem;
+    font-weight: 600;
+}
+
+.detail-box strong {
+    font-size: 0.82rem;
+    overflow-wrap: anywhere;
+}
+
+.reference-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    border-radius: 10px;
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    font-size: 0.8rem;
+}
+
+    .reference-box span {
+        color: #6c757d;
+    }
+
+.reminder-modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 14px 20px;
+    border-top: 1px solid #eeeeee;
+}
+
+
+/* ================================== */
+/* TABLET */
+/* ================================== */
+
+@media (max-width: 1199px) {
+
+    .reminder-form-card {
+        max-width: 760px;
+    }
+
+    .reminder-form-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .details-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+
+/* ================================== */
+/* MOBILE */
+/* ================================== */
+
+@media (max-width: 767px) {
+
+    .page-title {
+        font-size: 1.5rem;
+    }
+
+    .reminder-form-card {
+        max-width: 100%;
+        padding: 16px;
+    }
+
+    .reminder-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-actions {
+        justify-content: center;
+    }
+
+    .reminder-action-row {
+        grid-template-columns: 1fr;
+    }
+
+    .details-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .reminder-modal-backdrop {
+        padding: 10px;
+    }
+
+    .reminder-modal {
+        max-height: calc(100vh - 20px);
+    }
+
+    .reminder-modal-header,
+    .reminder-modal-body,
+    .reminder-modal-footer {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+}

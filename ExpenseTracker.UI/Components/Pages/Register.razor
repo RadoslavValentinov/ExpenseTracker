@@ -7,20 +7,45 @@
 @inject NavigationManager Navigation
 
 
-<div class="row justify-content-center">
+<div class="auth-page">
 
-    <div class="col-md-6 col-lg-4">
+    <div class="auth-card">
 
-        <div class="card shadow-sm p-4">
+        <div class="auth-brand">
+            <div class="auth-logo">
+                ET
+            </div>
 
-            <h3 class="text-center mb-4">
-                Register
-            </h3>
+            <div>
+                <div class="auth-brand-name">
+                    ExpenseTracker
+                </div>
+
+                <div class="auth-brand-subtitle">
+                    Personal Finance Dashboard
+                </div>
+            </div>
+        </div>
 
 
-            <div class="mb-3">
+        <div class="auth-header">
 
-                <label class="form-label">
+            <h2>
+                Create your account
+            </h2>
+
+            <p>
+                Start managing your finances in one place.
+            </p>
+
+        </div>
+
+
+        <div class="auth-form">
+
+            <div class="auth-field">
+
+                <label>
                     Email
                 </label>
 
@@ -32,9 +57,9 @@
             </div>
 
 
-            <div class="mb-3">
+            <div class="auth-field">
 
-                <label class="form-label">
+                <label>
                     Password
                 </label>
 
@@ -46,9 +71,9 @@
             </div>
 
 
-            <div class="mb-3">
+            <div class="auth-field">
 
-                <label class="form-label">
+                <label>
                     Confirm Password
                 </label>
 
@@ -62,50 +87,59 @@
 
             @if (!string.IsNullOrWhiteSpace(errorMessage))
             {
-                <div class="alert alert-danger">
-                    @errorMessage
+                <div class="auth-alert auth-alert-danger">
+                    <span class="auth-alert-icon">⚠️</span>
+
+                    <span>
+                        @errorMessage
+                    </span>
                 </div>
             }
 
 
             @if (!string.IsNullOrWhiteSpace(successMessage))
             {
-                <div class="alert alert-success">
-                    @successMessage
+                <div class="auth-alert auth-alert-success">
+                    <span class="auth-alert-icon">✅</span>
+
+                    <span>
+                        @successMessage
+                    </span>
                 </div>
             }
 
 
-            <button class="btn btn-primary w-100"
+            <button class="btn btn-primary auth-submit"
                     @onclick="HandleRegister"
                     disabled="@isSubmitting">
 
-                @(isSubmitting ? "Registering..." : "Register")
+                @(isSubmitting
+                                ? "Creating account..."
+                                : "Create Account")
 
             </button>
 
+        </div>
 
-            <div class="text-center mt-3">
 
-                <span>
-                    Already have an account?
-                </span>
+        <div class="auth-footer">
 
-                <a href="/login"
-                   data-enhance-nav="false">
+            <span>
+                Already have an account?
+            </span>
 
-                    Login
+            <a href="/login"
+               data-enhance-nav="false">
 
-                </a>
+                Login
 
-            </div>
+            </a>
 
         </div>
 
     </div>
 
 </div>
-
 
 @code {
 

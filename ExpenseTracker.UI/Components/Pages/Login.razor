@@ -8,53 +8,104 @@
 @inject JwtAuthenticationStateProvider AuthenticationStateProvider
 
 
-<div class="row justify-content-center">
+<div class="auth-page">
 
-    <div class="col-md-6 col-lg-4">
+    <div class="auth-card">
 
-        <div class="card shadow-sm p-4">
+        <div class="auth-brand">
+            <div class="auth-logo">
+                ET
+            </div>
 
-            <h3 class="text-center mb-4">
-                Login
-            </h3>
+            <div>
+                <div class="auth-brand-name">
+                    ExpenseTracker
+                </div>
 
-            <div class="mb-3">
+                <div class="auth-brand-subtitle">
+                    Personal Finance Dashboard
+                </div>
+            </div>
+        </div>
 
-                <label class="form-label">
+
+        <div class="auth-header">
+
+            <h2>
+                Welcome back
+            </h2>
+
+            <p>
+                Sign in to manage your finances and tasks.
+            </p>
+
+        </div>
+
+
+        <div class="auth-form">
+
+            <div class="auth-field">
+
+                <label>
                     Email
                 </label>
 
                 <input class="form-control"
                        type="email"
-                       @bind="email" />
+                       @bind="email"
+                       placeholder="Enter your email" />
 
             </div>
 
-            <div class="mb-3">
 
-                <label class="form-label">
+            <div class="auth-field">
+
+                <label>
                     Password
                 </label>
 
                 <input class="form-control"
                        type="password"
-                       @bind="password" />
+                       @bind="password"
+                       placeholder="Enter your password" />
 
             </div>
 
+
             @if (!string.IsNullOrWhiteSpace(errorMessage))
             {
-                <div class="alert alert-danger">
-                    @errorMessage
+                <div class="auth-alert auth-alert-danger">
+                    <span class="auth-alert-icon">⚠️</span>
+
+                    <span>
+                        @errorMessage
+                    </span>
                 </div>
             }
 
-            <button class="btn btn-primary w-100"
+
+            <button class="btn btn-primary auth-submit"
                     @onclick="HandleLogin">
 
                 Login
 
             </button>
+
+        </div>
+
+
+        <div class="auth-footer">
+
+            <span>
+                Don't have an account?
+            </span>
+
+            <a href="/register"
+               data-enhance-nav="false">
+
+                Create an account
+
+            </a>
 
         </div>
 

@@ -30,37 +30,7 @@
     </div>
 
 
-    <!-- ============================== -->
-    <!-- ERROR -->
-    <!-- ============================== -->
-    @if (!string.IsNullOrWhiteSpace(errorMessage))
-    {
-        <div class="alert alert-danger alert-dismissible fade show compact-alert"
-             role="alert">
-
-            <div>
-
-                <strong>
-                    ❌ Something went wrong.
-                </strong>
-
-                <div class="mt-1">
-                    @errorMessage
-                </div>
-
-            </div>
-
-            <button type="button"
-                    class="btn-close"
-                    aria-label="Close"
-                    @onclick="ClearError">
-            </button>
-
-        </div>
-    }
-
-
-    @if (reminders == null)
+    @if (isLoading)
     {
         <!-- ============================== -->
         <!-- LOADING -->
@@ -78,38 +48,100 @@
 
         </div>
     }
+    else if (!string.IsNullOrWhiteSpace(loadError))
+    {
+        <!-- ============================== -->
+        <!-- LOAD ERROR -->
+        <!-- ============================== -->
+
+        <div class="reminder-error-card">
+
+            <div class="reminder-error-icon">
+                ⚠️
+            </div>
+
+            <h5>
+                Unable to load reminders
+            </h5>
+
+            <p>
+                @loadError
+            </p>
+
+            <button type="button"
+                    class="btn btn-primary compact-button"
+                    @onclick="LoadRemindersAsync">
+
+                Try Again
+
+            </button>
+
+        </div>
+    }
     else
     {
         <!-- ============================== -->
-        <!-- ADD / EDIT REMINDER -->
+        <!-- OPERATION ERROR -->
         <!-- ============================== -->
+        @if (!string.IsNullOrWhiteSpace(errorMessage))
+        {
+            <div class="alert alert-danger alert-dismissible fade show compact-alert"
+                 role="alert">
 
-        <EditForm Model="newReminder"
-                  OnValidSubmit="@(editingReminderId == null ? AddReminder : SaveReminder)">
+                <div>
 
-            <div class="reminder-form-card">
+                    <strong>
+                        ❌ Something went wrong.
+                    </strong>
 
-                <div class="form-header">
+                    <div class="mt-1">
+                        @errorMessage
+                    </div>
 
-                    <h4>
-                        @(editingReminderId == null
-                                            ? "Add Reminder"
-                                            : "Edit Reminder")
-                                                          </h4>
+                </div>
 
-                    <p>
-                        @(editingReminderId == null
-                                            ? "Create a new reminder."
-                                            : "Update the selected reminder.")
+                <button type="button"
+                        class="btn-close"
+                        aria-label="Close"
+                        @onclick="ClearError">
+                </button>
+
+            </div>
+        }
+
+
+    <!-- ============================== -->
+    <!-- ADD / EDIT REMINDER -->
+    <!-- ============================== -->
+
+    <EditForm Model="newReminder"
+              OnValidSubmit="@(editingReminderId == null ? AddReminder : SaveReminder)">
+
+        <div class="reminder-form-card">
+
+            <div class="form-header">
+
+                <h4>
+                    @(editingReminderId == null
+                                        ? "Add Reminder"
+                                        : "Edit Reminder")
+                                                      </h4>
+
+                <p>
+                    @(editingReminderId == null
+                                        ? "Create a new reminder."
+                                        : "Update the selected reminder.")
                 </p>
 
                 </div>
 
 
                 <!-- FORM -->
+
                 <div class="reminder-form-grid">
 
                     <!-- TITLE -->
+
                     <div class="form-field">
 
                         <label>
@@ -132,6 +164,7 @@
 
 
                     <!-- DATE -->
+
                     <div class="form-field">
 
                         <label>
@@ -145,6 +178,7 @@
 
 
                     <!-- TYPE -->
+
                     <div class="form-field">
 
                         <label>
@@ -194,6 +228,7 @@
 
 
                 <!-- BUTTONS -->
+
                 <div class="form-actions">
 
                     @if (editingReminderId == null)
@@ -254,7 +289,7 @@
         <!-- ============================== -->
         <!-- REMINDER LIST -->
         <!-- ============================== -->
-        @if (!FilteredReminders.Any())
+        @if (FilteredReminders?.Any() != true)
         {
             <div class="empty-reminders-card">
 
@@ -448,6 +483,7 @@
                      @onclick:stopPropagation="true">
 
                     <!-- HEADER -->
+
                     <div class="reminder-modal-header">
 
                         <div class="reminder-modal-title">
@@ -484,11 +520,13 @@
 
 
                     <!-- BODY -->
+
                     <div class="reminder-modal-body">
 
                         <div class="details-grid">
 
                             <!-- TYPE -->
+
                             <div class="detail-box">
 
                                 <span class="detail-label">
@@ -518,6 +556,7 @@
 
 
                             <!-- DATE -->
+
                             <div class="detail-box">
 
                                 <span class="detail-label">
@@ -532,6 +571,7 @@
 
 
                             <!-- STATUS -->
+
                             <div class="detail-box">
 
                                 <span class="detail-label">
@@ -575,6 +615,7 @@
 
 
                     <!-- FOOTER -->
+
                     <div class="reminder-modal-footer">
 
                         <button type="button"
@@ -639,6 +680,10 @@
 
     private string? errorMessage;
 
+    private string? loadError;
+
+    private bool isLoading = true;
+
 
     private bool showValidation;
 
@@ -655,12 +700,27 @@
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadRemindersAsync();
+    }
+
+
+    private async Task LoadRemindersAsync()
+    {
+        isLoading = true;
+        loadError = null;
+
         try
         {
             ClearError();
 
             reminders =
                 await ReminderService.GetAllAsync();
+
+            if (reminders == null)
+            {
+                reminders =
+                    new List<Reminder>();
+            }
 
 
             if (Id != null)
@@ -676,10 +736,17 @@
         }
         catch (Exception ex)
         {
-            SetError(ex);
+            Console.WriteLine(
+                $"Reminders loading error: {ex.Message}");
 
-            reminders =
-                new List<Reminder>();
+            reminders = null;
+
+            loadError =
+                "Please try again in a moment.";
+        }
+        finally
+        {
+            isLoading = false;
         }
     }
 
@@ -709,11 +776,13 @@
         {
             ClearError();
 
-            await ReminderService.CreateAsync(newReminder);
+            await ReminderService.CreateAsync(
+                newReminder);
 
 
             reminders =
-                await ReminderService.GetAllAsync();
+                await ReminderService.GetAllAsync()
+                ?? new List<Reminder>();
 
 
             showValidation = false;
@@ -804,7 +873,8 @@
 
 
             reminders =
-                await ReminderService.GetAllAsync();
+                await ReminderService.GetAllAsync()
+                ?? new List<Reminder>();
 
 
             CancelEdit();
@@ -850,11 +920,13 @@
         {
             ClearError();
 
-            await ReminderService.TriggerAsync(id);
+            await ReminderService.TriggerAsync(
+                id);
 
 
             reminders =
-                await ReminderService.GetAllAsync();
+                await ReminderService.GetAllAsync()
+                ?? new List<Reminder>();
 
 
             if (selectedReminder != null &&
@@ -880,11 +952,13 @@
         {
             ClearError();
 
-            await ReminderService.DeleteAsync(id);
+            await ReminderService.DeleteAsync(
+                id);
 
 
             reminders =
-                await ReminderService.GetAllAsync();
+                await ReminderService.GetAllAsync()
+                ?? new List<Reminder>();
 
 
             if (selectedReminder != null &&
@@ -926,7 +1000,8 @@
     }
 
 
-    private void EditReminderFromDetails(Reminder reminder)
+    private void EditReminderFromDetails(
+        Reminder reminder)
     {
         CloseReminderDetails();
 
@@ -934,7 +1009,8 @@
     }
 
 
-    private async Task CompleteReminderFromDetails(int id)
+    private async Task CompleteReminderFromDetails(
+        int id)
     {
         await TriggerReminder(id);
     }

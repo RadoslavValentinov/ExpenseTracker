@@ -11,155 +11,82 @@
 <div class="charts-page">
 
     <!-- HEADER -->
+
     <div class="charts-page-header">
 
         <div>
-            <h2 class="page-title">📊 Анализ на разходите</h2>
+
+            <h2 class="page-title">
+                📊 Анализ на разходите
+            </h2>
 
             <p class="page-subtitle">
                 Подробен преглед на твоите разходи за @monthName
             </p>
-        </div>
-
-    </div>
-
-
-    <!-- STATISTICS -->
-    <div class="stats-grid">
-
-        <div class="stat-card total-card">
-
-            <div class="stat-icon">
-                💰
-            </div>
-
-            <div class="stat-content">
-
-                <span class="stat-label">
-                    Общо разходи
-                </span>
-
-                <strong class="stat-value">
-                    @totalExpenses.ToString("N2", culture) лв.
-                </strong>
-
-            </div>
-
-        </div>
-
-
-        <div class="stat-card paid-card">
-
-            <div class="stat-icon">
-                ✅
-            </div>
-
-            <div class="stat-content">
-
-                <span class="stat-label">
-                    Платени
-                </span>
-
-                <strong class="stat-value">
-                    @paidExpenses.ToString("N2", culture) лв.
-                </strong>
-
-            </div>
-
-        </div>
-
-
-        <div class="stat-card unpaid-card">
-
-            <div class="stat-icon">
-                ⏳
-            </div>
-
-            <div class="stat-content">
-
-                <span class="stat-label">
-                    Неплатени
-                </span>
-
-                <strong class="stat-value">
-                    @unpaidExpenses.ToString("N2", culture) лв.
-                </strong>
-
-            </div>
 
         </div>
 
     </div>
 
 
-    <!-- EXPENSE CHART -->
-    <div class="chart-card">
-
-        <div class="chart-card-header">
-
-            <div>
-
-                <h4>
-                    Последни разходи
-                </h4>
-
-                <p>
-                    Последните разходи за текущия месец
-                </p>
-
-            </div>
-
-            <div class="chart-card-icon">
-                📈
-            </div>
-
-        </div>
-
-
-        <div class="chart-container">
-
-            <canvas id="expensesChart"></canvas>
-
-        </div>
-
-    </div>
-
-
-    <!-- CATEGORY CHART -->
-    <div class="chart-card">
-
-        <div class="chart-card-header">
-
-            <div>
-
-                <h4>
-                    Разходи по категории
-                </h4>
-
-                <p>
-                    Разпределение на разходите по категории
-                </p>
-
-            </div>
-
-            <div class="chart-card-icon">
-                🥧
-            </div>
-
-        </div>
-
-
-        <div class="category-chart-container">
-
-            <canvas id="categoryChart"></canvas>
-
-        </div>
-
-    </div>
-
-
-    @if (expenses.Count == 0)
+    @if (isLoading)
     {
+        <!-- ============================== -->
+        <!-- LOADING -->
+        <!-- ============================== -->
+
+        <div class="chart-card">
+
+            <div class="d-flex flex-column align-items-center justify-content-center py-5">
+
+                <div class="spinner-border text-primary"
+                     role="status">
+                </div>
+
+                <p class="text-muted mt-3 mb-0">
+                    Зареждане на статистиката...
+                </p>
+
+            </div>
+
+        </div>
+    }
+    else if (!string.IsNullOrWhiteSpace(loadError))
+    {
+        <!-- ============================== -->
+        <!-- LOAD ERROR -->
+        <!-- ============================== -->
+
+        <div class="empty-chart-card">
+
+            <div class="empty-icon">
+                ⚠️
+            </div>
+
+            <h4>
+                Неуспешно зареждане
+            </h4>
+
+            <p>
+                @loadError
+            </p>
+
+            <button type="button"
+                    class="btn btn-primary"
+                    @onclick="LoadChartsAsync">
+
+                Опитай отново
+
+            </button>
+
+        </div>
+    }
+    else if (!CurrentMonthExpenses.Any())
+    {
+        <!-- ============================== -->
+        <!-- EMPTY -->
+        <!-- ============================== -->
+
         <div class="empty-chart-card">
 
             <div class="empty-icon">
@@ -171,8 +98,152 @@
             </h4>
 
             <p>
-                Когато добавиш разходи, тук ще се появи статистика.
+                Когато добавиш разходи за текущия месец, тук ще се появи статистика.
             </p>
+
+        </div>
+    }
+    else
+    {
+        <!-- ============================== -->
+        <!-- STATISTICS -->
+        <!-- ============================== -->
+
+        <div class="stats-grid">
+
+            <div class="stat-card total-card">
+
+                <div class="stat-icon">
+                    💰
+                </div>
+
+                <div class="stat-content">
+
+                    <span class="stat-label">
+                        Общо разходи
+                    </span>
+
+                    <strong class="stat-value">
+                        @totalExpenses.ToString("N2", culture) лв.
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="stat-card paid-card">
+
+                <div class="stat-icon">
+                    ✅
+                </div>
+
+                <div class="stat-content">
+
+                    <span class="stat-label">
+                        Платени
+                    </span>
+
+                    <strong class="stat-value">
+                        @paidExpenses.ToString("N2", culture) лв.
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="stat-card unpaid-card">
+
+                <div class="stat-icon">
+                    ⏳
+                </div>
+
+                <div class="stat-content">
+
+                    <span class="stat-label">
+                        Неплатени
+                    </span>
+
+                    <strong class="stat-value">
+                        @unpaidExpenses.ToString("N2", culture) лв.
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ============================== -->
+        <!-- EXPENSE CHART -->
+        <!-- ============================== -->
+
+        <div class="chart-card">
+
+            <div class="chart-card-header">
+
+                <div>
+
+                    <h4>
+                        Последни разходи
+                    </h4>
+
+                    <p>
+                        Последните разходи за текущия месец
+                    </p>
+
+                </div>
+
+                <div class="chart-card-icon">
+                    📈
+                </div>
+
+            </div>
+
+
+            <div class="chart-container">
+
+                <canvas id="expensesChart"></canvas>
+
+            </div>
+
+        </div>
+
+
+        <!-- ============================== -->
+        <!-- CATEGORY CHART -->
+        <!-- ============================== -->
+
+        <div class="chart-card">
+
+            <div class="chart-card-header">
+
+                <div>
+
+                    <h4>
+                        Разходи по категории
+                    </h4>
+
+                    <p>
+                        Разпределение на разходите по категории
+                    </p>
+
+                </div>
+
+                <div class="chart-card-icon">
+                    🥧
+                </div>
+
+            </div>
+
+
+            <div class="category-chart-container">
+
+                <canvas id="categoryChart"></canvas>
+
+            </div>
 
         </div>
     }
@@ -190,11 +261,21 @@
     private string monthName = string.Empty;
 
     private decimal totalExpenses;
+
     private decimal paidExpenses;
+
     private decimal unpaidExpenses;
+
+    private bool isLoading = true;
+
+    private string? loadError;
 
     private bool chartsRendered;
 
+
+    // =========================
+    // INITIALIZATION
+    // =========================
 
     protected override async Task OnInitializedAsync()
     {
@@ -202,27 +283,68 @@
             culture.TextInfo.ToTitleCase(
                 DateTime.Now.ToString("MMMM", culture));
 
-        var result =
-            await ExpenseService.GetExpensesAsync();
-
-        if (result != null)
-        {
-            expenses = result;
-        }
-
-        CalculateStatistics();
+        await LoadChartsAsync();
     }
 
 
+    // =========================
+    // LOAD DATA
+    // =========================
+
+    private async Task LoadChartsAsync()
+    {
+        isLoading = true;
+
+        loadError = null;
+
+        chartsRendered = false;
+
+        try
+        {
+            var result =
+                await ExpenseService.GetExpensesAsync();
+
+            expenses =
+                result ?? new List<Expense>();
+
+            CalculateStatistics();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(
+                $"Charts loading error: {ex.Message}");
+
+            expenses =
+                new List<Expense>();
+
+            loadError =
+                "Моля, опитай отново след малко.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+
+    // =========================
+    // CURRENT MONTH
+    // =========================
+
+    private IEnumerable<Expense> CurrentMonthExpenses =>
+        expenses.Where(x =>
+            x.CreatedDate.Year == DateTime.Now.Year &&
+            x.CreatedDate.Month == DateTime.Now.Month);
+
+
+    // =========================
+    // STATISTICS
+    // =========================
+
     private void CalculateStatistics()
     {
-        var now = DateTime.Now;
-
-        var currentMonthExpenses = expenses
-            .Where(x =>
-                x.CreatedDate.Year == now.Year &&
-                x.CreatedDate.Month == now.Month)
-            .ToList();
+        var currentMonthExpenses =
+            CurrentMonthExpenses.ToList();
 
 
         totalExpenses =
@@ -242,58 +364,75 @@
     }
 
 
+    // =========================
+    // RENDER CHARTS
+    // =========================
+
     protected override async Task OnAfterRenderAsync(
-     bool firstRender)
+        bool firstRender)
     {
-        if (!firstRender)
+        if (isLoading)
             return;
 
-        await Task.Delay(500);
+        if (!string.IsNullOrWhiteSpace(loadError))
+            return;
 
-        var now = DateTime.Now;
+        if (chartsRendered)
+            return;
 
-        var currentMonthExpenses = expenses
-            .Where(x =>
-                x.CreatedDate.Year == now.Year &&
-                x.CreatedDate.Month == now.Month)
-            .OrderByDescending(x => x.Id)
-            .ToList();
-
-
-        var latestExpenses = currentMonthExpenses
-            .Take(7)
-            .Reverse()
-            .ToList();
+        var currentMonthExpenses =
+            CurrentMonthExpenses
+                .OrderByDescending(x => x.Id)
+                .ToList();
 
 
-        var labels = latestExpenses
-            .Select(x => x.Title)
-            .ToArray();
+        if (currentMonthExpenses.Count == 0)
+        {
+            chartsRendered = true;
+            return;
+        }
 
 
-        var values = latestExpenses
-            .Select(x => (double)x.Amount)
-            .ToArray();
+        var latestExpenses =
+            currentMonthExpenses
+                .Take(7)
+                .Reverse()
+                .ToList();
 
 
-        var categoryGroups = currentMonthExpenses
-            .GroupBy(x =>
-                string.IsNullOrWhiteSpace(x.Category)
-                    ? "Без категория"
-                    : x.Category)
-            .OrderByDescending(
-                g => g.Sum(x => x.Amount))
-            .ToList();
+        var labels =
+            latestExpenses
+                .Select(x => x.Title)
+                .ToArray();
 
 
-        var categoryLabels = categoryGroups
-            .Select(g => g.Key)
-            .ToArray();
+        var values =
+            latestExpenses
+                .Select(x => (double)x.Amount)
+                .ToArray();
 
 
-        var categoryValues = categoryGroups
-            .Select(g => (double)g.Sum(x => x.Amount))
-            .ToArray();
+        var categoryGroups =
+            currentMonthExpenses
+                .GroupBy(x =>
+                    string.IsNullOrWhiteSpace(x.Category)
+                        ? "Без категория"
+                        : x.Category)
+                .OrderByDescending(
+                    g => g.Sum(x => x.Amount))
+                .ToList();
+
+
+        var categoryLabels =
+            categoryGroups
+                .Select(g => g.Key)
+                .ToArray();
+
+
+        var categoryValues =
+            categoryGroups
+                .Select(g => (double)g.Sum(x => x.Amount))
+                .ToArray();
 
 
         try
@@ -308,11 +447,16 @@
                 "renderCategoryChart",
                 categoryLabels,
                 categoryValues);
+
+            chartsRendered = true;
         }
         catch (Exception ex)
         {
             Console.WriteLine(
                 $"Charts JavaScript error: {ex.Message}");
+
+            chartsRendered = true;
         }
     }
+
 }

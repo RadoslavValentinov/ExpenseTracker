@@ -29,37 +29,7 @@
     </div>
 
 
-    <!-- ============================== -->
-    <!-- ERROR -->
-    <!-- ============================== -->
-    @if (!string.IsNullOrWhiteSpace(errorMessage))
-    {
-        <div class="alert alert-danger alert-dismissible fade show compact-alert"
-             role="alert">
-
-            <div>
-
-                <strong>
-                    ❌ Something went wrong.
-                </strong>
-
-                <div class="mt-1">
-                    @errorMessage
-                </div>
-
-            </div>
-
-            <button type="button"
-                    class="btn-close"
-                    aria-label="Close"
-                    @onclick="ClearError">
-            </button>
-
-        </div>
-    }
-
-
-    @if (recurringExpenses == null)
+    @if (isLoading)
     {
         <!-- ============================== -->
         <!-- LOADING -->
@@ -77,35 +47,99 @@
 
         </div>
     }
+    else if (recurringExpenses == null)
+    {
+        <!-- ============================== -->
+        <!-- LOAD ERROR -->
+        <!-- ============================== -->
+
+        <div class="recurring-error-card">
+
+            <div class="recurring-error-icon">
+                ⚠️
+            </div>
+
+            <h5>
+                Unable to load recurring expenses
+            </h5>
+
+            <p>
+                @(string.IsNullOrWhiteSpace(loadError)
+                            ? "Please try again in a moment."
+                            : loadError)
+        </p>
+
+            <button type="button"
+                    class="btn btn-primary compact-button"
+                    @onclick="LoadRecurringExpensesAsync">
+
+                Try Again
+
+            </button>
+
+        </div>
+        }
     else
     {
         <!-- ============================== -->
-        <!-- ADD / EDIT -->
+        <!-- OPERATION ERROR -->
         <!-- ============================== -->
+        @if (!string.IsNullOrWhiteSpace(errorMessage))
+        {
+            <div class="alert alert-danger alert-dismissible fade show compact-alert"
+                 role="alert">
 
-        <div class="recurring-form-card">
+                <div>
 
-            <div class="form-header">
+                    <strong>
+                        ❌ Something went wrong.
+                    </strong>
 
-                <h4>
-                    @(editingExpenseId == null
-                                    ? "Add Recurring Expense"
-                                    : "Edit Recurring Expense")
-                                                           </h4>
+                    <div class="mt-1">
+                        @errorMessage
+                    </div>
 
-                <p>
-                    @(editingExpenseId == null
-                                    ? "Set up a payment that repeats every month."
-                                    : "Update the selected recurring expense.")
+                </div>
+
+                <button type="button"
+                        class="btn-close"
+                        aria-label="Close"
+                        @onclick="ClearError">
+                </button>
+
+            </div>
+        }
+
+
+    <!-- ============================== -->
+    <!-- ADD / EDIT -->
+    <!-- ============================== -->
+
+    <div class="recurring-form-card">
+
+        <div class="form-header">
+
+            <h4>
+                @(editingExpenseId == null
+                                ? "Add Recurring Expense"
+                                : "Edit Recurring Expense")
+                                                       </h4>
+
+            <p>
+                @(editingExpenseId == null
+                                ? "Set up a payment that repeats every month."
+                                : "Update the selected recurring expense.")
             </p>
 
             </div>
 
 
             <!-- FORM -->
+
             <div class="recurring-form-grid">
 
                 <!-- TITLE -->
+
                 <div class="form-field">
 
                     <label>
@@ -128,6 +162,7 @@
 
 
                 <!-- AMOUNT -->
+
                 <div class="form-field">
 
                     <label>
@@ -153,6 +188,7 @@
 
 
                 <!-- DAY -->
+
                 <div class="form-field">
 
                     <label>
@@ -179,6 +215,7 @@
 
 
                 <!-- ACTIVE -->
+
                 <div class="form-field active-field">
 
                     <label>
@@ -210,7 +247,8 @@
             </div>
 
 
-            @if (showValidation && !IsRecurringExpenseValid)
+            @if (showValidation &&
+                    !IsRecurringExpenseValid)
             {
                 <div class="validation-summary">
                     Please correct the highlighted fields before saving.
@@ -219,6 +257,7 @@
 
 
             <!-- BUTTONS -->
+
             <div class="form-actions">
 
                 @if (editingExpenseId == null)
@@ -258,7 +297,7 @@
         <!-- ============================== -->
         <!-- LIST -->
         <!-- ============================== -->
-        @if (!recurringExpenses.Any())
+        @if (recurringExpenses?.Any() != true)
         {
             <div class="empty-recurring-card">
 
@@ -287,6 +326,7 @@
                         <div class="recurring-card">
 
                             <!-- HEADER -->
+
                             <div class="recurring-card-header">
 
                                 <div class="recurring-title-area">
@@ -327,6 +367,7 @@
 
 
                             <!-- AMOUNT -->
+
                             <div class="recurring-amount">
 
                                 @expense.Amount.ToString("C")
@@ -335,6 +376,7 @@
 
 
                             <!-- DETAILS -->
+
                             <div class="recurring-info">
 
                                 <div class="recurring-info-row">
@@ -377,6 +419,7 @@
 
 
                             <!-- ACTIONS -->
+
                             <div class="recurring-actions">
 
                                 @if (expense.IsActive)
@@ -439,6 +482,10 @@
 
     private string? errorMessage;
 
+    private bool isLoading = true;
+
+    private string? loadError;
+
 
     private RecurringExpense newExpense = new()
     {
@@ -452,19 +499,36 @@
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadRecurringExpensesAsync();
+    }
+
+
+    private async Task LoadRecurringExpensesAsync()
+    {
+        isLoading = true;
+        loadError = null;
+
         try
         {
             ClearError();
 
             recurringExpenses =
-                await RecurringExpenseService.GetAllAsync();
+                await RecurringExpenseService.GetAllAsync()
+                ?? new List<RecurringExpense>();
         }
         catch (Exception ex)
         {
-            SetError(ex);
+            Console.WriteLine(
+                $"Recurring expenses loading error: {ex.Message}");
 
-            recurringExpenses =
-                new List<RecurringExpense>();
+            recurringExpenses = null;
+
+            loadError =
+                "Please try again in a moment.";
+        }
+        finally
+        {
+            isLoading = false;
         }
     }
 
@@ -501,7 +565,8 @@
 
 
             recurringExpenses =
-                await RecurringExpenseService.GetAllAsync();
+                await RecurringExpenseService.GetAllAsync()
+                ?? new List<RecurringExpense>();
 
 
             showValidation = false;
@@ -578,7 +643,8 @@
 
 
             recurringExpenses =
-                await RecurringExpenseService.GetAllAsync();
+                await RecurringExpenseService.GetAllAsync()
+                ?? new List<RecurringExpense>();
 
 
             CancelEdit();
@@ -631,7 +697,8 @@
 
 
             recurringExpenses =
-                await RecurringExpenseService.GetAllAsync();
+                await RecurringExpenseService.GetAllAsync()
+                ?? new List<RecurringExpense>();
         }
         catch (Exception ex)
         {
@@ -655,7 +722,8 @@
 
 
             recurringExpenses =
-                await RecurringExpenseService.GetAllAsync();
+                await RecurringExpenseService.GetAllAsync()
+                ?? new List<RecurringExpense>();
         }
         catch (Exception ex)
         {
@@ -679,7 +747,8 @@
 
 
             recurringExpenses =
-                await RecurringExpenseService.GetAllAsync();
+                await RecurringExpenseService.GetAllAsync()
+                ?? new List<RecurringExpense>();
 
 
             if (editingExpenseId == id)

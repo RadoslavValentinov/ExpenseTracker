@@ -12,7 +12,6 @@
 @inject NavigationManager NavigationManager
 @inject AuthStateService AuthState
 
-
 <div class="dashboard-page">
 
     <!-- ============================= -->
@@ -37,8 +36,7 @@
 
     </div>
 
-
-    @if (expenses == null || tasks == null || reminders == null)
+    @if (isLoading)
     {
         <!-- ============================= -->
         <!-- LOADING -->
@@ -53,6 +51,30 @@
             <p class="text-muted mt-3 mb-0">
                 Loading dashboard...
             </p>
+
+        </div>
+    }
+    else if (!string.IsNullOrEmpty(loadError))
+    {
+        <!-- ============================= -->
+        <!-- ERROR -->
+        <!-- ============================= -->
+
+        <div class="alert alert-danger d-flex flex-column align-items-center text-center p-4 mb-4" role="alert">
+
+            <div class="fs-2 mb-2">⚠️</div>
+
+            <strong class="mb-1">Unable to load dashboard</strong>
+
+            <p class="mb-3">
+                @loadError
+            </p>
+
+            <button type="button"
+                    class="btn btn-primary"
+                    @onclick="LoadDashboardAsync">
+                Try Again
+            </button>
 
         </div>
     }
@@ -89,7 +111,6 @@
 
             </div>
 
-
             <!-- UNPAID -->
             <div class="col-xl-3 col-md-6">
 
@@ -114,7 +135,6 @@
                 </div>
 
             </div>
-
 
             <!-- PAID -->
             <div class="col-xl-3 col-md-6">
@@ -141,7 +161,6 @@
 
             </div>
 
-
             <!-- PENDING TASKS -->
             <div class="col-xl-3 col-md-6">
 
@@ -166,7 +185,6 @@
                 </div>
 
             </div>
-
 
             <!-- ACTIVE REMINDERS -->
             <div class="col-xl-3 col-md-6">
@@ -193,7 +211,6 @@
 
             </div>
 
-
             <!-- COMPLETED TASKS -->
             <div class="col-xl-3 col-md-6">
 
@@ -219,7 +236,6 @@
 
             </div>
 
-
             <!-- TODAY -->
             <div class="col-xl-3 col-md-6">
 
@@ -244,7 +260,6 @@
                 </div>
 
             </div>
-
 
             <!-- OVERDUE -->
             <div class="col-xl-3 col-md-6">
@@ -272,7 +287,6 @@
             </div>
 
         </div>
-
 
         <!-- ============================= -->
         <!-- TODAY / UPCOMING -->
@@ -302,7 +316,6 @@
                         </span>
 
                     </div>
-
 
                     @if (TodayItemsCount == 0)
                     {
@@ -364,7 +377,6 @@
                             </div>
                         }
 
-
                         @foreach (var expense in TodayExpenses)
                         {
                             <div class="dashboard-item">
@@ -395,7 +407,6 @@
 
                             </div>
                         }
-
 
                         @foreach (var reminder in TodayRemindersList)
                         {
@@ -433,7 +444,6 @@
 
             </div>
 
-
             <!-- UPCOMING -->
             <div class="col-xl-6">
 
@@ -456,7 +466,6 @@
                         </span>
 
                     </div>
-
 
                     @if (UpcomingItemsCount == 0)
                     {
@@ -509,7 +518,6 @@
                             </div>
                         }
 
-
                         @foreach (var task in UpcomingTasks)
                         {
                             <div class="dashboard-item">
@@ -550,7 +558,6 @@
                             </div>
                         }
 
-
                         @foreach (var reminder in UpcomingRemindersList)
                         {
                             <div class="dashboard-item">
@@ -589,7 +596,6 @@
 
         </div>
 
-
         <!-- ============================= -->
         <!-- OVERDUE -->
         <!-- ============================= -->
@@ -613,7 +619,6 @@
                 </span>
 
             </div>
-
 
             @if (OverdueItemsCount == 0)
             {
@@ -682,7 +687,6 @@
                     </div>
                 }
 
-
                 @foreach (var expense in OverdueExpenses)
                 {
                     <div class="dashboard-item overdue-row">
@@ -713,7 +717,6 @@
 
                     </div>
                 }
-
 
                 @foreach (var reminder in OverdueReminders)
                 {
@@ -749,7 +752,6 @@
 
         </div>
 
-
         <!-- ============================= -->
         <!-- QUICK ACTIONS -->
         <!-- ============================= -->
@@ -770,7 +772,6 @@
 
             </div>
 
-
             <div class="quick-actions">
 
                 <a class="quick-action primary"
@@ -786,7 +787,6 @@
 
                 </a>
 
-
                 <a class="quick-action success"
                    href="/tasks">
 
@@ -800,7 +800,6 @@
 
                 </a>
 
-
                 <a class="quick-action info"
                    href="/reminders">
 
@@ -813,7 +812,6 @@
                     </span>
 
                 </a>
-
 
                 <a class="quick-action secondary"
                    href="/recurring-expenses">
@@ -831,7 +829,6 @@
             </div>
 
         </div>
-
 
         <!-- ============================= -->
         <!-- RECENT TASKS / EXPENSES -->
@@ -863,8 +860,7 @@
 
                     </div>
 
-
-                    @if (!tasks.Any())
+                    @if (tasks?.Any() != true)
                     {
                         <div class="empty-state compact">
 
@@ -927,7 +923,6 @@
 
             </div>
 
-
             <!-- UPCOMING EXPENSES -->
             <div class="col-xl-6">
 
@@ -952,8 +947,7 @@
 
                     </div>
 
-
-                    @if (!expenses.Any(x => !x.IsPaid))
+                    @if (expenses?.Any(x => !x.IsPaid) != true)
                     {
                         <div class="empty-state compact">
 
@@ -1010,7 +1004,6 @@
 
         </div>
 
-
         <!-- ============================= -->
         <!-- PROGRESS -->
         <!-- ============================= -->
@@ -1034,7 +1027,6 @@
 
                     </div>
 
-
                     <div class="progress-info">
 
                         <div class="d-flex justify-content-between mb-2">
@@ -1048,7 +1040,6 @@
                             </strong>
 
                         </div>
-
 
                         <div class="progress progress-large">
 
@@ -1068,7 +1059,6 @@
 
             </div>
 
-
             <!-- EXPENSE PROGRESS -->
             <div class="col-xl-6">
 
@@ -1086,7 +1076,6 @@
 
                     </div>
 
-
                     <div class="progress-info">
 
                         <div class="d-flex justify-content-between mb-2">
@@ -1102,7 +1091,6 @@
                             </strong>
 
                         </div>
-
 
                         <div class="progress progress-large">
 
@@ -1123,7 +1111,6 @@
             </div>
 
         </div>
-
 
         <!-- ============================= -->
         <!-- OVERALL / DISTRIBUTION -->
@@ -1154,7 +1141,6 @@
 
                     </div>
 
-
                     <div class="overall-progress-list">
 
                         <!-- TASKS -->
@@ -1182,7 +1168,6 @@
 
                         </div>
 
-
                         <!-- EXPENSES -->
                         <div class="overall-progress-row">
 
@@ -1207,7 +1192,6 @@
                             </div>
 
                         </div>
-
 
                         <!-- REMINDERS -->
                         <div class="overall-progress-row">
@@ -1236,7 +1220,6 @@
 
                     </div>
 
-
                     <div class="overall-footer">
 
                         <span>
@@ -1253,7 +1236,6 @@
 
             </div>
 
-
             <!-- EXPENSE DISTRIBUTION -->
             <div class="col-xl-5">
 
@@ -1266,7 +1248,6 @@
                         </h5>
 
                     </div>
-
 
                     <div class="distribution-wrapper">
 
@@ -1308,7 +1289,6 @@
 
                     </div>
 
-
                     <div class="distribution-details">
 
                         <div>
@@ -1326,7 +1306,6 @@
                             </strong>
 
                         </div>
-
 
                         <div>
 
@@ -1352,7 +1331,6 @@
 
         </div>
 
-
         <!-- ============================= -->
         <!-- QUICK LINKS -->
         <!-- ============================= -->
@@ -1374,7 +1352,6 @@
                 </div>
 
             </div>
-
 
             <div class="quick-links-grid">
 
@@ -1399,7 +1376,6 @@
 
                 </a>
 
-
                 <a href="/tasks"
                    class="quick-link-card">
 
@@ -1420,7 +1396,6 @@
                     </div>
 
                 </a>
-
 
                 <a href="/reminders"
                    class="quick-link-card">
@@ -1443,7 +1418,6 @@
 
                 </a>
 
-
                 <a href="/completed-reminders"
                    class="quick-link-card">
 
@@ -1465,7 +1439,6 @@
 
                 </a>
 
-
                 <a href="/recurring-expenses"
                    class="quick-link-card">
 
@@ -1486,7 +1459,6 @@
                     </div>
 
                 </a>
-
 
                 <a href="/calendar"
                    class="quick-link-card">
@@ -1515,7 +1487,6 @@
     }
 </div>
 
-
 @code {
 
     private List<Expense>? expenses;
@@ -1526,37 +1497,60 @@
 
     private List<NotificationItem> notifications = new();
 
-
     // =============================
     // INITIALIZATION
     // =============================
 
+    private bool isLoading = true;
+
+    private string? loadError;
+
     protected override async Task OnInitializedAsync()
     {
         if (!AuthState.IsAuthenticated)
+        {
+            isLoading = false;
             return;
+        }
+
+        await LoadDashboardAsync();
+    }
+
+    private async Task LoadDashboardAsync()
+    {
+        isLoading = true;
+        loadError = null;
 
         try
         {
             expenses =
-                await ExpenseService.GetExpensesAsync();
+                await ExpenseService.GetExpensesAsync()
+                ?? new List<Expense>();
 
             tasks =
-                await TaskService.GetTasksAsync();
+                await TaskService.GetTasksAsync()
+                ?? new List<TaskItem>();
 
             reminders =
-                await ReminderService.GetAllAsync();
+                await ReminderService.GetAllAsync()
+                ?? new List<Reminder>();
 
             notifications =
-                await NotificationService.GetNotificationsAsync();
+                await NotificationService.GetNotificationsAsync()
+                ?? new List<NotificationItem>();
         }
         catch (Exception ex)
         {
             Console.WriteLine(
                 $"Dashboard loading error: {ex.Message}");
+
+            loadError = "Please try again in a moment.";
+        }
+        finally
+        {
+            isLoading = false;
         }
     }
-
 
     // =============================
     // EXPENSES
@@ -1565,38 +1559,31 @@
     private decimal TotalExpenses =>
         expenses?.Sum(x => x.Amount) ?? 0;
 
-
     private decimal PaidExpenses =>
         expenses?
             .Where(x => x.IsPaid)
             .Sum(x => x.Amount) ?? 0;
-
 
     private decimal UnpaidExpenses =>
         expenses?
             .Where(x => !x.IsPaid)
             .Sum(x => x.Amount) ?? 0;
 
-
     private decimal PaidAmount =>
         PaidExpenses;
 
-
     private decimal UnpaidAmount =>
         UnpaidExpenses;
-
 
     private int ExpenseProgress =>
         TotalExpenses == 0
             ? 0
             : (int)((PaidAmount / TotalExpenses) * 100);
 
-
     private double PaidPercent =>
         TotalExpenses == 0
             ? 0
             : (double)(PaidAmount / TotalExpenses * 100);
-
 
     // =============================
     // TASKS
@@ -1605,21 +1592,17 @@
     private int TotalTasks =>
         tasks?.Count ?? 0;
 
-
     private int CompletedTasks =>
         tasks?.Count(x => x.IsCompleted) ?? 0;
-
 
     private int PendingTasks =>
         tasks?
             .Count(x => !x.IsCompleted) ?? 0;
 
-
     private int CompletionPercentage =>
         TotalTasks == 0
             ? 0
             : (CompletedTasks * 100) / TotalTasks;
-
 
     // =============================
     // REMINDERS
@@ -1629,13 +1612,11 @@
         reminders?
             .Count(r => !r.IsRead) ?? 0;
 
-
     private int TodayReminders =>
         reminders?
             .Count(r =>
                 r.ReminderDate.Date == DateTime.Today &&
                 !r.IsRead) ?? 0;
-
 
     private int UpcomingReminders =>
         reminders?
@@ -1643,13 +1624,11 @@
                 r.ReminderDate.Date > DateTime.Today &&
                 !r.IsRead) ?? 0;
 
-
     private int ReminderProgress =>
         reminders == null || reminders.Count == 0
             ? 100
             : (reminders.Count(r => r.IsTriggered) * 100)
                 / reminders.Count;
-
 
     // =============================
     // OVERALL
@@ -1659,7 +1638,6 @@
         (CompletionPercentage +
          ExpenseProgress +
          ReminderProgress) / 3;
-
 
     // =============================
     // TODAY
@@ -1672,14 +1650,12 @@
                 x.DueDate.Date == DateTime.Today)
             ?? Enumerable.Empty<TaskItem>();
 
-
     private IEnumerable<Expense> TodayExpenses =>
         expenses?
             .Where(x =>
                 !x.IsPaid &&
                 x.DueDate.Date == DateTime.Today)
             ?? Enumerable.Empty<Expense>();
-
 
     private IEnumerable<Reminder> TodayRemindersList =>
         reminders?
@@ -1688,12 +1664,10 @@
                 x.ReminderDate.Date == DateTime.Today)
             ?? Enumerable.Empty<Reminder>();
 
-
     private int TodayItemsCount =>
         TodayTasks.Count() +
         TodayExpenses.Count() +
         TodayRemindersList.Count();
-
 
     // =============================
     // OVERDUE
@@ -1708,7 +1682,6 @@
             .Take(5)
             ?? Enumerable.Empty<TaskItem>();
 
-
     private IEnumerable<Expense> OverdueExpenses =>
         expenses?
             .Where(x =>
@@ -1717,7 +1690,6 @@
             .OrderBy(x => x.DueDate)
             .Take(5)
             ?? Enumerable.Empty<Expense>();
-
 
     private IEnumerable<Reminder> OverdueReminders =>
         reminders?
@@ -1728,18 +1700,15 @@
             .Take(5)
             ?? Enumerable.Empty<Reminder>();
 
-
     private int OverdueItemsCount =>
         OverdueTasks.Count() +
         OverdueExpenses.Count() +
         OverdueReminders.Count();
 
-
     private void OpenTask(int id)
     {
         NavigationManager.NavigateTo($"/tasks/{id}");
     }
-
 
     // =============================
     // UPCOMING
@@ -1754,7 +1723,6 @@
             .Take(5)
             ?? Enumerable.Empty<TaskItem>();
 
-
     private IEnumerable<Expense> UpcomingExpenses =>
         expenses?
             .Where(x =>
@@ -1764,7 +1732,6 @@
             .Take(5)
             ?? Enumerable.Empty<Expense>();
 
-
     private IEnumerable<Reminder> UpcomingRemindersList =>
         reminders?
             .Where(x =>
@@ -1773,7 +1740,6 @@
             .OrderBy(x => x.ReminderDate)
             .Take(5)
             ?? Enumerable.Empty<Reminder>();
-
 
     private int UpcomingItemsCount =>
         UpcomingTasks.Count() +

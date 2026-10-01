@@ -11,9 +11,11 @@
 <div class="notifications-page">
 
     <!-- HEADER -->
+
     <div class="notifications-page-header">
 
         <div>
+
             <h2 class="page-title">
                 🔔 Notifications
             </h2>
@@ -21,22 +23,29 @@
             <p class="page-subtitle">
                 Всичко важно за твоите разходи, задачи и напомняния
             </p>
+
         </div>
 
-        <div class="notification-summary">
-            <span class="summary-count">
-                @FilteredNotifications.Count()
-            </span>
+        @if (notifications != null)
+        {
+            <div class="notification-summary">
 
-            <span class="summary-label">
-                notifications
-            </span>
-        </div>
+                <span class="summary-count">
+                    @FilteredNotifications.Count()
+                </span>
+
+                <span class="summary-label">
+                    notifications
+                </span>
+
+            </div>
+        }
 
     </div>
 
 
     <!-- SEARCH -->
+
     <div class="notification-toolbar-card">
 
         <div class="notification-search-wrapper">
@@ -55,7 +64,9 @@
                 <button type="button"
                         class="clear-search"
                         @onclick="ClearSearch">
+
                     ✕
+
                 </button>
             }
 
@@ -65,6 +76,7 @@
 
 
     <!-- FILTERS -->
+
     <div class="notification-filters-card">
 
         <div class="notification-filters">
@@ -114,7 +126,7 @@
 
 
     <!-- CONTENT -->
-    @if (notifications == null)
+    @if (isLoading)
     {
         <div class="notifications-loading">
 
@@ -127,6 +139,72 @@
             </h4>
 
         </div>
+    }
+    else if (!string.IsNullOrWhiteSpace(loadError))
+    {
+        <div class="notifications-empty">
+
+            <div class="empty-icon">
+                ⚠️
+            </div>
+
+            <h4>
+                Unable to load notifications
+            </h4>
+
+            <p>
+                @loadError
+            </p>
+
+            <button type="button"
+                    class="empty-action-button"
+                    @onclick="LoadNotificationsAsync">
+
+                Try Again
+
+            </button>
+
+        </div>
+    }
+    else if (!string.IsNullOrWhiteSpace(operationError))
+    {
+        <div class="alert alert-danger compact-alert"
+             role="alert">
+
+            <strong>
+                ❌ Something went wrong.
+            </strong>
+
+            <div class="mt-1">
+                @operationError
+            </div>
+
+            <button type="button"
+                    class="btn-close"
+                    aria-label="Close"
+                    @onclick="ClearOperationError">
+            </button>
+
+        </div>
+
+        @if (notifications?.Any() != true)
+        {
+            <div class="notifications-empty">
+
+                <div class="empty-icon">
+                    🎉
+                </div>
+
+                <h4>
+                    No notifications
+                </h4>
+
+                <p>
+                    Няма известия, които да отговарят на текущия филтър.
+                </p>
+
+            </div>
+        }
     }
     else if (!FilteredNotifications.Any())
     {
@@ -149,7 +227,9 @@
                 <button type="button"
                         class="empty-action-button"
                         @onclick="ClearSearch">
+
                     Clear search
+
                 </button>
             }
 
@@ -164,6 +244,7 @@
                 <div class="notification-card @GetNotificationCardClass(notification)">
 
                     <!-- CARD TOP -->
+
                     <div class="notification-card-top">
 
                         <div class="notification-main">
@@ -203,6 +284,7 @@
 
 
                     <!-- CARD BOTTOM -->
+
                     <div class="notification-card-bottom">
 
                         <div class="notification-date">
@@ -287,15 +369,56 @@
 
     private string selectedFilter = "All";
 
-    private List<NotificationItem> notifications = new();
+    private List<NotificationItem>? notifications;
 
+    private bool isLoading = true;
+
+    private string? loadError;
+
+    private string? operationError;
+
+
+    // =========================
+    // INITIALIZATION
+    // =========================
 
     protected override async Task OnInitializedAsync()
     {
-        notifications =
-            await NotificationService.GetNotificationsAsync();
+        await LoadNotificationsAsync();
     }
 
+
+    private async Task LoadNotificationsAsync()
+    {
+        isLoading = true;
+        loadError = null;
+
+        try
+        {
+            notifications =
+                await NotificationService.GetNotificationsAsync()
+                ?? new List<NotificationItem>();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(
+                $"Notifications loading error: {ex.Message}");
+
+            notifications = null;
+
+            loadError =
+                "Please try again in a moment.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+
+    // =========================
+    // OPEN
+    // =========================
 
     private void Open(NotificationItem notification)
     {
@@ -303,17 +426,35 @@
     }
 
 
+    // =========================
+    // MARK AS READ
+    // =========================
+
     private async Task MarkAsRead(
         NotificationItem notification)
     {
         if (notification.Type != "Reminder")
             return;
 
-        await NotificationService.MarkAsReadAsync(notification);
+        try
+        {
+            ClearOperationError();
 
-        await ReloadNotifications();
+            await NotificationService.MarkAsReadAsync(
+                notification);
+
+            await ReloadNotifications();
+        }
+        catch (Exception ex)
+        {
+            SetOperationError(ex);
+        }
     }
 
+
+    // =========================
+    // COMPLETE TASK
+    // =========================
 
     private async Task CompleteTask(
         NotificationItem notification)
@@ -321,12 +462,25 @@
         if (notification.Type != "Task")
             return;
 
-        await TaskApiService.CompleteTaskAsync(
-            notification.Id);
+        try
+        {
+            ClearOperationError();
 
-        await ReloadNotifications();
+            await TaskApiService.CompleteTaskAsync(
+                notification.Id);
+
+            await ReloadNotifications();
+        }
+        catch (Exception ex)
+        {
+            SetOperationError(ex);
+        }
     }
 
+
+    // =========================
+    // MARK AS PAID
+    // =========================
 
     private async Task MarkAsPaid(
         NotificationItem notification)
@@ -334,25 +488,47 @@
         if (notification.Type != "Expense")
             return;
 
-        await ExpenseApiService.MarkAsPaidAsync(
-            notification.Id);
+        try
+        {
+            ClearOperationError();
 
-        await ReloadNotifications();
+            await ExpenseApiService.MarkAsPaidAsync(
+                notification.Id);
+
+            await ReloadNotifications();
+        }
+        catch (Exception ex)
+        {
+            SetOperationError(ex);
+        }
     }
 
+
+    // =========================
+    // RELOAD
+    // =========================
 
     private async Task ReloadNotifications()
     {
         notifications =
-            await NotificationService.GetNotificationsAsync();
+            await NotificationService.GetNotificationsAsync()
+            ?? new List<NotificationItem>();
     }
 
+
+    // =========================
+    // FILTER
+    // =========================
 
     private void SetFilter(string filter)
     {
         selectedFilter = filter;
     }
 
+
+    // =========================
+    // SEARCH
+    // =========================
 
     private void ClearSearch()
     {
@@ -361,7 +537,7 @@
 
 
     private IEnumerable<NotificationItem> FilteredNotifications =>
-        notifications
+        notifications?
             .Where(n =>
                 (
                     string.IsNullOrWhiteSpace(searchText)
@@ -390,8 +566,13 @@
 
                     || n.Type == selectedFilter
                 )
-            );
+            )
+        ?? Enumerable.Empty<NotificationItem>();
 
+
+    // =========================
+    // ICON
+    // =========================
 
     private string GetIcon(string type)
     {
@@ -416,6 +597,10 @@
         };
     }
 
+
+    // =========================
+    // BADGES
+    // =========================
 
     private string GetTypeBadgeClass(string type)
     {
@@ -451,6 +636,25 @@
             "Reminder" => "Reminder",
             _ => type
         };
+    }
+
+
+    // =========================
+    // ERROR HANDLING
+    // =========================
+
+    private void SetOperationError(Exception ex)
+    {
+        operationError =
+            string.IsNullOrWhiteSpace(ex.Message)
+                ? "Unable to complete the operation. Please try again."
+                : ex.Message;
+    }
+
+
+    private void ClearOperationError()
+    {
+        operationError = null;
     }
 
 }

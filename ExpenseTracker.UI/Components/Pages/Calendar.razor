@@ -8,7 +8,6 @@
 @inject TaskApiService TaskService
 @inject NavigationManager NavigationManager
 
-
 <div class="calendar-page">
 
     <!-- ============================== -->
@@ -29,7 +28,6 @@
 
         </div>
 
-
         <div class="calendar-navigation">
 
             <button class="calendar-nav-button"
@@ -40,7 +38,6 @@
 
             </button>
 
-
             <button class="calendar-today-button"
                     type="button"
                     @onclick="GoToToday">
@@ -48,7 +45,6 @@
                 Today
 
             </button>
-
 
             <button class="calendar-nav-button"
                     type="button"
@@ -62,796 +58,826 @@
 
     </div>
 
+    @if (isLoading)
+    {
+        <!-- ============================== -->
+        <!-- LOADING -->
+        <!-- ============================== -->
 
-    <!-- ============================== -->
-    <!-- CALENDAR CARD -->
-    <!-- ============================== -->
+        <div class="calendar-card-container">
 
-    <div class="calendar-card-container">
+            <div class="d-flex flex-column align-items-center justify-content-center py-5">
 
-        <!-- MONTH HEADER -->
-        <div class="calendar-toolbar">
+                <div class="spinner-border text-primary"
+                     role="status">
+                </div>
 
-            <div class="calendar-month-title">
-                @currentMonth.ToString("MMMM yyyy")
-            </div>
-
-
-            <div class="calendar-legend">
-
-                <span class="legend-item">
-                    <span class="legend-color reminder-color"></span>
-                    Reminder
-                </span>
-
-                <span class="legend-item">
-                    <span class="legend-color expense-color"></span>
-                    Expense
-                </span>
-
-                <span class="legend-item">
-                    <span class="legend-color task-color"></span>
-                    Task
-                </span>
+                <p class="text-muted mt-3 mb-0">
+                    Loading calendar...
+                </p>
 
             </div>
 
         </div>
-
-
+    }
+    else if (!string.IsNullOrWhiteSpace(loadError))
+    {
         <!-- ============================== -->
-        <!-- CALENDAR GRID -->
+        <!-- ERROR -->
         <!-- ============================== -->
 
-        <div class="calendar-grid">
+        <div class="alert alert-danger d-flex flex-column align-items-center text-center p-4"
+             role="alert">
 
-            <!-- WEEK DAYS -->
-
-            <div class="calendar-header">
-                Mon
+            <div class="fs-2 mb-2">
+                ⚠️
             </div>
 
-            <div class="calendar-header">
-                Tue
+            <strong class="mb-1">
+                Unable to load calendar
+            </strong>
+
+            <p class="mb-3">
+                @loadError
+            </p>
+
+            <button type="button"
+                    class="btn btn-primary"
+                    @onclick="LoadCalendarAsync">
+
+                Try Again
+
+            </button>
+
+        </div>
+    }
+    else
+    {
+        <!-- ============================== -->
+        <!-- CALENDAR CARD -->
+        <!-- ============================== -->
+
+        <div class="calendar-card-container">
+
+            <!-- MONTH HEADER -->
+
+            <div class="calendar-toolbar">
+
+                <div class="calendar-month-title">
+                    @currentMonth.ToString("MMMM yyyy")
+                </div>
+
+                <div class="calendar-legend">
+
+                    <span class="legend-item">
+                        <span class="legend-color reminder-color"></span>
+                        Reminder
+                    </span>
+
+                    <span class="legend-item">
+                        <span class="legend-color expense-color"></span>
+                        Expense
+                    </span>
+
+                    <span class="legend-item">
+                        <span class="legend-color task-color"></span>
+                        Task
+                    </span>
+
+                </div>
+
             </div>
 
-            <div class="calendar-header">
-                Wed
-            </div>
 
-            <div class="calendar-header">
-                Thu
-            </div>
+            <!-- ============================== -->
+            <!-- CALENDAR GRID -->
+            <!-- ============================== -->
 
-            <div class="calendar-header">
-                Fri
-            </div>
+            <div class="calendar-grid">
 
-            <div class="calendar-header weekend-header">
-                Sat
-            </div>
+                <!-- WEEK DAYS -->
 
-            <div class="calendar-header weekend-header">
-                Sun
-            </div>
+                <div class="calendar-header">
+                    Mon
+                </div>
+
+                <div class="calendar-header">
+                    Tue
+                </div>
+
+                <div class="calendar-header">
+                    Wed
+                </div>
+
+                <div class="calendar-header">
+                    Thu
+                </div>
+
+                <div class="calendar-header">
+                    Fri
+                </div>
+
+                <div class="calendar-header weekend-header">
+                    Sat
+                </div>
+
+                <div class="calendar-header weekend-header">
+                    Sun
+                </div>
 
 
-            <!-- EMPTY CELLS -->
+                <!-- EMPTY CELLS -->
+                @for (int i = 0; i < FirstDayOffset; i++)
+                {
+                    <div class="calendar-cell empty-cell"></div>
+                }
 
-            @for (int i = 0; i < FirstDayOffset; i++)
-            {
-                <div class="calendar-cell empty-cell"></div>
-            }
 
+                <!-- DAYS -->
+                @for (int day = 1; day <= DaysInMonth; day++)
+                {
+                    var currentDay = day;
 
-            <!-- DAYS -->
-
-            @for (int day = 1; day <= DaysInMonth; day++)
-            {
-                var currentDay = day;
-
-                var dayReminders =
+                    var dayReminders =
                     GetRemindersForDay(currentDay).ToList();
 
-                var dayExpenses =
+                    var dayExpenses =
                     GetExpensesForDay(currentDay).ToList();
 
-                var dayTasks =
+                    var dayTasks =
                     GetTasksForDay(currentDay).ToList();
 
-                var totalItems =
+                    var totalItems =
                     dayReminders.Count
                     + dayExpenses.Count
                     + dayTasks.Count;
 
-                var isToday =
+                    var isToday =
                     IsToday(currentDay);
 
-                <div class="calendar-cell
-                            @(isToday ? "today-cell" : "")
-                            @(HasAnyItems(currentDay) ? "has-items" : "")
-                            @GetDayClass(currentDay)"
-                     @onclick="() => OpenDay(currentDay)">
+                    <div class="calendar-cell
+                                        @(isToday ? "today-cell" : "")
+                                        @(HasAnyItems(currentDay) ? "has-items" : "")
+                                        @GetDayClass(currentDay)"
+                         @onclick="() => OpenDay(currentDay)">
 
-                    <!-- DAY NUMBER -->
+                        <!-- DAY NUMBER -->
 
-                    <div class="day-number-row">
+                        <div class="day-number-row">
 
-                        <span class="day-number">
-                            @currentDay
-                        </span>
-
-                        @if (isToday)
-                        {
-                            <span class="today-label">
-                                Today
+                            <span class="day-number">
+                                @currentDay
                             </span>
-                        }
 
-                    </div>
-
-
-                    <!-- INDICATORS -->
-
-                    @if (totalItems > 0)
-                    {
-                        <div class="calendar-indicators">
-
-                            @if (dayReminders.Any())
+                            @if (isToday)
                             {
-                                <span class="calendar-bar reminder-bar">
-                                    <span class="indicator-count">
-                                        @dayReminders.Count
-                                    </span>
-                                </span>
-                            }
-
-
-                            @if (dayExpenses.Any())
-                            {
-                                <span class="calendar-bar expense-bar">
-                                    <span class="indicator-count">
-                                        @dayExpenses.Count
-                                    </span>
-                                </span>
-                            }
-
-
-                            @if (dayTasks.Any())
-                            {
-                                <span class="calendar-bar task-bar">
-                                    <span class="indicator-count">
-                                        @dayTasks.Count
-                                    </span>
+                                <span class="today-label">
+                                    Today
                                 </span>
                             }
 
                         </div>
-                    }
 
 
-                    <!-- ITEM PREVIEW -->
-
-                    <div class="calendar-preview">
-
-                        @foreach (var reminder in dayReminders.Take(1))
+                        <!-- INDICATORS -->
+                        @if (totalItems > 0)
                         {
-                            <button type="button"
-                                    class="calendar-preview-item reminder-preview"
-                                    title="@reminder.Title"
-                                    @onclick:stopPropagation="true"
-                                    @onclick="() => ShowReminder(reminder)">
+                            <div class="calendar-indicators">
 
-                                <span class="preview-dot"></span>
-
-                                <span class="preview-title">
-                                    @reminder.Title
-                                </span>
-
-                            </button>
-                        }
-
-
-                        @foreach (var expense in dayExpenses.Take(1))
-                        {
-                            <button type="button"
-                                    class="calendar-preview-item expense-preview"
-                                    title="@expense.Title"
-                                    @onclick:stopPropagation="true"
-                                    @onclick="() => ShowExpense(expense)">
-
-                                <span class="preview-dot"></span>
-
-                                <span class="preview-title">
-                                    @expense.Title
-                                </span>
-
-                            </button>
-                        }
-
-
-                        @foreach (var task in dayTasks.Take(1))
-                        {
-                            <button type="button"
-                                    class="calendar-preview-item task-preview"
-                                    title="@task.Title"
-                                    @onclick:stopPropagation="true"
-                                    @onclick="() => ShowTask(task)">
-
-                                <span class="preview-dot"></span>
-
-                                <span class="preview-title">
-                                    @task.Title
-                                </span>
-
-                            </button>
-                        }
-
-
-                        @if (totalItems > 3)
-                        {
-                            <div class="calendar-more">
-                                +@(totalItems - 3) more
-                            </div>
-                        }
-
-                    </div>
-
-                </div>
-            }
-
-        </div>
-
-    </div>
-
-
-    <!-- ============================== -->
-    <!-- DAY MODAL -->
-    <!-- ============================== -->
-
-    @if (showModal && selectedDay != null)
-    {
-        <div class="calendar-modal-backdrop"
-             @onclick="CloseModal">
-
-            <div class="calendar-modal"
-                 @onclick:stopPropagation="true">
-
-                <!-- MODAL HEADER -->
-
-                <div class="calendar-modal-header">
-
-                    <div class="calendar-modal-title">
-
-                        <div class="modal-date-icon">
-                            📅
-                        </div>
-
-                        <div>
-
-                            <h4>
-                                @SelectedDate.ToString("dddd")
-                            </h4>
-
-                            <span>
-                                @SelectedDate.ToString("dd MMMM yyyy")
-                            </span>
-
-                        </div>
-
-                    </div>
-
-
-                    <button type="button"
-                            class="calendar-close"
-                            @onclick="CloseModal"
-                            aria-label="Close">
-
-                        ×
-
-                    </button>
-
-                </div>
-
-
-                <!-- MODAL BODY -->
-
-                <div class="calendar-modal-body">
-
-                    @if (!SelectedReminders.Any()
-                         && !SelectedExpenses.Any()
-                         && !SelectedTasks.Any())
-                    {
-                        <div class="calendar-empty-day">
-
-                            <div>
-                                🎉
-                            </div>
-
-                            <strong>
-                                Nothing scheduled
-                            </strong>
-
-                            <span>
-                                There are no items for this day.
-                            </span>
-
-                        </div>
-                    }
-                    else
-                    {
-                        <!-- REMINDERS -->
-
-                        @if (SelectedReminders.Any())
-                        {
-                            <div class="calendar-section">
-
-                                <div class="calendar-section-title reminder-title">
-
-                                    <span>
-                                        🔔
-                                    </span>
-
-                                    Reminders
-
-                                    <span class="section-count">
-                                        @SelectedReminders.Count()
-                                    </span>
-
-                                </div>
-
-
-                                @foreach (var reminder in SelectedReminders)
+                                @if (dayReminders.Any())
                                 {
-                                    <button type="button"
-                                            class="calendar-item-card reminder-item"
-                                            @onclick="() => ShowReminder(reminder)">
+                                    <span class="calendar-bar reminder-bar">
 
-                                        <div class="calendar-item-icon">
-                                            🔔
-                                        </div>
-
-                                        <div class="calendar-item-content">
-
-                                            <strong>
-                                                @reminder.Title
-                                            </strong>
-
-                                            <span>
-                                                @reminder.ReminderDate.ToString("HH:mm")
-                                                ·
-                                                @reminder.Type
-                                            </span>
-
-                                        </div>
-
-                                        <span class="item-arrow">
-                                            →
+                                        <span class="indicator-count">
+                                            @dayReminders.Count
                                         </span>
 
-                                    </button>
+                                    </span>
+                                }
+
+                                @if (dayExpenses.Any())
+                                {
+                                    <span class="calendar-bar expense-bar">
+
+                                        <span class="indicator-count">
+                                            @dayExpenses.Count
+                                        </span>
+
+                                    </span>
+                                }
+
+                                @if (dayTasks.Any())
+                                {
+                                    <span class="calendar-bar task-bar">
+
+                                        <span class="indicator-count">
+                                            @dayTasks.Count
+                                        </span>
+
+                                    </span>
                                 }
 
                             </div>
                         }
 
 
-                        <!-- EXPENSES -->
+                        <!-- ITEM PREVIEW -->
 
-                        @if (SelectedExpenses.Any())
-                        {
-                            <div class="calendar-section">
+                        <div class="calendar-preview">
 
-                                <div class="calendar-section-title expense-title">
+                            @foreach (var reminder in dayReminders.Take(1))
+                            {
+                                <button type="button"
+                                        class="calendar-preview-item reminder-preview"
+                                        title="@reminder.Title"
+                                        @onclick:stopPropagation="true"
+                                        @onclick="() => ShowReminder(reminder)">
 
-                                    <span>
-                                        💰
+                                    <span class="preview-dot"></span>
+
+                                    <span class="preview-title">
+                                        @reminder.Title
                                     </span>
 
-                                    Expenses
+                                </button>
+                            }
 
-                                    <span class="section-count">
-                                        @SelectedExpenses.Count()
+                            @foreach (var expense in dayExpenses.Take(1))
+                            {
+                                <button type="button"
+                                        class="calendar-preview-item expense-preview"
+                                        title="@expense.Title"
+                                        @onclick:stopPropagation="true"
+                                        @onclick="() => ShowExpense(expense)">
+
+                                    <span class="preview-dot"></span>
+
+                                    <span class="preview-title">
+                                        @expense.Title
                                     </span>
 
-                                </div>
+                                </button>
+                            }
 
+                            @foreach (var task in dayTasks.Take(1))
+                            {
+                                <button type="button"
+                                        class="calendar-preview-item task-preview"
+                                        title="@task.Title"
+                                        @onclick:stopPropagation="true"
+                                        @onclick="() => ShowTask(task)">
 
-                                @foreach (var expense in SelectedExpenses)
-                                {
-                                    <button type="button"
-                                            class="calendar-item-card expense-item"
-                                            @onclick="() => ShowExpense(expense)">
+                                    <span class="preview-dot"></span>
 
-                                        <div class="calendar-item-icon">
-                                            💰
-                                        </div>
-
-                                        <div class="calendar-item-content">
-
-                                            <strong>
-                                                @expense.Title
-                                            </strong>
-
-                                            <span>
-                                                @expense.Amount.ToString("C")
-                                            </span>
-
-                                        </div>
-
-                                        <span class="item-arrow">
-                                            →
-                                        </span>
-
-                                    </button>
-                                }
-
-                            </div>
-                        }
-
-
-                        <!-- TASKS -->
-
-                        @if (SelectedTasks.Any())
-                        {
-                            <div class="calendar-section">
-
-                                <div class="calendar-section-title task-title">
-
-                                    <span>
-                                        ✅
+                                    <span class="preview-title">
+                                        @task.Title
                                     </span>
 
-                                    Tasks
+                                </button>
+                            }
 
-                                    <span class="section-count">
-                                        @SelectedTasks.Count()
-                                    </span>
-
+                            @if (totalItems > 3)
+                            {
+                                <div class="calendar-more">
+                                    +@(totalItems - 3) more
                                 </div>
+                            }
 
+                        </div>
 
-                                @foreach (var task in SelectedTasks)
-                                {
-                                    <button type="button"
-                                            class="calendar-item-card task-item"
-                                            @onclick="() => ShowTask(task)">
-
-                                        <div class="calendar-item-icon">
-                                            ✅
-                                        </div>
-
-                                        <div class="calendar-item-content">
-
-                                            <strong>
-                                                @task.Title
-                                            </strong>
-
-                                            <span>
-                                                @task.Priority
-                                            </span>
-
-                                        </div>
-
-                                        <span class="item-arrow">
-                                            →
-                                        </span>
-
-                                    </button>
-                                }
-
-                            </div>
-                        }
-
-
-                        <!-- DETAILS -->
-
-                        @if (selectedReminder != null)
-                        {
-                            <div class="details-panel reminder-details">
-
-                                <div class="details-panel-header">
-
-                                    <h5>
-                                        🔔 Reminder Details
-                                    </h5>
-
-                                    <button type="button"
-                                            class="details-close"
-                                            @onclick="ClearSelectedDetails">
-
-                                        ×
-
-                                    </button>
-
-                                </div>
-
-
-                                <div class="details-grid">
-
-                                    <div class="detail-box">
-
-                                        <span>
-                                            Title
-                                        </span>
-
-                                        <strong>
-                                            @selectedReminder.Title
-                                        </strong>
-
-                                    </div>
-
-
-                                    <div class="detail-box">
-
-                                        <span>
-                                            Date
-                                        </span>
-
-                                        <strong>
-                                            @selectedReminder.ReminderDate.ToString("dd.MM.yyyy")
-                                        </strong>
-
-                                    </div>
-
-
-                                    <div class="detail-box">
-
-                                        <span>
-                                            Type
-                                        </span>
-
-                                        <strong>
-                                            @selectedReminder.Type
-                                        </strong>
-
-                                    </div>
-
-                                </div>
-
-
-                                <div class="details-actions">
-
-                                    <button class="details-button details-edit"
-                                            @onclick="EditSelected">
-
-                                        ✏️ Edit
-
-                                    </button>
-
-                                    <button class="details-button details-delete"
-                                            @onclick="DeleteSelected">
-
-                                        🗑 Delete
-
-                                    </button>
-
-                                </div>
-
-                            </div>
-                        }
-
-
-                        @if (selectedExpense != null)
-                        {
-                            <div class="details-panel expense-details">
-
-                                <div class="details-panel-header">
-
-                                    <h5>
-                                        💰 Expense Details
-                                    </h5>
-
-                                    <button type="button"
-                                            class="details-close"
-                                            @onclick="ClearSelectedDetails">
-
-                                        ×
-
-                                    </button>
-
-                                </div>
-
-
-                                <div class="details-grid">
-
-                                    <div class="detail-box">
-
-                                        <span>
-                                            Title
-                                        </span>
-
-                                        <strong>
-                                            @selectedExpense.Title
-                                        </strong>
-
-                                    </div>
-
-
-                                    <div class="detail-box">
-
-                                        <span>
-                                            Amount
-                                        </span>
-
-                                        <strong>
-                                            @selectedExpense.Amount.ToString("C")
-                                        </strong>
-
-                                    </div>
-
-
-                                    <div class="detail-box">
-
-                                        <span>
-                                            Category
-                                        </span>
-
-                                        <strong>
-                                            @selectedExpense.Category
-                                        </strong>
-
-                                    </div>
-
-
-                                    <div class="detail-box">
-
-                                        <span>
-                                            Due
-                                        </span>
-
-                                        <strong>
-                                            @selectedExpense.DueDate.ToShortDateString()
-                                        </strong>
-
-                                    </div>
-
-                                </div>
-
-
-                                <div class="details-actions">
-
-                                    <button class="details-button details-edit"
-                                            @onclick="EditSelected">
-
-                                        ✏️ Edit
-
-                                    </button>
-
-                                    <button class="details-button details-delete"
-                                            @onclick="DeleteSelected">
-
-                                        🗑 Delete
-
-                                    </button>
-
-                                </div>
-
-                            </div>
-                        }
-
-
-                        @if (selectedTask != null)
-                        {
-                            <div class="details-panel task-details">
-
-                                <div class="details-panel-header">
-
-                                    <h5>
-                                        ✅ Task Details
-                                    </h5>
-
-                                    <button type="button"
-                                            class="details-close"
-                                            @onclick="ClearSelectedDetails">
-
-                                        ×
-
-                                    </button>
-
-                                </div>
-
-
-                                <div class="details-grid">
-
-                                    <div class="detail-box">
-
-                                        <span>
-                                            Title
-                                        </span>
-
-                                        <strong>
-                                            @selectedTask.Title
-                                        </strong>
-
-                                    </div>
-
-
-                                    <div class="detail-box detail-full">
-
-                                        <span>
-                                            Description
-                                        </span>
-
-                                        <strong>
-                                            @(string.IsNullOrWhiteSpace(selectedTask.Description)
-                                                ? "No description"
-                                                : selectedTask.Description)
-                                        </strong>
-
-                                    </div>
-
-
-                                    <div class="detail-box">
-
-                                        <span>
-                                            Priority
-                                        </span>
-
-                                        <strong>
-                                            @selectedTask.Priority
-                                        </strong>
-
-                                    </div>
-
-
-                                    <div class="detail-box">
-
-                                        <span>
-                                            Due
-                                        </span>
-
-                                        <strong>
-                                            @selectedTask.DueDate.ToString("dd.MM.yyyy HH:mm")
-                                        </strong>
-
-                                    </div>
-
-                                </div>
-
-
-                                <div class="details-actions">
-
-                                    <button class="details-button details-edit"
-                                            @onclick="EditSelected">
-
-                                        ✏️ Edit
-
-                                    </button>
-
-                                    <button class="details-button details-delete"
-                                            @onclick="DeleteSelected">
-
-                                        🗑 Delete
-
-                                    </button>
-
-                                </div>
-
-                            </div>
-                        }
-                    }
-
-                </div>
-
-
-                <!-- MODAL FOOTER -->
-
-                <div class="calendar-modal-footer">
-
-                    <button type="button"
-                            class="modal-footer-button"
-                            @onclick="CloseModal">
-
-                        Close
-
-                    </button>
-
-                </div>
+                    </div>
+                }
 
             </div>
 
         </div>
+
+
+        <!-- ============================== -->
+        <!-- DAY MODAL -->
+        <!-- ============================== -->
+        @if (showModal && selectedDay != null)
+        {
+            <div class="calendar-modal-backdrop"
+                 @onclick="CloseModal">
+
+                <div class="calendar-modal"
+                     @onclick:stopPropagation="true">
+
+                    <!-- MODAL HEADER -->
+
+                    <div class="calendar-modal-header">
+
+                        <div class="calendar-modal-title">
+
+                            <div class="modal-date-icon">
+                                📅
+                            </div>
+
+                            <div>
+
+                                <h4>
+                                    @SelectedDate.ToString("dddd")
+                                </h4>
+
+                                <span>
+                                    @SelectedDate.ToString("dd MMMM yyyy")
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <button type="button"
+                                class="calendar-close"
+                                @onclick="CloseModal"
+                                aria-label="Close">
+
+                            ×
+
+                        </button>
+
+                    </div>
+
+
+                    <!-- MODAL BODY -->
+
+                    <div class="calendar-modal-body">
+
+                        @if (!SelectedReminders.Any()
+                                        && !SelectedExpenses.Any()
+                                        && !SelectedTasks.Any())
+                        {
+                            <div class="calendar-empty-day">
+
+                                <div>
+                                    🎉
+                                </div>
+
+                                <strong>
+                                    Nothing scheduled
+                                </strong>
+
+                                <span>
+                                    There are no items for this day.
+                                </span>
+
+                            </div>
+                        }
+                        else
+                        {
+                            <!-- REMINDERS -->
+                            @if (SelectedReminders.Any())
+                            {
+                                <div class="calendar-section">
+
+                                    <div class="calendar-section-title reminder-title">
+
+                                        <span>
+                                            🔔
+                                        </span>
+
+                                        Reminders
+
+                                        <span class="section-count">
+                                            @SelectedReminders.Count()
+                                        </span>
+
+                                    </div>
+
+                                    @foreach (var reminder in SelectedReminders)
+                                    {
+                                        <button type="button"
+                                                class="calendar-item-card reminder-item"
+                                                @onclick="() => ShowReminder(reminder)">
+
+                                            <div class="calendar-item-icon">
+                                                🔔
+                                            </div>
+
+                                            <div class="calendar-item-content">
+
+                                                <strong>
+                                                    @reminder.Title
+                                                </strong>
+
+                                                <span>
+                                                    @reminder.ReminderDate.ToString("HH:mm")
+                                                    ·
+                                                    @reminder.Type
+                                                </span>
+
+                                            </div>
+
+                                            <span class="item-arrow">
+                                                →
+                                            </span>
+
+                                        </button>
+                                    }
+
+                                </div>
+                            }
+
+
+                            <!-- EXPENSES -->
+                            @if (SelectedExpenses.Any())
+                            {
+                                <div class="calendar-section">
+
+                                    <div class="calendar-section-title expense-title">
+
+                                        <span>
+                                            💰
+                                        </span>
+
+                                        Expenses
+
+                                        <span class="section-count">
+                                            @SelectedExpenses.Count()
+                                        </span>
+
+                                    </div>
+
+                                    @foreach (var expense in SelectedExpenses)
+                                    {
+                                        <button type="button"
+                                                class="calendar-item-card expense-item"
+                                                @onclick="() => ShowExpense(expense)">
+
+                                            <div class="calendar-item-icon">
+                                                💰
+                                            </div>
+
+                                            <div class="calendar-item-content">
+
+                                                <strong>
+                                                    @expense.Title
+                                                </strong>
+
+                                                <span>
+                                                    @expense.Amount.ToString("C")
+                                                </span>
+
+                                            </div>
+
+                                            <span class="item-arrow">
+                                                →
+                                            </span>
+
+                                        </button>
+                                    }
+
+                                </div>
+                            }
+
+
+                            <!-- TASKS -->
+                            @if (SelectedTasks.Any())
+                            {
+                                <div class="calendar-section">
+
+                                    <div class="calendar-section-title task-title">
+
+                                        <span>
+                                            ✅
+                                        </span>
+
+                                        Tasks
+
+                                        <span class="section-count">
+                                            @SelectedTasks.Count()
+                                        </span>
+
+                                    </div>
+
+                                    @foreach (var task in SelectedTasks)
+                                    {
+                                        <button type="button"
+                                                class="calendar-item-card task-item"
+                                                @onclick="() => ShowTask(task)">
+
+                                            <div class="calendar-item-icon">
+                                                ✅
+                                            </div>
+
+                                            <div class="calendar-item-content">
+
+                                                <strong>
+                                                    @task.Title
+                                                </strong>
+
+                                                <span>
+                                                    @task.Priority
+                                                </span>
+
+                                            </div>
+
+                                            <span class="item-arrow">
+                                                →
+                                            </span>
+
+                                        </button>
+                                    }
+
+                                </div>
+                            }
+
+
+                            <!-- DETAILS -->
+                            @if (selectedReminder != null)
+                            {
+                                <div class="details-panel reminder-details">
+
+                                    <div class="details-panel-header">
+
+                                        <h5>
+                                            🔔 Reminder Details
+                                        </h5>
+
+                                        <button type="button"
+                                                class="details-close"
+                                                @onclick="ClearSelectedDetails">
+
+                                            ×
+
+                                        </button>
+
+                                    </div>
+
+                                    <div class="details-grid">
+
+                                        <div class="detail-box">
+
+                                            <span>
+                                                Title
+                                            </span>
+
+                                            <strong>
+                                                @selectedReminder.Title
+                                            </strong>
+
+                                        </div>
+
+                                        <div class="detail-box">
+
+                                            <span>
+                                                Date
+                                            </span>
+
+                                            <strong>
+                                                @selectedReminder.ReminderDate.ToString("dd.MM.yyyy")
+                                            </strong>
+
+                                        </div>
+
+                                        <div class="detail-box">
+
+                                            <span>
+                                                Type
+                                            </span>
+
+                                            <strong>
+                                                @selectedReminder.Type
+                                            </strong>
+
+                                        </div>
+
+                                    </div>
+
+                                    <div class="details-actions">
+
+                                        <button class="details-button details-edit"
+                                                @onclick="EditSelected">
+
+                                            ✏️ Edit
+
+                                        </button>
+
+                                        <button class="details-button details-delete"
+                                                @onclick="DeleteSelected">
+
+                                            🗑 Delete
+
+                                        </button>
+
+                                    </div>
+
+                                </div>
+                            }
+
+
+                            @if (selectedExpense != null)
+                            {
+                                <div class="details-panel expense-details">
+
+                                    <div class="details-panel-header">
+
+                                        <h5>
+                                            💰 Expense Details
+                                        </h5>
+
+                                        <button type="button"
+                                                class="details-close"
+                                                @onclick="ClearSelectedDetails">
+
+                                            ×
+
+                                        </button>
+
+                                    </div>
+
+                                    <div class="details-grid">
+
+                                        <div class="detail-box">
+
+                                            <span>
+                                                Title
+                                            </span>
+
+                                            <strong>
+                                                @selectedExpense.Title
+                                            </strong>
+
+                                        </div>
+
+                                        <div class="detail-box">
+
+                                            <span>
+                                                Amount
+                                            </span>
+
+                                            <strong>
+                                                @selectedExpense.Amount.ToString("C")
+                                            </strong>
+
+                                        </div>
+
+                                        <div class="detail-box">
+
+                                            <span>
+                                                Category
+                                            </span>
+
+                                            <strong>
+                                                @selectedExpense.Category
+                                            </strong>
+
+                                        </div>
+
+                                        <div class="detail-box">
+
+                                            <span>
+                                                Due
+                                            </span>
+
+                                            <strong>
+                                                @selectedExpense.DueDate.ToShortDateString()
+                                            </strong>
+
+                                        </div>
+
+                                    </div>
+
+                                    <div class="details-actions">
+
+                                        <button class="details-button details-edit"
+                                                @onclick="EditSelected">
+
+                                            ✏️ Edit
+
+                                        </button>
+
+                                        <button class="details-button details-delete"
+                                                @onclick="DeleteSelected">
+
+                                            🗑 Delete
+
+                                        </button>
+
+                                    </div>
+
+                                </div>
+                            }
+
+
+                            @if (selectedTask != null)
+                            {
+                                <div class="details-panel task-details">
+
+                                    <div class="details-panel-header">
+
+                                        <h5>
+                                            ✅ Task Details
+                                        </h5>
+
+                                        <button type="button"
+                                                class="details-close"
+                                                @onclick="ClearSelectedDetails">
+
+                                            ×
+
+                                        </button>
+
+                                    </div>
+
+                                    <div class="details-grid">
+
+                                        <div class="detail-box">
+
+                                            <span>
+                                                Title
+                                            </span>
+
+                                            <strong>
+                                                @selectedTask.Title
+                                            </strong>
+
+                                        </div>
+
+                                        <div class="detail-box detail-full">
+
+                                            <span>
+                                                Description
+                                            </span>
+
+                                            <strong>
+                                                @(string.IsNullOrWhiteSpace(selectedTask.Description)
+                                                                                ? "No description"
+                                                                                : selectedTask.Description)
+                            </strong>
+
+                                        </div>
+
+                                        <div class="detail-box">
+
+                                            <span>
+                                                Priority
+                                            </span>
+
+                                            <strong>
+                                                @selectedTask.Priority
+                                            </strong>
+
+                                        </div>
+
+                                        <div class="detail-box">
+
+                                            <span>
+                                                Due
+                                            </span>
+
+                                            <strong>
+                                                @selectedTask.DueDate.ToString("dd.MM.yyyy HH:mm")
+                                            </strong>
+
+                                        </div>
+
+                                    </div>
+
+                                    <div class="details-actions">
+
+                                        <button class="details-button details-edit"
+                                                @onclick="EditSelected">
+
+                                            ✏️ Edit
+
+                                        </button>
+
+                                        <button class="details-button details-delete"
+                                                @onclick="DeleteSelected">
+
+                                            🗑 Delete
+
+                                        </button>
+
+                                    </div>
+
+                                </div>
+                                }
+                        }
+
+                    </div>
+
+
+                    <!-- MODAL FOOTER -->
+
+                    <div class="calendar-modal-footer">
+
+                        <button type="button"
+                                class="modal-footer-button"
+                                @onclick="CloseModal">
+
+                            Close
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+        }
     }
 
 </div>
@@ -883,19 +909,52 @@
 
 
     // =========================
+    // LOADING / ERROR
+    // =========================
+
+    private bool isLoading = true;
+
+    private string? loadError;
+
+
+    // =========================
     // INITIALIZATION
     // =========================
 
     protected override async Task OnInitializedAsync()
     {
-        reminders =
-            await ReminderService.GetAllAsync();
+        await LoadCalendarAsync();
+    }
 
-        expenses =
-            await ExpenseService.GetExpensesAsync();
 
-        tasks =
-            await TaskService.GetTasksAsync();
+    private async Task LoadCalendarAsync()
+    {
+        isLoading = true;
+        loadError = null;
+
+        try
+        {
+            reminders =
+                await ReminderService.GetAllAsync();
+
+            expenses =
+                await ExpenseService.GetExpensesAsync();
+
+            tasks =
+                await TaskService.GetTasksAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(
+                $"Calendar loading error: {ex.Message}");
+
+            loadError =
+                "Please try again in a moment.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
     }
 
 

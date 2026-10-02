@@ -13,11 +13,13 @@
     <div class="auth-card">
 
         <div class="auth-brand">
+
             <div class="auth-logo">
                 ET
             </div>
 
             <div>
+
                 <div class="auth-brand-name">
                     ExpenseTracker
                 </div>
@@ -25,7 +27,9 @@
                 <div class="auth-brand-subtitle">
                     Personal Finance Dashboard
                 </div>
+
             </div>
+
         </div>
 
 
@@ -44,6 +48,8 @@
 
         <div class="auth-form">
 
+            <!-- EMAIL -->
+
             <div class="auth-field">
 
                 <label>
@@ -52,11 +58,15 @@
 
                 <input class="form-control"
                        type="email"
+                       autocomplete="email"
                        @bind="email"
+                       @bind:event="oninput"
                        placeholder="Enter your email" />
 
             </div>
 
+
+            <!-- PASSWORD -->
 
             <div class="auth-field">
 
@@ -66,28 +76,57 @@
 
                 <input class="form-control"
                        type="password"
+                       autocomplete="current-password"
                        @bind="password"
+                       @bind:event="oninput"
                        placeholder="Enter your password" />
 
             </div>
 
 
+            <!-- ERROR -->
             @if (!string.IsNullOrWhiteSpace(errorMessage))
             {
-                <div class="auth-alert auth-alert-danger">
-                    <span class="auth-alert-icon">⚠️</span>
+                <div class="auth-alert auth-alert-danger"
+                     role="alert"
+                     aria-live="polite">
+
+                    <span class="auth-alert-icon">
+                        ⚠️
+                    </span>
 
                     <span>
                         @errorMessage
                     </span>
+
                 </div>
             }
 
 
-            <button class="btn btn-primary auth-submit"
-                    @onclick="HandleLogin">
+            <!-- LOGIN -->
 
-                Login
+            <button type="button"
+                    class="btn btn-primary auth-submit"
+                    @onclick="HandleLogin"
+                    disabled="@isLoading">
+
+                @if (isLoading)
+                {
+                    <span class="spinner-border spinner-border-sm me-2"
+                          role="status"
+                          aria-hidden="true">
+                    </span>
+
+                    <span>
+                        Signing in...
+                    </span>
+                }
+                else
+                {
+                    <span>
+                        Login
+                    </span>
+                }
 
             </button>
 
@@ -122,28 +161,123 @@
 
     private string errorMessage = string.Empty;
 
+    private bool isLoading;
+
 
     private async Task HandleLogin()
     {
+        if (isLoading)
+            return;
+
+
         errorMessage = string.Empty;
 
-        var result =
-            await AuthService.LoginAsync(
-                email,
-                password);
 
-        if (result == null)
+        // =========================
+        // VALIDATION
+        // =========================
+
+        if (string.IsNullOrWhiteSpace(email))
         {
             errorMessage =
-                "Invalid email or password.";
+                "Please enter your email.";
 
             return;
         }
 
-        await AuthState.SetTokenAsync(
-            result.Token);
-        AuthenticationStateProvider.NotifyAuthenticationStateChanged();
 
-        Navigation.NavigateTo("/");
+        if (!IsValidEmail(email))
+        {
+            errorMessage =
+                "Please enter a valid email address.";
+
+            return;
+        }
+
+
+        if (string.IsNullOrWhiteSpace(password))
+        {
+            errorMessage =
+                "Please enter your password.";
+
+            return;
+        }
+
+
+        // =========================
+        // LOGIN
+        // =========================
+
+        isLoading = true;
+
+        StateHasChanged();
+
+
+        try
+        {
+            var result =
+                await AuthService.LoginAsync(
+                    email.Trim(),
+                    password);
+
+
+            if (result == null)
+            {
+                errorMessage =
+                    "Invalid email or password.";
+
+                return;
+            }
+
+
+            await AuthState.SetTokenAsync(
+                result.Token);
+
+
+            AuthenticationStateProvider
+                .NotifyAuthenticationStateChanged();
+
+
+            Navigation.NavigateTo("/");
+        }
+        catch (HttpRequestException)
+        {
+            errorMessage =
+                "Unable to connect to the server. Please try again.";
+        }
+        catch (Exception)
+        {
+            errorMessage =
+                "Something went wrong while signing in. Please try again.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
     }
+
+
+    // =========================
+    // EMAIL VALIDATION
+    // =========================
+
+    private static bool IsValidEmail(string value)
+    {
+        try
+        {
+            var address =
+                new System.Net.Mail.MailAddress(
+                    value.Trim());
+
+            return
+                address.Address.Equals(
+                    value.Trim(),
+                    StringComparison.OrdinalIgnoreCase);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
 }

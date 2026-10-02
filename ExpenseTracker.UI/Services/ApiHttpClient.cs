@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 
@@ -23,58 +24,81 @@ public class ApiHttpClient
         };
     }
 
-    private async Task PrepareClientAsync()
-    {
-        var token = await _authState.GetTokenAsync();
 
-        _http.DefaultRequestHeaders.Remove("Authorization");
-
-        if (!string.IsNullOrWhiteSpace(token))
-        {
-            _http.DefaultRequestHeaders.Authorization =
-                new AuthenticationHeaderValue(
-                    "Bearer",
-                    token);
-        }
-    }
+    // =========================
+    // SEND
+    // =========================
 
     private async Task<HttpResponseMessage> SendAsync(
         HttpRequestMessage request)
     {
-        await PrepareClientAsync();
+        var token =
+            await _authState.GetTokenAsync();
 
-        var response =
-            await _http.SendAsync(request);
 
-        if (response.StatusCode ==
-            System.Net.HttpStatusCode.Unauthorized)
+        if (!string.IsNullOrWhiteSpace(token))
+        {
+            request.Headers.Authorization =
+                new AuthenticationHeaderValue(
+                    "Bearer",
+                    token);
+        }
+
+
+        HttpResponseMessage response;
+
+        try
+        {
+            response =
+                await _http.SendAsync(request);
+        }
+        catch (HttpRequestException)
+        {
+            throw;
+        }
+
+
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
         {
             await _authState.LogoutAsync();
+
 
             _navigation.NavigateTo(
                 "/login",
                 forceLoad: true);
         }
 
+
         return response;
     }
+
+
+    // =========================
+    // GET
+    // =========================
 
     public async Task<HttpResponseMessage> GetAsync(
         string requestUri)
     {
-        var request =
+        using var request =
             new HttpRequestMessage(
                 HttpMethod.Get,
                 requestUri);
 
+
         return await SendAsync(request);
     }
+
+
+    // =========================
+    // POST
+    // =========================
 
     public async Task<HttpResponseMessage> PostAsync(
         string requestUri,
         HttpContent? content = null)
     {
-        var request =
+        using var request =
             new HttpRequestMessage(
                 HttpMethod.Post,
                 requestUri)
@@ -82,14 +106,20 @@ public class ApiHttpClient
                 Content = content
             };
 
+
         return await SendAsync(request);
     }
+
+
+    // =========================
+    // POST JSON
+    // =========================
 
     public async Task<HttpResponseMessage> PostAsJsonAsync<T>(
         string requestUri,
         T value)
     {
-        var request =
+        using var request =
             new HttpRequestMessage(
                 HttpMethod.Post,
                 requestUri)
@@ -98,14 +128,20 @@ public class ApiHttpClient
                     JsonContent.Create(value)
             };
 
+
         return await SendAsync(request);
     }
+
+
+    // =========================
+    // PUT
+    // =========================
 
     public async Task<HttpResponseMessage> PutAsync(
         string requestUri,
         HttpContent? content = null)
     {
-        var request =
+        using var request =
             new HttpRequestMessage(
                 HttpMethod.Put,
                 requestUri)
@@ -113,14 +149,20 @@ public class ApiHttpClient
                 Content = content
             };
 
+
         return await SendAsync(request);
     }
+
+
+    // =========================
+    // PUT JSON
+    // =========================
 
     public async Task<HttpResponseMessage> PutAsJsonAsync<T>(
         string requestUri,
         T value)
     {
-        var request =
+        using var request =
             new HttpRequestMessage(
                 HttpMethod.Put,
                 requestUri)
@@ -129,16 +171,23 @@ public class ApiHttpClient
                     JsonContent.Create(value)
             };
 
+
         return await SendAsync(request);
     }
+
+
+    // =========================
+    // DELETE
+    // =========================
 
     public async Task<HttpResponseMessage> DeleteAsync(
         string requestUri)
     {
-        var request =
+        using var request =
             new HttpRequestMessage(
                 HttpMethod.Delete,
                 requestUri);
+
 
         return await SendAsync(request);
     }

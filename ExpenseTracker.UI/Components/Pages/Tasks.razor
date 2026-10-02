@@ -32,6 +32,33 @@
 
 
     <!-- ============================== -->
+    <!-- SUCCESS -->
+    <!-- ============================== -->
+    @if (!string.IsNullOrWhiteSpace(successMessage))
+    {
+        <div class="alert alert-success alert-dismissible fade show compact-alert"
+             role="status"
+             aria-live="polite">
+
+            <div>
+                <strong>✅ Success</strong>
+
+                <div class="mt-1">
+                    @successMessage
+                </div>
+            </div>
+
+            <button type="button"
+                    class="btn-close"
+                    aria-label="Close"
+                    @onclick="ClearSuccess">
+            </button>
+
+        </div>
+    }
+
+
+    <!-- ============================== -->
     <!-- ERROR -->
     <!-- ============================== -->
     @if (!string.IsNullOrWhiteSpace(errorMessage))
@@ -62,7 +89,8 @@
     <!-- ============================== -->
 
     <EditForm Model="newTask"
-              OnValidSubmit="@(editingTaskId == null ? AddTask : SaveTask)">
+              OnValidSubmit="@(editingTaskId == null ? AddTask : SaveTask)"
+              OnInvalidSubmit="HandleInvalidSubmit">
 
         <DataAnnotationsValidator />
 
@@ -88,9 +116,11 @@
 
 
             <!-- FORM GRID -->
+
             <div class="task-form-grid">
 
                 <!-- TITLE -->
+
                 <div class="form-field field-title">
 
                     <label>
@@ -107,6 +137,7 @@
 
 
                 <!-- DUE DATE -->
+
                 <div class="form-field">
 
                     <label>
@@ -123,6 +154,7 @@
 
 
                 <!-- REMINDER -->
+
                 <div class="form-field">
 
                     <label>
@@ -137,6 +169,7 @@
 
 
                 <!-- PRIORITY -->
+
                 <div class="form-field">
 
                     <label>
@@ -164,6 +197,7 @@
 
 
                 <!-- DESCRIPTION -->
+
                 <div class="form-field field-description">
 
                     <label>
@@ -185,6 +219,7 @@
 
 
             <!-- ACTIONS -->
+
             <div class="form-actions">
 
                 @if (editingTaskId == null)
@@ -290,6 +325,7 @@
                         <div class="task-card">
 
                             <!-- TASK HEADER -->
+
                             <div class="task-card-header">
 
                                 <div class="task-title-area">
@@ -346,6 +382,7 @@
 
 
                             <!-- TASK INFO -->
+
                             <div class="task-info">
 
                                 <div class="task-info-row">
@@ -380,6 +417,7 @@
 
 
                             <!-- TASK ACTIONS -->
+
                             <div class="task-actions">
 
                                 <button class="task-details-button"
@@ -455,6 +493,7 @@
                  @onclick:stopPropagation="true">
 
                 <!-- HEADER -->
+
                 <div class="task-modal-header">
 
                     <div class="task-modal-title">
@@ -464,6 +503,7 @@
                         </div>
 
                         <div>
+
                             <h5>
                                 @selectedTask.Title
                             </h5>
@@ -471,6 +511,7 @@
                             <span>
                                 Task details
                             </span>
+
                         </div>
 
                     </div>
@@ -488,11 +529,13 @@
 
 
                 <!-- BODY -->
+
                 <div class="task-modal-body">
 
                     <div class="details-grid">
 
                         <!-- PRIORITY -->
+
                         <div class="detail-box">
 
                             <span class="detail-label">
@@ -522,6 +565,7 @@
 
 
                         <!-- DUE DATE -->
+
                         <div class="detail-box">
 
                             <span class="detail-label">
@@ -580,6 +624,7 @@
 
 
                 <!-- FOOTER -->
+
                 <div class="task-modal-footer">
 
                     <button type="button"
@@ -644,6 +689,9 @@
     private string? errorMessage;
 
 
+    private string? successMessage;
+
+
     private CreateTaskDto newTask = new()
     {
         DueDate = DateTime.Now
@@ -658,7 +706,7 @@
     {
         try
         {
-            ClearError();
+            ClearMessages();
 
             tasks =
                 await TaskService.GetTasksAsync();
@@ -667,7 +715,7 @@
             if (Id != null)
             {
                 var task =
-                    tasks!.FirstOrDefault(x => x.Id == Id);
+                    tasks?.FirstOrDefault(x => x.Id == Id);
 
                 if (task != null)
                 {
@@ -697,7 +745,7 @@
 
         try
         {
-            ClearError();
+            ClearMessages();
 
             await TaskService.AddTaskAsync(newTask);
 
@@ -711,6 +759,8 @@
                 {
                     DueDate = DateTime.Now
                 };
+
+            SetSuccess("Task added successfully.");
         }
         catch (Exception ex)
         {
@@ -727,7 +777,7 @@
     {
         try
         {
-            ClearError();
+            ClearMessages();
 
             await TaskService.CompleteTaskAsync(id);
 
@@ -741,6 +791,8 @@
             {
                 selectedTask = null;
             }
+
+            SetSuccess("Task completed successfully.");
         }
         catch (Exception ex)
         {
@@ -755,7 +807,7 @@
 
     private void EditTask(TaskItem task)
     {
-        ClearError();
+        ClearMessages();
 
         editingTask =
             task;
@@ -784,7 +836,7 @@
     {
         try
         {
-            ClearError();
+            ClearMessages();
 
             await TaskService.DeleteAsync(id);
 
@@ -804,6 +856,8 @@
             {
                 CancelEdit();
             }
+
+            SetSuccess("Task deleted successfully.");
         }
         catch (Exception ex)
         {
@@ -828,7 +882,7 @@
 
         try
         {
-            ClearError();
+            ClearMessages();
 
 
             editingTask.Title =
@@ -866,6 +920,8 @@
                 {
                     DueDate = DateTime.Now
                 };
+
+            SetSuccess("Task updated successfully.");
         }
         catch (Exception ex)
         {
@@ -880,7 +936,7 @@
 
     private void CancelEdit()
     {
-        ClearError();
+        ClearMessages();
 
         editingTask =
             null;
@@ -903,7 +959,7 @@
 
     private void ViewTaskDetails(TaskItem task)
     {
-        ClearError();
+        ClearMessages();
 
         selectedTask =
             task;
@@ -970,12 +1026,20 @@
     }
 
 
+    private void HandleInvalidSubmit(EditContext editContext)
+    {
+        ClearSuccess();
+    }
+
+
     // =========================
     // ERROR HANDLING
     // =========================
 
     private void SetError(Exception ex)
     {
+        successMessage = null;
+
         errorMessage =
             string.IsNullOrWhiteSpace(ex.Message)
                 ? "Unable to complete the operation. Please try again."
@@ -987,6 +1051,34 @@
     {
         errorMessage =
             null;
+    }
+
+
+    // =========================
+    // SUCCESS HANDLING
+    // =========================
+
+    private void SetSuccess(string message)
+    {
+        errorMessage = null;
+
+        successMessage =
+            message;
+    }
+
+
+    private void ClearSuccess()
+    {
+        successMessage =
+            null;
+    }
+
+
+    private void ClearMessages()
+    {
+        errorMessage = null;
+
+        successMessage = null;
     }
 
 

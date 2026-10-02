@@ -70,7 +70,8 @@
 
             <button type="button"
                     class="btn btn-primary compact-button"
-                    @onclick="LoadRemindersAsync">
+                    @onclick="LoadRemindersAsync"
+                    disabled="@isProcessing">
 
                 Try Again
 
@@ -80,6 +81,37 @@
     }
     else
     {
+        <!-- ============================== -->
+        <!-- SUCCESS -->
+        <!-- ============================== -->
+        @if (!string.IsNullOrWhiteSpace(successMessage))
+        {
+            <div class="alert alert-success alert-dismissible fade show compact-alert"
+                 role="status"
+                 aria-live="polite">
+
+                <div>
+
+                    <strong>
+                        ✅ Success
+                    </strong>
+
+                    <div class="mt-1">
+                        @successMessage
+                    </div>
+
+                </div>
+
+                <button type="button"
+                        class="btn-close"
+                        aria-label="Close"
+                        @onclick="ClearSuccess">
+                </button>
+
+            </div>
+        }
+
+
         <!-- ============================== -->
         <!-- OPERATION ERROR -->
         <!-- ============================== -->
@@ -121,22 +153,28 @@
 
             <div class="form-header">
 
-                <h4>
-                    @(editingReminderId == null
-                                        ? "Add Reminder"
-                                        : "Edit Reminder")
-                                                      </h4>
+                <div>
 
-                <p>
-                    @(editingReminderId == null
-                                        ? "Create a new reminder."
-                                        : "Update the selected reminder.")
-                </p>
+                    <h4>
+                        @(editingReminderId == null
+                                                ? "Add Reminder"
+                                                : "Edit Reminder")
+                                                              </h4>
+
+                    <p>
+                        @(editingReminderId == null
+                                                ? "Create a new reminder."
+                                                : "Update the selected reminder.")
+                    </p>
+
+                    </div>
 
                 </div>
 
 
+                <!-- ============================== -->
                 <!-- FORM -->
+                <!-- ============================== -->
 
                 <div class="reminder-form-grid">
 
@@ -219,7 +257,8 @@
                 </div>
 
 
-                @if (showValidation && !IsReminderValid)
+                @if (showValidation &&
+                            !IsReminderValid)
                 {
                     <div class="validation-summary">
                         Please correct the highlighted fields before saving.
@@ -227,31 +266,68 @@
                 }
 
 
+                <!-- ============================== -->
                 <!-- BUTTONS -->
+                <!-- ============================== -->
 
                 <div class="form-actions">
 
                     @if (editingReminderId == null)
                     {
                         <button type="submit"
-                                class="btn btn-primary compact-button">
+                                class="btn btn-primary compact-button"
+                                disabled="@isProcessing">
 
-                            ➕ Add Reminder
+                            @if (isProcessing)
+                            {
+                                <span class="spinner-border spinner-border-sm me-2"
+                                      role="status"
+                                      aria-hidden="true">
+                                </span>
+
+                                <span>
+                                    Adding...
+                                </span>
+                            }
+                            else
+                            {
+                                <span>
+                                    ➕ Add Reminder
+                                </span>
+                            }
 
                         </button>
                     }
                     else
                     {
                         <button type="submit"
-                                class="btn btn-warning compact-button">
+                                class="btn btn-warning compact-button"
+                                disabled="@isProcessing">
 
-                            💾 Save Changes
+                            @if (isProcessing)
+                            {
+                                <span class="spinner-border spinner-border-sm me-2"
+                                      role="status"
+                                      aria-hidden="true">
+                                </span>
+
+                                <span>
+                                    Saving...
+                                </span>
+                            }
+                            else
+                            {
+                                <span>
+                                    💾 Save Changes
+                                </span>
+                            }
 
                         </button>
 
                         <button type="button"
                                 class="btn btn-light border compact-button"
-                                @onclick="CancelEdit">
+                                @onclick="CancelEdit"
+                                disabled="@isProcessing">
 
                             Cancel
 
@@ -279,7 +355,8 @@
 
                 <input class="search-input"
                        placeholder="Search reminders..."
-                       @bind="searchText" />
+                       @bind="searchText"
+                       @bind:event="oninput" />
 
             </div>
 
@@ -415,8 +492,10 @@
 
                             <div class="reminder-actions">
 
-                                <button class="details-button"
-                                        @onclick="() => ViewReminderDetails(reminder)">
+                                <button type="button"
+                                        class="details-button"
+                                        @onclick="() => ViewReminderDetails(reminder)"
+                                        disabled="@isProcessing">
 
                                     👁️ View Details
 
@@ -427,22 +506,28 @@
                                 {
                                     <div class="reminder-action-row">
 
-                                        <button class="action-button action-complete"
-                                                @onclick="() => TriggerReminder(reminder.Id)">
+                                        <button type="button"
+                                                class="action-button action-complete"
+                                                @onclick="() => TriggerReminder(reminder.Id)"
+                                                disabled="@isProcessing">
 
                                             ✓ Complete
 
                                         </button>
 
-                                        <button class="action-button action-edit"
-                                                @onclick="() => EditReminder(reminder)">
+                                        <button type="button"
+                                                class="action-button action-edit"
+                                                @onclick="() => EditReminder(reminder)"
+                                                disabled="@isProcessing">
 
                                             ✏️ Edit
 
                                         </button>
 
-                                        <button class="action-button action-delete"
-                                                @onclick="() => DeleteReminder(reminder.Id)">
+                                        <button type="button"
+                                                class="action-button action-delete"
+                                                @onclick="() => DeleteReminder(reminder.Id)"
+                                                disabled="@isProcessing">
 
                                             🗑 Delete
 
@@ -452,8 +537,10 @@
                                 }
                                 else
                                 {
-                                    <button class="action-button action-delete full-width"
-                                            @onclick="() => DeleteReminder(reminder.Id)">
+                                    <button type="button"
+                                            class="action-button action-delete full-width"
+                                            @onclick="() => DeleteReminder(reminder.Id)"
+                                            disabled="@isProcessing">
 
                                         🗑 Delete
 
@@ -510,7 +597,8 @@
                         <button type="button"
                                 class="modal-close-button"
                                 aria-label="Close"
-                                @onclick="CloseReminderDetails">
+                                @onclick="CloseReminderDetails"
+                                disabled="@isProcessing">
 
                             ×
 
@@ -620,7 +708,8 @@
 
                         <button type="button"
                                 class="btn btn-light border compact-button"
-                                @onclick="CloseReminderDetails">
+                                @onclick="CloseReminderDetails"
+                                disabled="@isProcessing">
 
                             Close
 
@@ -631,7 +720,8 @@
                         {
                             <button type="button"
                                     class="btn btn-warning compact-button"
-                                    @onclick="() => EditReminderFromDetails(selectedReminder)">
+                                    @onclick="() => EditReminderFromDetails(selectedReminder)"
+                                    disabled="@isProcessing">
 
                                 ✏️ Edit
 
@@ -639,7 +729,8 @@
 
                             <button type="button"
                                     class="btn btn-success compact-button"
-                                    @onclick="() => CompleteReminderFromDetails(selectedReminder.Id)">
+                                    @onclick="() => CompleteReminderFromDetails(selectedReminder.Id)"
+                                    disabled="@isProcessing">
 
                                 ✅ Complete
 
@@ -680,9 +771,14 @@
 
     private string? errorMessage;
 
+    private string? successMessage;
+
     private string? loadError;
 
+
     private bool isLoading = true;
+
+    private bool isProcessing;
 
 
     private bool showValidation;
@@ -707,26 +803,24 @@
     private async Task LoadRemindersAsync()
     {
         isLoading = true;
+
         loadError = null;
+
+        ClearMessages();
+
 
         try
         {
-            ClearError();
-
             reminders =
-                await ReminderService.GetAllAsync();
-
-            if (reminders == null)
-            {
-                reminders =
-                    new List<Reminder>();
-            }
+                await ReminderService.GetAllAsync()
+                ?? new List<Reminder>();
 
 
             if (Id != null)
             {
                 var reminder =
-                    reminders.FirstOrDefault(x => x.Id == Id);
+                    reminders.FirstOrDefault(
+                        x => x.Id == Id);
 
                 if (reminder != null)
                 {
@@ -772,9 +866,17 @@
             return;
 
 
+        if (isProcessing)
+            return;
+
+
+        isProcessing = true;
+
+
         try
         {
-            ClearError();
+            ClearMessages();
+
 
             await ReminderService.CreateAsync(
                 newReminder);
@@ -793,10 +895,18 @@
                 {
                     ReminderDate = DateTime.Today
                 };
+
+
+            SetSuccess(
+                "Reminder added successfully.");
         }
         catch (Exception ex)
         {
             SetError(ex);
+        }
+        finally
+        {
+            isProcessing = false;
         }
     }
 
@@ -807,10 +917,12 @@
 
     private void EditReminder(Reminder reminder)
     {
-        ClearError();
+        ClearMessages();
+
 
         editingReminder =
             reminder;
+
 
         editingReminderId =
             reminder.Id;
@@ -824,12 +936,22 @@
             new Reminder
             {
                 Id = reminder.Id,
+
                 Title = reminder.Title,
-                ReminderDate = reminder.ReminderDate,
+
+                ReminderDate =
+                    reminder.ReminderDate,
+
                 Type = reminder.Type,
-                ReferenceId = reminder.ReferenceId,
-                IsTriggered = reminder.IsTriggered,
-                CreatedAt = reminder.CreatedAt
+
+                ReferenceId =
+                    reminder.ReferenceId,
+
+                IsTriggered =
+                    reminder.IsTriggered,
+
+                CreatedAt =
+                    reminder.CreatedAt
             };
     }
 
@@ -850,19 +972,29 @@
             return;
 
 
+        if (isProcessing)
+            return;
+
+
+        isProcessing = true;
+
+
         try
         {
-            ClearError();
+            ClearMessages();
 
 
             editingReminder.Title =
                 newReminder.Title;
 
+
             editingReminder.ReminderDate =
                 newReminder.ReminderDate;
 
+
             editingReminder.Type =
                 newReminder.Type;
+
 
             editingReminder.ReferenceId =
                 newReminder.ReferenceId;
@@ -878,10 +1010,18 @@
 
 
             CancelEdit();
+
+
+            SetSuccess(
+                "Reminder updated successfully.");
         }
         catch (Exception ex)
         {
             SetError(ex);
+        }
+        finally
+        {
+            isProcessing = false;
         }
     }
 
@@ -895,8 +1035,10 @@
         editingReminder =
             null;
 
+
         editingReminderId =
             null;
+
 
         showValidation =
             false;
@@ -916,9 +1058,17 @@
 
     private async Task TriggerReminder(int id)
     {
+        if (isProcessing)
+            return;
+
+
+        isProcessing = true;
+
+
         try
         {
-            ClearError();
+            ClearMessages();
+
 
             await ReminderService.TriggerAsync(
                 id);
@@ -932,12 +1082,21 @@
             if (selectedReminder != null &&
                 selectedReminder.Id == id)
             {
-                selectedReminder = null;
+                selectedReminder =
+                    null;
             }
+
+
+            SetSuccess(
+                "Reminder completed successfully.");
         }
         catch (Exception ex)
         {
             SetError(ex);
+        }
+        finally
+        {
+            isProcessing = false;
         }
     }
 
@@ -948,9 +1107,17 @@
 
     private async Task DeleteReminder(int id)
     {
+        if (isProcessing)
+            return;
+
+
+        isProcessing = true;
+
+
         try
         {
-            ClearError();
+            ClearMessages();
+
 
             await ReminderService.DeleteAsync(
                 id);
@@ -964,7 +1131,8 @@
             if (selectedReminder != null &&
                 selectedReminder.Id == id)
             {
-                selectedReminder = null;
+                selectedReminder =
+                    null;
             }
 
 
@@ -972,10 +1140,18 @@
             {
                 CancelEdit();
             }
+
+
+            SetSuccess(
+                "Reminder deleted successfully.");
         }
         catch (Exception ex)
         {
             SetError(ex);
+        }
+        finally
+        {
+            isProcessing = false;
         }
     }
 
@@ -986,7 +1162,8 @@
 
     private void ViewReminderDetails(Reminder reminder)
     {
-        ClearError();
+        ClearMessages();
+
 
         selectedReminder =
             reminder;
@@ -1022,10 +1199,15 @@
 
     private void SetError(Exception ex)
     {
+        successMessage = null;
+
+
         errorMessage =
-            string.IsNullOrWhiteSpace(ex.Message)
-                ? "Unable to complete the operation. Please try again."
-                : ex.Message;
+            "Unable to complete the operation. Please try again.";
+
+
+        Console.WriteLine(
+            $"Reminder operation error: {ex.Message}");
     }
 
 
@@ -1033,6 +1215,34 @@
     {
         errorMessage =
             null;
+    }
+
+
+    // =========================
+    // SUCCESS HANDLING
+    // =========================
+
+    private void SetSuccess(string message)
+    {
+        errorMessage = null;
+
+        successMessage =
+            message;
+    }
+
+
+    private void ClearSuccess()
+    {
+        successMessage =
+            null;
+    }
+
+
+    private void ClearMessages()
+    {
+        errorMessage = null;
+
+        successMessage = null;
     }
 
 

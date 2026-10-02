@@ -8,6 +8,7 @@
 @inject TaskApiService TaskService
 @inject NavigationManager NavigationManager
 
+
 <div class="calendar-page">
 
     <!-- ============================== -->
@@ -28,6 +29,7 @@
 
         </div>
 
+
         <div class="calendar-navigation">
 
             <button class="calendar-nav-button"
@@ -38,6 +40,7 @@
 
             </button>
 
+
             <button class="calendar-today-button"
                     type="button"
                     @onclick="GoToToday">
@@ -45,6 +48,7 @@
                 Today
 
             </button>
+
 
             <button class="calendar-nav-button"
                     type="button"
@@ -57,6 +61,7 @@
         </div>
 
     </div>
+
 
     @if (isLoading)
     {
@@ -83,7 +88,7 @@
     else if (!string.IsNullOrWhiteSpace(loadError))
     {
         <!-- ============================== -->
-        <!-- ERROR -->
+        <!-- LOAD ERROR -->
         <!-- ============================== -->
 
         <div class="alert alert-danger d-flex flex-column align-items-center text-center p-4"
@@ -113,6 +118,67 @@
     }
     else
     {
+        <!-- ============================== -->
+        <!-- SUCCESS -->
+        <!-- ============================== -->
+        @if (!string.IsNullOrWhiteSpace(successMessage))
+        {
+            <div class="alert alert-success alert-dismissible fade show compact-alert"
+                 role="status"
+                 aria-live="polite">
+
+                <div>
+
+                    <strong>
+                        ✅ Success
+                    </strong>
+
+                    <div class="mt-1">
+                        @successMessage
+                    </div>
+
+                </div>
+
+                <button type="button"
+                        class="btn-close"
+                        aria-label="Close"
+                        @onclick="ClearSuccess">
+                </button>
+
+            </div>
+        }
+
+
+        <!-- ============================== -->
+        <!-- OPERATION ERROR -->
+        <!-- ============================== -->
+        @if (!string.IsNullOrWhiteSpace(errorMessage))
+        {
+            <div class="alert alert-danger alert-dismissible fade show compact-alert"
+                 role="alert">
+
+                <div>
+
+                    <strong>
+                        ❌ Something went wrong.
+                    </strong>
+
+                    <div class="mt-1">
+                        @errorMessage
+                    </div>
+
+                </div>
+
+                <button type="button"
+                        class="btn-close"
+                        aria-label="Close"
+                        @onclick="ClearError">
+                </button>
+
+            </div>
+        }
+
+
         <!-- ============================== -->
         <!-- CALENDAR CARD -->
         <!-- ============================== -->
@@ -215,10 +281,11 @@
                     var isToday =
                     IsToday(currentDay);
 
+
                     <div class="calendar-cell
-                                        @(isToday ? "today-cell" : "")
-                                        @(HasAnyItems(currentDay) ? "has-items" : "")
-                                        @GetDayClass(currentDay)"
+                                                @(isToday ? "today-cell" : "")
+                                                @(HasAnyItems(currentDay) ? "has-items" : "")
+                                                @GetDayClass(currentDay)"
                          @onclick="() => OpenDay(currentDay)">
 
                         <!-- DAY NUMBER -->
@@ -255,6 +322,7 @@
                                     </span>
                                 }
 
+
                                 @if (dayExpenses.Any())
                                 {
                                     <span class="calendar-bar expense-bar">
@@ -265,6 +333,7 @@
 
                                     </span>
                                 }
+
 
                                 @if (dayTasks.Any())
                                 {
@@ -302,6 +371,7 @@
                                 </button>
                             }
 
+
                             @foreach (var expense in dayExpenses.Take(1))
                             {
                                 <button type="button"
@@ -319,6 +389,7 @@
                                 </button>
                             }
 
+
                             @foreach (var task in dayTasks.Take(1))
                             {
                                 <button type="button"
@@ -335,6 +406,7 @@
 
                                 </button>
                             }
+
 
                             @if (totalItems > 3)
                             {
@@ -388,6 +460,7 @@
 
                         </div>
 
+
                         <button type="button"
                                 class="calendar-close"
                                 @onclick="CloseModal"
@@ -426,7 +499,9 @@
                         }
                         else
                         {
+                            <!-- ============================== -->
                             <!-- REMINDERS -->
+                            <!-- ============================== -->
                             @if (SelectedReminders.Any())
                             {
                                 <div class="calendar-section">
@@ -444,6 +519,7 @@
                                         </span>
 
                                     </div>
+
 
                                     @foreach (var reminder in SelectedReminders)
                                     {
@@ -480,7 +556,9 @@
                             }
 
 
+                            <!-- ============================== -->
                             <!-- EXPENSES -->
+                            <!-- ============================== -->
                             @if (SelectedExpenses.Any())
                             {
                                 <div class="calendar-section">
@@ -498,6 +576,7 @@
                                         </span>
 
                                     </div>
+
 
                                     @foreach (var expense in SelectedExpenses)
                                     {
@@ -532,7 +611,9 @@
                             }
 
 
+                            <!-- ============================== -->
                             <!-- TASKS -->
+                            <!-- ============================== -->
                             @if (SelectedTasks.Any())
                             {
                                 <div class="calendar-section">
@@ -550,6 +631,7 @@
                                         </span>
 
                                     </div>
+
 
                                     @foreach (var task in SelectedTasks)
                                     {
@@ -584,7 +666,9 @@
                             }
 
 
-                            <!-- DETAILS -->
+                            <!-- ============================== -->
+                            <!-- REMINDER DETAILS -->
+                            <!-- ============================== -->
                             @if (selectedReminder != null)
                             {
                                 <div class="details-panel reminder-details">
@@ -597,13 +681,15 @@
 
                                         <button type="button"
                                                 class="details-close"
-                                                @onclick="ClearSelectedDetails">
+                                                @onclick="ClearSelectedDetails"
+                                                aria-label="Close details">
 
                                             ×
 
                                         </button>
 
                                     </div>
+
 
                                     <div class="details-grid">
 
@@ -619,6 +705,7 @@
 
                                         </div>
 
+
                                         <div class="detail-box">
 
                                             <span>
@@ -630,6 +717,7 @@
                                             </strong>
 
                                         </div>
+
 
                                         <div class="detail-box">
 
@@ -645,16 +733,19 @@
 
                                     </div>
 
+
                                     <div class="details-actions">
 
-                                        <button class="details-button details-edit"
+                                        <button type="button"
+                                                class="details-button details-edit"
                                                 @onclick="EditSelected">
 
                                             ✏️ Edit
 
                                         </button>
 
-                                        <button class="details-button details-delete"
+                                        <button type="button"
+                                                class="details-button details-delete"
                                                 @onclick="DeleteSelected">
 
                                             🗑 Delete
@@ -667,6 +758,9 @@
                             }
 
 
+                            <!-- ============================== -->
+                            <!-- EXPENSE DETAILS -->
+                            <!-- ============================== -->
                             @if (selectedExpense != null)
                             {
                                 <div class="details-panel expense-details">
@@ -679,13 +773,15 @@
 
                                         <button type="button"
                                                 class="details-close"
-                                                @onclick="ClearSelectedDetails">
+                                                @onclick="ClearSelectedDetails"
+                                                aria-label="Close details">
 
                                             ×
 
                                         </button>
 
                                     </div>
+
 
                                     <div class="details-grid">
 
@@ -701,6 +797,7 @@
 
                                         </div>
 
+
                                         <div class="detail-box">
 
                                             <span>
@@ -713,6 +810,7 @@
 
                                         </div>
 
+
                                         <div class="detail-box">
 
                                             <span>
@@ -720,10 +818,13 @@
                                             </span>
 
                                             <strong>
-                                                @selectedExpense.Category
-                                            </strong>
+                                                @(string.IsNullOrWhiteSpace(selectedExpense.Category)
+                                                                                ? "No category"
+                                                                                : selectedExpense.Category)
+                            </strong>
 
                                         </div>
+
 
                                         <div class="detail-box">
 
@@ -739,16 +840,19 @@
 
                                     </div>
 
+
                                     <div class="details-actions">
 
-                                        <button class="details-button details-edit"
+                                        <button type="button"
+                                                class="details-button details-edit"
                                                 @onclick="EditSelected">
 
                                             ✏️ Edit
 
                                         </button>
 
-                                        <button class="details-button details-delete"
+                                        <button type="button"
+                                                class="details-button details-delete"
                                                 @onclick="DeleteSelected">
 
                                             🗑 Delete
@@ -758,9 +862,12 @@
                                     </div>
 
                                 </div>
-                            }
+                                }
 
 
+                            <!-- ============================== -->
+                            <!-- TASK DETAILS -->
+                            <!-- ============================== -->
                             @if (selectedTask != null)
                             {
                                 <div class="details-panel task-details">
@@ -773,13 +880,15 @@
 
                                         <button type="button"
                                                 class="details-close"
-                                                @onclick="ClearSelectedDetails">
+                                                @onclick="ClearSelectedDetails"
+                                                aria-label="Close details">
 
                                             ×
 
                                         </button>
 
                                     </div>
+
 
                                     <div class="details-grid">
 
@@ -795,6 +904,7 @@
 
                                         </div>
 
+
                                         <div class="detail-box detail-full">
 
                                             <span>
@@ -809,6 +919,7 @@
 
                                         </div>
 
+
                                         <div class="detail-box">
 
                                             <span>
@@ -820,6 +931,7 @@
                                             </strong>
 
                                         </div>
+
 
                                         <div class="detail-box">
 
@@ -835,16 +947,19 @@
 
                                     </div>
 
+
                                     <div class="details-actions">
 
-                                        <button class="details-button details-edit"
+                                        <button type="button"
+                                                class="details-button details-edit"
                                                 @onclick="EditSelected">
 
                                             ✏️ Edit
 
                                         </button>
 
-                                        <button class="details-button details-delete"
+                                        <button type="button"
+                                                class="details-button details-delete"
                                                 @onclick="DeleteSelected">
 
                                             🗑 Delete
@@ -909,12 +1024,16 @@
 
 
     // =========================
-    // LOADING / ERROR
+    // LOADING / ERROR / SUCCESS
     // =========================
 
     private bool isLoading = true;
 
     private string? loadError;
+
+    private string? errorMessage;
+
+    private string? successMessage;
 
 
     // =========================
@@ -930,23 +1049,41 @@
     private async Task LoadCalendarAsync()
     {
         isLoading = true;
+
         loadError = null;
+
+        ClearMessages();
+
 
         try
         {
             reminders =
-                await ReminderService.GetAllAsync();
+                await ReminderService.GetAllAsync()
+                ?? new List<Reminder>();
+
 
             expenses =
-                await ExpenseService.GetExpensesAsync();
+                await ExpenseService.GetExpensesAsync()
+                ?? new List<Expense>();
+
 
             tasks =
-                await TaskService.GetTasksAsync();
+                await TaskService.GetTasksAsync()
+                ?? new List<TaskItem>();
+
+
+            CloseModalWithoutRender();
         }
         catch (Exception ex)
         {
             Console.WriteLine(
                 $"Calendar loading error: {ex.Message}");
+
+            reminders = null;
+
+            expenses = null;
+
+            tasks = null;
 
             loadError =
                 "Please try again in a moment.";
@@ -968,6 +1105,10 @@
             currentMonth.AddMonths(-1);
 
         ClearSelectedDetails();
+
+        showModal = false;
+
+        ClearMessages();
     }
 
 
@@ -977,6 +1118,10 @@
             currentMonth.AddMonths(1);
 
         ClearSelectedDetails();
+
+        showModal = false;
+
+        ClearMessages();
     }
 
 
@@ -985,7 +1130,11 @@
         currentMonth =
             DateTime.Today;
 
-        CloseModal();
+        ClearSelectedDetails();
+
+        showModal = false;
+
+        ClearMessages();
     }
 
 
@@ -1025,6 +1174,16 @@
         ClearSelectedDetails();
 
         StateHasChanged();
+    }
+
+
+    private void CloseModalWithoutRender()
+    {
+        showModal = false;
+
+        selectedDay = null;
+
+        ClearSelectedDetails();
     }
 
 
@@ -1256,52 +1415,92 @@
 
     private async Task DeleteSelected()
     {
-        if (selectedExpense != null)
+        try
         {
-            await ExpenseService.DeleteAsync(
-                selectedExpense.Id);
+            ClearMessages();
 
-            expenses =
-                await ExpenseService.GetExpensesAsync();
 
-            selectedExpense =
-                null;
+            if (selectedExpense != null)
+            {
+                var id =
+                    selectedExpense.Id;
 
-            CloseModal();
 
-            return;
+                await ExpenseService.DeleteAsync(id);
+
+
+                expenses =
+                    await ExpenseService.GetExpensesAsync()
+                    ?? new List<Expense>();
+
+
+                selectedExpense =
+                    null;
+
+
+                CloseModal();
+
+                SetSuccess(
+                    "Expense deleted successfully.");
+
+                return;
+            }
+
+
+            if (selectedTask != null)
+            {
+                var id =
+                    selectedTask.Id;
+
+
+                await TaskService.DeleteAsync(id);
+
+
+                tasks =
+                    await TaskService.GetTasksAsync()
+                    ?? new List<TaskItem>();
+
+
+                selectedTask =
+                    null;
+
+
+                CloseModal();
+
+                SetSuccess(
+                    "Task deleted successfully.");
+
+                return;
+            }
+
+
+            if (selectedReminder != null)
+            {
+                var id =
+                    selectedReminder.Id;
+
+
+                await ReminderService.DeleteAsync(id);
+
+
+                reminders =
+                    await ReminderService.GetAllAsync()
+                    ?? new List<Reminder>();
+
+
+                selectedReminder =
+                    null;
+
+
+                CloseModal();
+
+                SetSuccess(
+                    "Reminder deleted successfully.");
+            }
         }
-
-
-        if (selectedTask != null)
+        catch (Exception ex)
         {
-            await TaskService.DeleteAsync(
-                selectedTask.Id);
-
-            tasks =
-                await TaskService.GetTasksAsync();
-
-            selectedTask =
-                null;
-
-            CloseModal();
-
-            return;
-        }
-
-
-        if (selectedReminder != null)
-        {
-            await ReminderService.DeleteAsync(
-                selectedReminder.Id);
-
-            reminders =
-                await ReminderService.GetAllAsync();
-
-            selectedReminder =
-                null;
-
-            CloseModal();
+            SetError(ex);
         }
     }
 
@@ -1337,6 +1536,56 @@
 
             return;
         }
+    }
+
+
+    // =========================
+    // ERROR HANDLING
+    // =========================
+
+    private void SetError(Exception ex)
+    {
+        successMessage = null;
+
+        errorMessage =
+            string.IsNullOrWhiteSpace(ex.Message)
+                ? "Unable to complete the operation. Please try again."
+                : ex.Message;
+    }
+
+
+    private void ClearError()
+    {
+        errorMessage =
+            null;
+    }
+
+
+    // =========================
+    // SUCCESS HANDLING
+    // =========================
+
+    private void SetSuccess(string message)
+    {
+        errorMessage = null;
+
+        successMessage =
+            message;
+    }
+
+
+    private void ClearSuccess()
+    {
+        successMessage =
+            null;
+    }
+
+
+    private void ClearMessages()
+    {
+        errorMessage = null;
+
+        successMessage = null;
     }
 
 }

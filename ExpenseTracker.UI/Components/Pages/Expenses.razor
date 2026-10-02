@@ -7,7 +7,6 @@
 
 @inject ExpenseApiService ExpenseService
 
-
 <div class="expenses-page">
 
     <!-- ============================== -->
@@ -27,6 +26,33 @@
         </div>
 
     </div>
+
+
+    <!-- ============================== -->
+    <!-- SUCCESS -->
+    <!-- ============================== -->
+    @if (!string.IsNullOrWhiteSpace(successMessage))
+    {
+        <div class="alert alert-success alert-dismissible fade show compact-alert"
+             role="status"
+             aria-live="polite">
+
+            <div>
+                <strong>✅ Success</strong>
+
+                <div class="mt-1">
+                    @successMessage
+                </div>
+            </div>
+
+            <button type="button"
+                    class="btn-close"
+                    aria-label="Close"
+                    @onclick="ClearSuccess">
+            </button>
+
+        </div>
+    }
 
 
     <!-- ============================== -->
@@ -62,6 +88,7 @@
     <div class="row g-3 mb-3">
 
         <!-- TOTAL -->
+
         <div class="col-xl-3 col-md-6">
 
             <div class="expense-stat-card">
@@ -88,6 +115,7 @@
 
 
         <!-- PAID -->
+
         <div class="col-xl-3 col-md-6">
 
             <div class="expense-stat-card">
@@ -114,6 +142,7 @@
 
 
         <!-- UNPAID -->
+
         <div class="col-xl-3 col-md-6">
 
             <div class="expense-stat-card">
@@ -140,6 +169,7 @@
 
 
         <!-- UPCOMING -->
+
         <div class="col-xl-3 col-md-6">
 
             <div class="expense-stat-card">
@@ -172,7 +202,8 @@
     <!-- ============================== -->
 
     <EditForm Model="newExpense"
-              OnValidSubmit="@(editingExpenseId == null ? AddExpense : SaveExpense)">
+              OnValidSubmit="@(editingExpenseId == null ? AddExpense : SaveExpense)"
+              OnInvalidSubmit="HandleInvalidSubmit">
 
         <div class="expense-form-card">
 
@@ -196,9 +227,11 @@
 
 
             <!-- FORM FIELDS -->
+
             <div class="expense-form-grid">
 
                 <!-- TITLE -->
+
                 <div class="form-field">
 
                     <label>
@@ -221,6 +254,7 @@
 
 
                 <!-- AMOUNT -->
+
                 <div class="form-field">
 
                     <label>
@@ -246,6 +280,7 @@
 
 
                 <!-- DUE DATE -->
+
                 <div class="form-field">
 
                     <label>
@@ -268,6 +303,7 @@
 
 
                 <!-- CATEGORY -->
+
                 <div class="form-field">
 
                     <label>
@@ -292,6 +328,7 @@
 
 
             <!-- BUTTONS -->
+
             <div class="form-actions">
 
                 @if (editingExpenseId == null)
@@ -428,6 +465,7 @@
                             <tr>
 
                                 <!-- TITLE -->
+
                                 <td>
 
                                     <div class="expense-title-cell">
@@ -457,6 +495,7 @@
 
 
                                 <!-- AMOUNT -->
+
                                 <td>
 
                                     <strong class="amount-value">
@@ -467,6 +506,7 @@
 
 
                                 <!-- DATE -->
+
                                 <td>
 
                                     <span class="date-value">
@@ -477,6 +517,7 @@
 
 
                                 <!-- STATUS -->
+
                                 <td>
 
                                     @if (expense.IsPaid)
@@ -496,6 +537,7 @@
 
 
                                 <!-- ACTIONS -->
+
                                 <td>
 
                                     <div class="expense-actions">
@@ -507,6 +549,7 @@
                                                     @onclick="() => MarkAsPaid(expense.Id)">
 
                                                 ✓
+
                                                 <span>
                                                     Pay
                                                 </span>
@@ -520,6 +563,7 @@
                                                 @onclick="() => EditExpense(expense)">
 
                                             ✏️
+
                                             <span>
                                                 Edit
                                             </span>
@@ -532,6 +576,7 @@
                                                 @onclick="() => DeleteExpense(expense.Id)">
 
                                             🗑
+
                                             <span>
                                                 Delete
                                             </span>
@@ -569,6 +614,8 @@
 
     private string? errorMessage;
 
+    private string? successMessage;
+
     private bool editingExpenseIsPaid;
 
 
@@ -587,7 +634,7 @@
     {
         try
         {
-            ClearError();
+            ClearMessages();
 
             expenses =
                 await ExpenseService.GetExpensesAsync();
@@ -596,7 +643,7 @@
             if (Id != null)
             {
                 var expense =
-                    expenses.FirstOrDefault(x => x.Id == Id);
+                    expenses?.FirstOrDefault(x => x.Id == Id);
 
                 if (expense != null)
                 {
@@ -621,6 +668,14 @@
         && newExpense.DueDate != default;
 
 
+    private void HandleInvalidSubmit(EditContext editContext)
+    {
+        ClearSuccess();
+
+        showValidation = true;
+    }
+
+
     // =========================
     // PAY
     // =========================
@@ -629,12 +684,14 @@
     {
         try
         {
-            ClearError();
+            ClearMessages();
 
             await ExpenseService.MarkAsPaidAsync(id);
 
             expenses =
                 await ExpenseService.GetExpensesAsync();
+
+            SetSuccess("Expense marked as paid.");
         }
         catch (Exception ex)
         {
@@ -651,7 +708,7 @@
     {
         try
         {
-            ClearError();
+            ClearMessages();
 
             await ExpenseService.DeleteAsync(id);
 
@@ -663,6 +720,8 @@
             {
                 CancelEdit();
             }
+
+            SetSuccess("Expense deleted successfully.");
         }
         catch (Exception ex)
         {
@@ -677,7 +736,7 @@
 
     private void EditExpense(Expense expense)
     {
-        ClearError();
+        ClearMessages();
 
         editingExpenseId =
             expense.Id;
@@ -715,7 +774,7 @@
 
         try
         {
-            ClearError();
+            ClearMessages();
 
             await ExpenseService.UpdateAsync(
                 new Expense
@@ -750,6 +809,8 @@
 
             newExpense =
                 new CreateExpenseDto();
+
+            SetSuccess("Expense updated successfully.");
         }
         catch (Exception ex)
         {
@@ -772,7 +833,7 @@
 
         try
         {
-            ClearError();
+            ClearMessages();
 
             await ExpenseService.AddExpenseAsync(
                 newExpense);
@@ -787,6 +848,8 @@
 
             newExpense =
                 new CreateExpenseDto();
+
+            SetSuccess("Expense added successfully.");
         }
         catch (Exception ex)
         {
@@ -821,6 +884,8 @@
 
     private void SetError(Exception ex)
     {
+        successMessage = null;
+
         errorMessage =
             string.IsNullOrWhiteSpace(ex.Message)
                 ? "Unable to complete the operation. Please try again."
@@ -832,6 +897,34 @@
     {
         errorMessage =
             null;
+    }
+
+
+    // =========================
+    // SUCCESS HANDLING
+    // =========================
+
+    private void SetSuccess(string message)
+    {
+        errorMessage = null;
+
+        successMessage =
+            message;
+    }
+
+
+    private void ClearSuccess()
+    {
+        successMessage =
+            null;
+    }
+
+
+    private void ClearMessages()
+    {
+        errorMessage = null;
+
+        successMessage = null;
     }
 
 

@@ -12,11 +12,13 @@
     <div class="auth-card">
 
         <div class="auth-brand">
+
             <div class="auth-logo">
                 ET
             </div>
 
             <div>
+
                 <div class="auth-brand-name">
                     ExpenseTracker
                 </div>
@@ -24,7 +26,9 @@
                 <div class="auth-brand-subtitle">
                     Personal Finance Dashboard
                 </div>
+
             </div>
+
         </div>
 
 
@@ -43,6 +47,8 @@
 
         <div class="auth-form">
 
+            <!-- EMAIL -->
+
             <div class="auth-field">
 
                 <label>
@@ -51,11 +57,15 @@
 
                 <input class="form-control"
                        type="email"
+                       autocomplete="email"
                        @bind="email"
+                       @bind:event="oninput"
                        placeholder="Enter your email" />
 
             </div>
 
+
+            <!-- PASSWORD -->
 
             <div class="auth-field">
 
@@ -65,11 +75,15 @@
 
                 <input class="form-control"
                        type="password"
+                       autocomplete="new-password"
                        @bind="password"
+                       @bind:event="oninput"
                        placeholder="Enter your password" />
 
             </div>
 
+
+            <!-- CONFIRM PASSWORD -->
 
             <div class="auth-field">
 
@@ -79,43 +93,76 @@
 
                 <input class="form-control"
                        type="password"
+                       autocomplete="new-password"
                        @bind="confirmPassword"
+                       @bind:event="oninput"
                        placeholder="Confirm your password" />
 
             </div>
 
 
+            <!-- ERROR -->
             @if (!string.IsNullOrWhiteSpace(errorMessage))
             {
-                <div class="auth-alert auth-alert-danger">
-                    <span class="auth-alert-icon">⚠️</span>
+                <div class="auth-alert auth-alert-danger"
+                     role="alert"
+                     aria-live="polite">
+
+                    <span class="auth-alert-icon">
+                        ⚠️
+                    </span>
 
                     <span>
                         @errorMessage
                     </span>
+
                 </div>
             }
 
 
+            <!-- SUCCESS -->
             @if (!string.IsNullOrWhiteSpace(successMessage))
             {
-                <div class="auth-alert auth-alert-success">
-                    <span class="auth-alert-icon">✅</span>
+                <div class="auth-alert auth-alert-success"
+                     role="status"
+                     aria-live="polite">
+
+                    <span class="auth-alert-icon">
+                        ✅
+                    </span>
 
                     <span>
                         @successMessage
                     </span>
+
                 </div>
             }
 
 
-            <button class="btn btn-primary auth-submit"
+            <!-- REGISTER -->
+
+            <button type="button"
+                    class="btn btn-primary auth-submit"
                     @onclick="HandleRegister"
                     disabled="@isSubmitting">
 
-                @(isSubmitting
-                                ? "Creating account..."
-                                : "Create Account")
+                @if (isSubmitting)
+                {
+                    <span class="spinner-border spinner-border-sm me-2"
+                          role="status"
+                          aria-hidden="true">
+                    </span>
+
+                    <span>
+                        Creating account...
+                    </span>
+                }
+                else
+                {
+                    <span>
+                        Create Account
+                    </span>
+                }
 
             </button>
 
@@ -141,6 +188,7 @@
 
 </div>
 
+
 @code {
 
     private string email = string.Empty;
@@ -156,34 +204,77 @@
     private bool isSubmitting;
 
 
+    // =========================
+    // REGISTER
+    // =========================
+
     private async Task HandleRegister()
     {
+        if (isSubmitting)
+            return;
+
+
         errorMessage = string.Empty;
+
         successMessage = string.Empty;
 
 
+        // =========================
+        // VALIDATION
+        // =========================
+
         if (string.IsNullOrWhiteSpace(email))
         {
-            errorMessage = "Email is required.";
+            errorMessage =
+                "Email is required.";
+
+            return;
+        }
+
+
+        if (!IsValidEmail(email))
+        {
+            errorMessage =
+                "Please enter a valid email address.";
+
             return;
         }
 
 
         if (string.IsNullOrWhiteSpace(password))
         {
-            errorMessage = "Password is required.";
+            errorMessage =
+                "Password is required.";
+
+            return;
+        }
+
+
+        if (string.IsNullOrWhiteSpace(confirmPassword))
+        {
+            errorMessage =
+                "Please confirm your password.";
+
             return;
         }
 
 
         if (password != confirmPassword)
         {
-            errorMessage = "Passwords do not match.";
+            errorMessage =
+                "Passwords do not match.";
+
             return;
         }
 
 
+        // =========================
+        // SUBMIT
+        // =========================
+
         isSubmitting = true;
+
+        StateHasChanged();
 
 
         try
@@ -197,7 +288,7 @@
                     "api/Auth/register",
                     new
                     {
-                        email,
+                        email = email.Trim(),
                         password
                     });
 
@@ -207,8 +298,11 @@
                 successMessage =
                     "User registered successfully.";
 
+
                 email = string.Empty;
+
                 password = string.Empty;
+
                 confirmPassword = string.Empty;
 
 
@@ -223,30 +317,92 @@
             }
 
 
-            var error =
-                await response.Content
-                    .ReadAsStringAsync();
-
-
-            if (string.IsNullOrWhiteSpace(error))
-            {
-                error =
-                    $"Registration failed with status code {(int)response.StatusCode}.";
-            }
-
-
-            errorMessage = error;
+            errorMessage =
+                await GetRegistrationErrorAsync(
+                    response);
         }
-        catch (Exception ex)
+        catch (HttpRequestException)
         {
             errorMessage =
-                string.IsNullOrWhiteSpace(ex.Message)
-                    ? "Registration failed."
-                    : ex.Message;
+                "Unable to connect to the server. Please try again.";
+        }
+        catch (Exception)
+        {
+            errorMessage =
+                "Something went wrong during registration. Please try again.";
         }
         finally
         {
             isSubmitting = false;
         }
     }
+
+
+    // =========================
+    // EMAIL VALIDATION
+    // =========================
+
+    private static bool IsValidEmail(string value)
+    {
+        try
+        {
+            var trimmed =
+                value.Trim();
+
+
+            var address =
+                new System.Net.Mail.MailAddress(
+                    trimmed);
+
+
+            return address.Address.Equals(
+                trimmed,
+                StringComparison.OrdinalIgnoreCase);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+
+    // =========================
+    // API ERROR
+    // =========================
+
+    private static async Task<string> GetRegistrationErrorAsync(
+        HttpResponseMessage response)
+    {
+        try
+        {
+            var body =
+                await response.Content.ReadAsStringAsync();
+
+
+            if (!string.IsNullOrWhiteSpace(body))
+            {
+                var lowerBody =
+                    body.ToLowerInvariant();
+
+
+                if (lowerBody.Contains("duplicate")
+                    || lowerBody.Contains("already exists")
+                    || lowerBody.Contains("already registered"))
+                {
+                    return
+                        "An account with this email already exists.";
+                }
+            }
+        }
+        catch
+        {
+            // Ignore response parsing errors
+            // and return the generic message below.
+        }
+
+
+        return
+            "Registration failed. Please check your details and try again.";
+    }
+
 }

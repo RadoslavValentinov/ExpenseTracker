@@ -150,6 +150,10 @@ textarea {
     border-color: #e5e7eb;
 }
 
+    .table > :not(caption) > * > * {
+        vertical-align: middle;
+    }
+
 
 /* =========================================================
    GLOBAL ERROR
@@ -172,9 +176,11 @@ textarea {
         content: "An error has occurred.";
     }
 
+
 /* =========================================================
    GLOBAL COMPONENT POLISH
    ========================================================= */
+
 
 /* ---------------------------------------------------------
    BUTTONS
@@ -193,6 +199,17 @@ textarea {
     .btn:active {
         transform: translateY(0);
     }
+
+    .btn:disabled,
+    .btn.disabled {
+        cursor: not-allowed;
+        transform: none;
+    }
+
+        .btn:disabled:hover,
+        .btn.disabled:hover {
+            transform: none;
+        }
 
 .btn-primary {
     box-shadow: 0 5px 14px rgba(37, 99, 235, 0.16);
@@ -269,15 +286,6 @@ textarea {
 
 
 /* ---------------------------------------------------------
-   TABLE FALLBACK
-   --------------------------------------------------------- */
-
-.table > :not(caption) > * > * {
-    vertical-align: middle;
-}
-
-
-/* ---------------------------------------------------------
    MODAL / DIALOG FALLBACK
    --------------------------------------------------------- */
 
@@ -310,7 +318,21 @@ textarea {
 }
 
 
+/* =========================================================
+   ACCESSIBILITY / REDUCED MOTION
+   ========================================================= */
 
+@media (prefers-reduced-motion: reduce) {
+
+    .btn {
+        transition: none;
+    }
+
+        .btn:hover,
+        .btn:active {
+            transform: none;
+        }
+}
 
 
 /* =========================================================

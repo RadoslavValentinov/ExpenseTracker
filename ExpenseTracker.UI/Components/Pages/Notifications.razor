@@ -8,9 +8,12 @@
 @inject ExpenseApiService ExpenseApiService
 @inject NavigationManager NavigationManager
 
+
 <div class="notifications-page">
 
+    <!-- ============================== -->
     <!-- HEADER -->
+    <!-- ============================== -->
 
     <div class="notifications-page-header">
 
@@ -25,6 +28,7 @@
             </p>
 
         </div>
+
 
         @if (notifications != null)
         {
@@ -44,7 +48,40 @@
     </div>
 
 
+    <!-- ============================== -->
+    <!-- SUCCESS -->
+    <!-- ============================== -->
+    @if (!string.IsNullOrWhiteSpace(successMessage))
+    {
+        <div class="alert alert-success alert-dismissible fade show compact-alert"
+             role="status"
+             aria-live="polite">
+
+            <div>
+
+                <strong>
+                    ✅ Success
+                </strong>
+
+                <div class="mt-1">
+                    @successMessage
+                </div>
+
+            </div>
+
+            <button type="button"
+                    class="btn-close"
+                    aria-label="Close"
+                    @onclick="ClearSuccess">
+            </button>
+
+        </div>
+    }
+
+
+    <!-- ============================== -->
     <!-- SEARCH -->
+    <!-- ============================== -->
 
     <div class="notification-toolbar-card">
 
@@ -57,13 +94,16 @@
             <input class="notification-search"
                    placeholder="Search notifications..."
                    @bind="searchText"
-                   @bind:event="oninput" />
+                   @bind:event="oninput"
+                   disabled="@isProcessing" />
+
 
             @if (!string.IsNullOrWhiteSpace(searchText))
             {
                 <button type="button"
                         class="clear-search"
-                        @onclick="ClearSearch">
+                        @onclick="ClearSearch"
+                        disabled="@isProcessing">
 
                     ✕
 
@@ -75,7 +115,9 @@
     </div>
 
 
+    <!-- ============================== -->
     <!-- FILTERS -->
+    <!-- ============================== -->
 
     <div class="notification-filters-card">
 
@@ -83,7 +125,8 @@
 
             <button type="button"
                     class="filter-button @(selectedFilter == "All" ? "active-filter" : "")"
-                    @onclick='() => SetFilter("All")'>
+                    @onclick='() => SetFilter("All")'
+                    disabled="@isProcessing">
 
                 <span>📋</span>
                 <span>All</span>
@@ -93,7 +136,8 @@
 
             <button type="button"
                     class="filter-button expense-filter @(selectedFilter == "Expense" ? "active-filter" : "")"
-                    @onclick='() => SetFilter("Expense")'>
+                    @onclick='() => SetFilter("Expense")'
+                    disabled="@isProcessing">
 
                 <span>💰</span>
                 <span>Expenses</span>
@@ -103,7 +147,8 @@
 
             <button type="button"
                     class="filter-button task-filter @(selectedFilter == "Task" ? "active-filter" : "")"
-                    @onclick='() => SetFilter("Task")'>
+                    @onclick='() => SetFilter("Task")'
+                    disabled="@isProcessing">
 
                 <span>✅</span>
                 <span>Tasks</span>
@@ -113,7 +158,8 @@
 
             <button type="button"
                     class="filter-button reminder-filter @(selectedFilter == "Reminder" ? "active-filter" : "")"
-                    @onclick='() => SetFilter("Reminder")'>
+                    @onclick='() => SetFilter("Reminder")'
+                    disabled="@isProcessing">
 
                 <span>🔔</span>
                 <span>Reminders</span>
@@ -125,7 +171,9 @@
     </div>
 
 
+    <!-- ============================== -->
     <!-- CONTENT -->
+    <!-- ============================== -->
     @if (isLoading)
     {
         <div class="notifications-loading">
@@ -158,7 +206,8 @@
 
             <button type="button"
                     class="empty-action-button"
-                    @onclick="LoadNotificationsAsync">
+                    @onclick="LoadNotificationsAsync"
+                    disabled="@isProcessing">
 
                 Try Again
 
@@ -166,28 +215,35 @@
 
         </div>
     }
-    else if (!string.IsNullOrWhiteSpace(operationError))
+    else
     {
-        <div class="alert alert-danger compact-alert"
-             role="alert">
+        <!-- ============================== -->
+        <!-- OPERATION ERROR -->
+        <!-- ============================== -->
+        @if (!string.IsNullOrWhiteSpace(operationError))
+        {
+            <div class="alert alert-danger compact-alert"
+                 role="alert">
 
-            <strong>
-                ❌ Something went wrong.
-            </strong>
+                <strong>
+                    ❌ Something went wrong.
+                </strong>
 
-            <div class="mt-1">
-                @operationError
+                <div class="mt-1">
+                    @operationError
+                </div>
+
+                <button type="button"
+                        class="btn-close"
+                        aria-label="Close"
+                        @onclick="ClearOperationError">
+                </button>
+
             </div>
+        }
 
-            <button type="button"
-                    class="btn-close"
-                    aria-label="Close"
-                    @onclick="ClearOperationError">
-            </button>
 
-        </div>
-
-        @if (notifications?.Any() != true)
+        @if (!FilteredNotifications.Any())
         {
             <div class="notifications-empty">
 
@@ -203,77 +259,141 @@
                     Няма известия, които да отговарят на текущия филтър.
                 </p>
 
+                @if (!string.IsNullOrWhiteSpace(searchText))
+                {
+                    <button type="button"
+                            class="empty-action-button"
+                            @onclick="ClearSearch"
+                            disabled="@isProcessing">
+
+                        Clear search
+
+                    </button>
+                }
+
             </div>
         }
-    }
-    else if (!FilteredNotifications.Any())
-    {
-        <div class="notifications-empty">
+        else
+        {
+            <div class="notifications-container">
 
-            <div class="empty-icon">
-                🎉
-            </div>
+                @foreach (var notification in FilteredNotifications)
+                {
+                    <div class="notification-card @GetNotificationCardClass(notification)">
 
-            <h4>
-                No notifications
-            </h4>
+                        <!-- ============================== -->
+                        <!-- CARD TOP -->
+                        <!-- ============================== -->
 
-            <p>
-                Няма известия, които да отговарят на текущия филтър.
-            </p>
+                        <div class="notification-card-top">
 
-            @if (!string.IsNullOrWhiteSpace(searchText))
-            {
-                <button type="button"
-                        class="empty-action-button"
-                        @onclick="ClearSearch">
+                            <div class="notification-main">
 
-                    Clear search
-
-                </button>
-            }
-
-        </div>
-    }
-    else
-    {
-        <div class="notifications-container">
-
-            @foreach (var notification in FilteredNotifications)
-            {
-                <div class="notification-card @GetNotificationCardClass(notification)">
-
-                    <!-- CARD TOP -->
-
-                    <div class="notification-card-top">
-
-                        <div class="notification-main">
-
-                            <div class="notification-icon @GetIconClass(notification.Type)">
-                                @GetIcon(notification.Type)
-                            </div>
-
-
-                            <div class="notification-title-area">
-
-                                <div class="notification-title-row">
-
-                                    <h4>
-                                        @notification.Title
-                                    </h4>
-
-                                    <span class="notification-type-badge @GetTypeBadgeClass(notification.Type)">
-                                        @GetTypeName(notification.Type)
-                                    </span>
-
+                                <div class="notification-icon @GetIconClass(notification.Type)">
+                                    @GetIcon(notification.Type)
                                 </div>
 
 
-                                @if (!string.IsNullOrWhiteSpace(notification.Description))
+                                <div class="notification-title-area">
+
+                                    <div class="notification-title-row">
+
+                                        <h4>
+                                            @notification.Title
+                                        </h4>
+
+                                        <span class="notification-type-badge @GetTypeBadgeClass(notification.Type)">
+                                            @GetTypeName(notification.Type)
+                                        </span>
+
+                                    </div>
+
+
+                                    @if (!string.IsNullOrWhiteSpace(notification.Description))
+                                    {
+                                        <p class="notification-description">
+                                            @notification.Description
+                                        </p>
+                                    }
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- ============================== -->
+                        <!-- CARD BOTTOM -->
+                        <!-- ============================== -->
+
+                        <div class="notification-card-bottom">
+
+                            <div class="notification-date">
+
+                                <span class="date-icon">
+                                    📅
+                                </span>
+
+                                <span>
+                                    @notification.Date.ToString("dd MMM yyyy")
+                                </span>
+
+                            </div>
+
+
+                            <div class="notification-buttons">
+
+                                <button type="button"
+                                        class="notification-action-button open-button"
+                                        @onclick="() => Open(notification)"
+                                        disabled="@isProcessing">
+
+                                    <span>↗</span>
+                                    <span>Open</span>
+
+                                </button>
+
+
+                                @if (notification.Type == "Reminder")
                                 {
-                                    <p class="notification-description">
-                                        @notification.Description
-                                    </p>
+                                    <button type="button"
+                                            class="notification-action-button success-button"
+                                            @onclick="() => MarkAsRead(notification)"
+                                            disabled="@isProcessing">
+
+                                        <span>✓</span>
+                                        <span>Mark as Read</span>
+
+                                    </button>
+                                }
+
+
+                                @if (notification.Type == "Task")
+                                {
+                                    <button type="button"
+                                            class="notification-action-button success-button"
+                                            @onclick="() => CompleteTask(notification)"
+                                            disabled="@isProcessing">
+
+                                        <span>✓</span>
+                                        <span>Complete</span>
+
+                                    </button>
+                                }
+
+
+                                @if (notification.Type == "Expense")
+                                {
+                                    <button type="button"
+                                            class="notification-action-button success-button"
+                                            @onclick="() => MarkAsPaid(notification)"
+                                            disabled="@isProcessing">
+
+                                        <span>✓</span>
+                                        <span>Mark as Paid</span>
+
+                                    </button>
                                 }
 
                             </div>
@@ -281,83 +401,10 @@
                         </div>
 
                     </div>
+                }
 
-
-                    <!-- CARD BOTTOM -->
-
-                    <div class="notification-card-bottom">
-
-                        <div class="notification-date">
-
-                            <span class="date-icon">
-                                📅
-                            </span>
-
-                            <span>
-                                @notification.Date.ToString("dd MMM yyyy")
-                            </span>
-
-                        </div>
-
-
-                        <div class="notification-buttons">
-
-                            <button type="button"
-                                    class="notification-action-button open-button"
-                                    @onclick="() => Open(notification)">
-
-                                <span>↗</span>
-                                <span>Open</span>
-
-                            </button>
-
-
-                            @if (notification.Type == "Reminder")
-                            {
-                                <button type="button"
-                                        class="notification-action-button success-button"
-                                        @onclick="() => MarkAsRead(notification)">
-
-                                    <span>✓</span>
-                                    <span>Mark as Read</span>
-
-                                </button>
-                            }
-
-
-                            @if (notification.Type == "Task")
-                            {
-                                <button type="button"
-                                        class="notification-action-button success-button"
-                                        @onclick="() => CompleteTask(notification)">
-
-                                    <span>✓</span>
-                                    <span>Complete</span>
-
-                                </button>
-                            }
-
-
-                            @if (notification.Type == "Expense")
-                            {
-                                <button type="button"
-                                        class="notification-action-button success-button"
-                                        @onclick="() => MarkAsPaid(notification)">
-
-                                    <span>✓</span>
-                                    <span>Mark as Paid</span>
-
-                                </button>
-                            }
-
-                        </div>
-
-                    </div>
-
-                </div>
-            }
-
-        </div>
+            </div>
+        }
     }
 
 </div>
@@ -369,13 +416,20 @@
 
     private string selectedFilter = "All";
 
+
     private List<NotificationItem>? notifications;
 
+
     private bool isLoading = true;
+
+    private bool isProcessing;
+
 
     private string? loadError;
 
     private string? operationError;
+
+    private string? successMessage;
 
 
     // =========================
@@ -390,8 +444,16 @@
 
     private async Task LoadNotificationsAsync()
     {
+        if (isProcessing)
+            return;
+
+
         isLoading = true;
+
         loadError = null;
+
+        ClearMessages();
+
 
         try
         {
@@ -422,7 +484,12 @@
 
     private void Open(NotificationItem notification)
     {
-        NavigationManager.NavigateTo(notification.Url);
+        if (isProcessing)
+            return;
+
+
+        NavigationManager.NavigateTo(
+            notification.Url);
     }
 
 
@@ -436,18 +503,36 @@
         if (notification.Type != "Reminder")
             return;
 
+
+        if (isProcessing)
+            return;
+
+
+        isProcessing = true;
+
+
         try
         {
-            ClearOperationError();
+            ClearMessages();
+
 
             await NotificationService.MarkAsReadAsync(
                 notification);
 
+
             await ReloadNotifications();
+
+
+            SetSuccess(
+                "Reminder marked as read.");
         }
         catch (Exception ex)
         {
             SetOperationError(ex);
+        }
+        finally
+        {
+            isProcessing = false;
         }
     }
 
@@ -462,18 +547,36 @@
         if (notification.Type != "Task")
             return;
 
+
+        if (isProcessing)
+            return;
+
+
+        isProcessing = true;
+
+
         try
         {
-            ClearOperationError();
+            ClearMessages();
+
 
             await TaskApiService.CompleteTaskAsync(
                 notification.Id);
 
+
             await ReloadNotifications();
+
+
+            SetSuccess(
+                "Task completed successfully.");
         }
         catch (Exception ex)
         {
             SetOperationError(ex);
+        }
+        finally
+        {
+            isProcessing = false;
         }
     }
 
@@ -488,18 +591,36 @@
         if (notification.Type != "Expense")
             return;
 
+
+        if (isProcessing)
+            return;
+
+
+        isProcessing = true;
+
+
         try
         {
-            ClearOperationError();
+            ClearMessages();
+
 
             await ExpenseApiService.MarkAsPaidAsync(
                 notification.Id);
 
+
             await ReloadNotifications();
+
+
+            SetSuccess(
+                "Expense marked as paid.");
         }
         catch (Exception ex)
         {
             SetOperationError(ex);
+        }
+        finally
+        {
+            isProcessing = false;
         }
     }
 
@@ -522,7 +643,14 @@
 
     private void SetFilter(string filter)
     {
-        selectedFilter = filter;
+        if (isProcessing)
+            return;
+
+
+        selectedFilter =
+            filter;
+
+        ClearMessages();
     }
 
 
@@ -532,7 +660,12 @@
 
     private void ClearSearch()
     {
-        searchText = string.Empty;
+        if (isProcessing)
+            return;
+
+
+        searchText =
+            string.Empty;
     }
 
 
@@ -554,9 +687,13 @@
                             StringComparison.OrdinalIgnoreCase)
                     )
 
-                    || n.Type.Contains(
-                        searchText,
-                        StringComparison.OrdinalIgnoreCase)
+                    || (
+                        !string.IsNullOrWhiteSpace(n.Type)
+
+                        && n.Type.Contains(
+                            searchText,
+                            StringComparison.OrdinalIgnoreCase)
+                    )
                 )
 
                 &&
@@ -567,6 +704,7 @@
                     || n.Type == selectedFilter
                 )
             )
+
         ?? Enumerable.Empty<NotificationItem>();
 
 
@@ -645,16 +783,50 @@
 
     private void SetOperationError(Exception ex)
     {
+        successMessage = null;
+
+
         operationError =
-            string.IsNullOrWhiteSpace(ex.Message)
-                ? "Unable to complete the operation. Please try again."
-                : ex.Message;
+            "Unable to complete the operation. Please try again.";
+
+
+        Console.WriteLine(
+            $"Notification operation error: {ex.Message}");
     }
 
 
     private void ClearOperationError()
     {
+        operationError =
+            null;
+    }
+
+
+    // =========================
+    // SUCCESS HANDLING
+    // =========================
+
+    private void SetSuccess(string message)
+    {
         operationError = null;
+
+        successMessage =
+            message;
+    }
+
+
+    private void ClearSuccess()
+    {
+        successMessage =
+            null;
+    }
+
+
+    private void ClearMessages()
+    {
+        operationError = null;
+
+        successMessage = null;
     }
 
 }

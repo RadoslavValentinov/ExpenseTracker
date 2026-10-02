@@ -6,7 +6,6 @@
 @inject AuthStateService AuthState
 
 
-
 <div class="app-layout">
 
     <!-- =========================
@@ -16,6 +15,10 @@
     <aside class="sidebar">
 
         <div class="logo-section">
+
+            <div class="logo-mark">
+                ET
+            </div>
 
             <div class="logo-text">
 
@@ -40,8 +43,13 @@
                    class="nav-item @(IsActive("/") ? "active" : "")"
                    data-enhance-nav="false">
 
-                    <span class="nav-icon">📊</span>
-                    <span class="nav-label">Dashboard</span>
+                    <span class="nav-icon">
+                        📊
+                    </span>
+
+                    <span class="nav-label">
+                        Dashboard
+                    </span>
 
                 </a>
 
@@ -50,8 +58,13 @@
                    class="nav-item @(IsActive("/expenses") ? "active" : "")"
                    data-enhance-nav="false">
 
-                    <span class="nav-icon">💰</span>
-                    <span class="nav-label">Expenses</span>
+                    <span class="nav-icon">
+                        💰
+                    </span>
+
+                    <span class="nav-label">
+                        Expenses
+                    </span>
 
                 </a>
 
@@ -60,8 +73,13 @@
                    class="nav-item @(IsActive("/tasks") ? "active" : "")"
                    data-enhance-nav="false">
 
-                    <span class="nav-icon">✅</span>
-                    <span class="nav-label">Tasks</span>
+                    <span class="nav-icon">
+                        ✅
+                    </span>
+
+                    <span class="nav-label">
+                        Tasks
+                    </span>
 
                 </a>
 
@@ -70,8 +88,13 @@
                    class="nav-item @(IsActive("/recurring-expenses") ? "active" : "")"
                    data-enhance-nav="false">
 
-                    <span class="nav-icon">🔄</span>
-                    <span class="nav-label">Recurring Expenses</span>
+                    <span class="nav-icon">
+                        🔄
+                    </span>
+
+                    <span class="nav-label">
+                        Recurring Expenses
+                    </span>
 
                 </a>
 
@@ -80,8 +103,13 @@
                    class="nav-item @(IsActive("/calendar") ? "active" : "")"
                    data-enhance-nav="false">
 
-                    <span class="nav-icon">📅</span>
-                    <span class="nav-label">Calendar</span>
+                    <span class="nav-icon">
+                        📅
+                    </span>
+
+                    <span class="nav-label">
+                        Calendar
+                    </span>
 
                 </a>
 
@@ -90,8 +118,13 @@
                    class="nav-item @(IsActive("/charts") ? "active" : "")"
                    data-enhance-nav="false">
 
-                    <span class="nav-icon">📈</span>
-                    <span class="nav-label">Charts</span>
+                    <span class="nav-icon">
+                        📈
+                    </span>
+
+                    <span class="nav-label">
+                        Charts
+                    </span>
 
                 </a>
 
@@ -100,8 +133,13 @@
                    class="nav-item @(IsActive("/notifications") ? "active" : "")"
                    data-enhance-nav="false">
 
-                    <span class="nav-icon">🔔</span>
-                    <span class="nav-label">Notifications</span>
+                    <span class="nav-icon">
+                        🔔
+                    </span>
+
+                    <span class="nav-label">
+                        Notifications
+                    </span>
 
                 </a>
 
@@ -115,8 +153,13 @@
                    class="nav-item @(IsActive("/login") ? "active" : "")"
                    data-enhance-nav="false">
 
-                    <span class="nav-icon">🔐</span>
-                    <span class="nav-label">Login</span>
+                    <span class="nav-icon">
+                        🔐
+                    </span>
+
+                    <span class="nav-label">
+                        Login
+                    </span>
 
                 </a>
 
@@ -125,8 +168,13 @@
                    class="nav-item @(IsActive("/register") ? "active" : "")"
                    data-enhance-nav="false">
 
-                    <span class="nav-icon">📝</span>
-                    <span class="nav-label">Register</span>
+                    <span class="nav-icon">
+                        📝
+                    </span>
+
+                    <span class="nav-label">
+                        Register
+                    </span>
 
                 </a>
 
@@ -161,10 +209,15 @@
 
                 @if (AuthState.IsAuthenticated)
                 {
+                    <!-- =========================
+                         NOTIFICATIONS
+                         ========================= -->
+
                     <button type="button"
                             class="notification-btn"
                             @onclick="OpenNotifications"
-                            title="Notifications">
+                            title="Notifications"
+                            aria-label="Open notifications">
 
                         <span class="notification-icon-top">
                             🔔
@@ -185,18 +238,38 @@
                     </button>
 
 
+                    <!-- =========================
+                         LOGOUT
+                         ========================= -->
+
                     <button type="button"
                             class="logout-button"
                             @onclick="Logout"
-                            title="Logout">
+                            disabled="@isLoggingOut"
+                            title="Logout"
+                            aria-label="Logout">
 
-                        <span class="logout-icon">
-                            ⎋
-                        </span>
+                        @if (isLoggingOut)
+                        {
+                            <span class="spinner-border spinner-border-sm"
+                                  role="status"
+                                  aria-hidden="true">
+                            </span>
 
-                        <span class="logout-text">
-                            Logout
-                        </span>
+                            <span class="logout-text">
+                                Logging out...
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="logout-icon">
+                                ⎋
+                            </span>
+
+                            <span class="logout-text">
+                                Logout
+                            </span>
+                        }
 
                     </button>
                 }
@@ -221,6 +294,12 @@
 
     private int notificationCount;
 
+    private bool isLoggingOut;
+
+
+    // =========================
+    // NOTIFICATIONS
+    // =========================
 
     private void OpenNotifications()
     {
@@ -229,23 +308,47 @@
     }
 
 
+    // =========================
+    // LOGOUT
+    // =========================
+
     private async Task Logout()
     {
-        await AuthState.LogoutAsync();
+        if (isLoggingOut)
+            return;
 
-        notificationCount = 0;
 
-        NavigationManager.NavigateTo(
-            "/login",
-            forceLoad: true);
+        isLoggingOut = true;
+
+
+        try
+        {
+            await AuthState.LogoutAsync();
+
+            notificationCount = 0;
+
+
+            NavigationManager.NavigateTo(
+                "/login",
+                forceLoad: true);
+        }
+        finally
+        {
+            isLoggingOut = false;
+        }
     }
 
+
+    // =========================
+    // ACTIVE NAVIGATION
+    // =========================
 
     private bool IsActive(string path)
     {
         var currentPath =
             NavigationManager.ToBaseRelativePath(
                 NavigationManager.Uri);
+
 
         currentPath =
             "/" + currentPath.Trim('/');
@@ -258,8 +361,11 @@
 
 
         return currentPath.Equals(
-            path,
-            StringComparison.OrdinalIgnoreCase);
+                   path,
+                   StringComparison.OrdinalIgnoreCase)
+               || currentPath.StartsWith(
+                   path + "/",
+                   StringComparison.OrdinalIgnoreCase);
     }
 
 }

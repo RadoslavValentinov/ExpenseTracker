@@ -58,6 +58,19 @@ public class ReminderRepository : IReminderRepository
     }
 
 
+    public async Task<Reminder?> GetByReferenceAsync(
+        string type,
+        int referenceId,
+        string userId)
+    {
+        return await _context.Reminders
+            .FirstOrDefaultAsync(r =>
+                r.Type == type &&
+                r.ReferenceId == referenceId &&
+                r.UserId == userId);
+    }
+
+
     public async Task UpdateAsync(Reminder reminder)
     {
         _context.Reminders.Update(reminder);
@@ -118,6 +131,28 @@ public class ReminderRepository : IReminderRepository
             return;
 
         _context.Reminders.Remove(reminder);
+
+        await _context.SaveChangesAsync();
+    }
+
+
+    public async Task DeleteByReferenceAsync(
+        string type,
+        int referenceId,
+        string userId)
+    {
+        var reminders =
+            await _context.Reminders
+                .Where(r =>
+                    r.Type == type &&
+                    r.ReferenceId == referenceId &&
+                    r.UserId == userId)
+                .ToListAsync();
+
+        if (reminders.Count == 0)
+            return;
+
+        _context.Reminders.RemoveRange(reminders);
 
         await _context.SaveChangesAsync();
     }

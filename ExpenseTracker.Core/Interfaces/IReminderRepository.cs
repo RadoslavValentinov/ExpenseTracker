@@ -6,12 +6,19 @@ public interface IReminderRepository
 {
     Task AddAsync(Reminder reminder);
 
-    Task<List<Reminder>> GetPendingAsync(string userId);
+    Task<List<Reminder>> GetPendingAsync(
+        string userId);
 
-    Task<List<Reminder>> GetCompletedAsync(string userId);
+    Task<List<Reminder>> GetCompletedAsync(
+        string userId);
 
     Task<Reminder?> GetByIdAsync(
         int id,
+        string userId);
+
+    Task<Reminder?> GetByReferenceAsync(
+        string type,
+        int referenceId,
         string userId);
 
     Task UpdateAsync(Reminder reminder);
@@ -26,6 +33,11 @@ public interface IReminderRepository
 
     Task DeleteAsync(
         int id,
+        string userId);
+
+    Task DeleteByReferenceAsync(
+        string type,
+        int referenceId,
         string userId);
 
     // Used only by background processing

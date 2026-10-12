@@ -23,29 +23,30 @@ public class ExpenseService : IExpenseService
     {
         expense.UserId = userId;
 
-        await _repository.AddAsync(expense);
+        await _repository.AddAsync(
+            expense);
 
-        if (expense.DueDate > DateTime.MinValue)
+
+        var reminder = new Reminder
         {
-            var reminder = new Reminder
-            {
-                Title = $"Pay {expense.Title}",
-                ReminderDate = expense.DueDate.AddDays(-1),
-                Type = "Expense",
-                ReferenceId = expense.Id
-            };
+            Title = $"Expense: {expense.Title}",
+            ReminderDate =
+                expense.DueDate.AddDays(-1),
+            Type = "Expense",
+            ReferenceId = expense.Id
+        };
 
-            await _reminderService.AddAsync(
-                reminder,
-                userId);
-        }
+        await _reminderService.AddAsync(
+            reminder,
+            userId);
     }
 
 
     public async Task<List<Expense>> GetExpensesAsync(
         string userId)
     {
-        return await _repository.GetAllAsync(userId);
+        return await _repository.GetAllAsync(
+            userId);
     }
 
 
@@ -63,6 +64,8 @@ public class ExpenseService : IExpenseService
 
         if (expense.IsPaid)
             return true;
+
+        expense.IsPaid = true;
 
         await _repository.MarkAsPaidAsync(
             id,
@@ -84,6 +87,14 @@ public class ExpenseService : IExpenseService
         if (expense == null)
             return false;
 
+
+        // Delete the related reminder first.
+        await _reminderService.DeleteByReferenceAsync(
+            "Expense",
+            id,
+            userId);
+
+
         await _repository.DeleteAsync(
             id,
             userId);
@@ -104,6 +115,11 @@ public class ExpenseService : IExpenseService
         if (existingExpense == null)
             return false;
 
+
+        var oldDueDate =
+            existingExpense.DueDate;
+
+
         existingExpense.Title =
             expense.Title;
 
@@ -119,8 +135,42 @@ public class ExpenseService : IExpenseService
         existingExpense.IsPaid =
             expense.IsPaid;
 
+
         await _repository.UpdateAsync(
             existingExpense);
+
+
+        var existingReminder =
+            await _reminderService.GetByReferenceAsync(
+                "Expense",
+                existingExpense.Id,
+                userId);
+
+
+        if (existingReminder != null)
+        {
+            existingReminder.Title =
+                $"Expense: {existingExpense.Title}";
+
+            existingReminder.ReminderDate =
+                existingExpense.DueDate.AddDays(-1);
+
+
+            // If the due date changed,
+            // make the reminder active again.
+            if (oldDueDate !=
+                existingExpense.DueDate)
+            {
+                existingReminder.IsTriggered = false;
+                existingReminder.IsRead = false;
+            }
+
+
+            await _reminderService.UpdateAsync(
+                existingReminder,
+                userId);
+        }
+
 
         return true;
     }

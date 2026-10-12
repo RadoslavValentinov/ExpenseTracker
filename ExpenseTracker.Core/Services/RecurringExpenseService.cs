@@ -26,6 +26,29 @@ public class RecurringExpenseService : IRecurringExpenseService
     {
         recurringExpense.UserId = userId;
 
+        recurringExpense.Title =
+            recurringExpense.Title?.Trim() ?? string.Empty;
+
+        if (string.IsNullOrWhiteSpace(
+                recurringExpense.Title))
+        {
+            throw new ArgumentException(
+                "Title is required.");
+        }
+
+        if (recurringExpense.Amount <= 0)
+        {
+            throw new ArgumentException(
+                "Amount must be greater than zero.");
+        }
+
+        if (recurringExpense.DayOfMonth < 1 ||
+            recurringExpense.DayOfMonth > 31)
+        {
+            throw new ArgumentException(
+                "Day of month must be between 1 and 31.");
+        }
+
         await _repository.AddAsync(
             recurringExpense);
     }
@@ -69,8 +92,33 @@ public class RecurringExpenseService : IRecurringExpenseService
         if (existing == null)
             return;
 
+
+        var title =
+            recurringExpense.Title?.Trim()
+            ?? string.Empty;
+
+        if (string.IsNullOrWhiteSpace(title))
+        {
+            throw new ArgumentException(
+                "Title is required.");
+        }
+
+        if (recurringExpense.Amount <= 0)
+        {
+            throw new ArgumentException(
+                "Amount must be greater than zero.");
+        }
+
+        if (recurringExpense.DayOfMonth < 1 ||
+            recurringExpense.DayOfMonth > 31)
+        {
+            throw new ArgumentException(
+                "Day of month must be between 1 and 31.");
+        }
+
+
         existing.Title =
-            recurringExpense.Title;
+            title;
 
         existing.Amount =
             recurringExpense.Amount;
@@ -81,10 +129,45 @@ public class RecurringExpenseService : IRecurringExpenseService
         existing.IsActive =
             recurringExpense.IsActive;
 
+
         await _repository.UpdateAsync(
             existing);
     }
 
+
+    // =========================
+    // USER GENERATION
+    // =========================
+
+    public async Task<bool> GenerateExpenseForUserAsync(
+        int id,
+        string userId)
+    {
+        await _generationLock.WaitAsync();
+
+        try
+        {
+            var recurringExpense =
+                await _repository.GetByIdAsync(
+                    id,
+                    userId);
+
+            if (recurringExpense == null)
+                return false;
+
+            return await GenerateExpenseInternalAsync(
+                recurringExpense);
+        }
+        finally
+        {
+            _generationLock.Release();
+        }
+    }
+
+
+    // =========================
+    // BACKGROUND GENERATION
+    // =========================
 
     public async Task GenerateExpenseAsync(
         int id)
@@ -100,68 +183,7 @@ public class RecurringExpenseService : IRecurringExpenseService
             if (recurringExpense == null)
                 return;
 
-            if (!recurringExpense.IsActive)
-                return;
-
-            var today =
-                DateTime.Now.Date;
-
-
-            // Already generated for current month
-            if (recurringExpense.LastGeneratedDate.HasValue &&
-                recurringExpense.LastGeneratedDate.Value.Year == today.Year &&
-                recurringExpense.LastGeneratedDate.Value.Month == today.Month)
-            {
-                return;
-            }
-
-
-            // Calculate actual day for current month
-            var day = Math.Min(
-                recurringExpense.DayOfMonth,
-                DateTime.DaysInMonth(
-                    today.Year,
-                    today.Month));
-
-
-            // Not reached yet
-            if (today.Day < day)
-                return;
-
-
-            // Planned due date
-            var dueDate = new DateTime(
-                today.Year,
-                today.Month,
-                day);
-
-
-            var expense = new Expense
-            {
-                UserId = recurringExpense.UserId,
-
-                Title = recurringExpense.Title,
-
-                Amount = recurringExpense.Amount,
-
-                DueDate = dueDate,
-
-                IsPaid = false,
-
-                Category = "Recurring"
-            };
-
-
-            await _expenseService.AddExpenseAsync(
-                expense,
-                recurringExpense.UserId);
-
-
-            // Remember generation
-            recurringExpense.LastGeneratedDate =
-                DateTime.UtcNow;
-
-            await _repository.UpdateAsync(
+            await GenerateExpenseInternalAsync(
                 recurringExpense);
         }
         finally
@@ -171,16 +193,99 @@ public class RecurringExpenseService : IRecurringExpenseService
     }
 
 
-    private async Task<RecurringExpense?> FindRecurringExpenseForGeneration(
-        int id)
+    private async Task<bool> GenerateExpenseInternalAsync(
+        RecurringExpense recurringExpense)
     {
-        // Background generation is not tied to a JWT user.
-        // The recurring expense itself contains the owner.
-        //
-        // We therefore need a repository-level lookup
-        // that does not depend on the current HTTP user.
+        if (!recurringExpense.IsActive)
+            return true;
 
-        return await _repository.GetByIdForBackgroundAsync(id);
+
+        var today =
+            DateTime.Now.Date;
+
+
+        // Already generated for current month.
+        if (recurringExpense.LastGeneratedDate.HasValue &&
+            recurringExpense.LastGeneratedDate.Value.Year ==
+                today.Year &&
+            recurringExpense.LastGeneratedDate.Value.Month ==
+                today.Month)
+        {
+            return true;
+        }
+
+
+        // Calculate actual day for current month.
+        var day =
+            Math.Min(
+                recurringExpense.DayOfMonth,
+                DateTime.DaysInMonth(
+                    today.Year,
+                    today.Month));
+
+
+        // Not reached yet.
+        if (today.Day < day)
+            return true;
+
+
+        // Planned due date.
+        var dueDate =
+            new DateTime(
+                today.Year,
+                today.Month,
+                day);
+
+
+        var expense =
+            new Expense
+            {
+                UserId =
+                    recurringExpense.UserId,
+
+                Title =
+                    recurringExpense.Title,
+
+                Amount =
+                    recurringExpense.Amount,
+
+                DueDate =
+                    dueDate,
+
+                IsPaid =
+                    false,
+
+                Category =
+                    "Recurring"
+            };
+
+
+        await _expenseService.AddExpenseAsync(
+            expense,
+            recurringExpense.UserId);
+
+
+        // Remember generation.
+        recurringExpense.LastGeneratedDate =
+            DateTime.UtcNow;
+
+        await _repository.UpdateAsync(
+            recurringExpense);
+
+
+        return true;
+    }
+
+
+    private async Task<RecurringExpense?>
+        FindRecurringExpenseForGeneration(
+            int id)
+    {
+        // Background generation is not tied
+        // to an HTTP/JWT user.
+
+        return await _repository
+            .GetByIdForBackgroundAsync(id);
     }
 
 
@@ -193,9 +298,11 @@ public class RecurringExpenseService : IRecurringExpenseService
             userId);
     }
 
-    public Task<List<RecurringExpense>> GetActiveForBackgroundAsync()
-    {
-        return _repository.GetActiveForBackgroundAsync();
-    }
 
+    public Task<List<RecurringExpense>>
+        GetActiveForBackgroundAsync()
+    {
+        return _repository
+            .GetActiveForBackgroundAsync();
+    }
 }

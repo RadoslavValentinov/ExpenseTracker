@@ -50,6 +50,18 @@ public class ReminderService : IReminderService
     }
 
 
+    public async Task<Reminder?> GetByReferenceAsync(
+        string type,
+        int referenceId,
+        string userId)
+    {
+        return await _repository.GetByReferenceAsync(
+            type,
+            referenceId,
+            userId);
+    }
+
+
     public async Task MarkAsTriggeredAsync(
         int id,
         string userId)
@@ -76,6 +88,18 @@ public class ReminderService : IReminderService
     {
         await _repository.DeleteAsync(
             id,
+            userId);
+    }
+
+
+    public async Task DeleteByReferenceAsync(
+        string type,
+        int referenceId,
+        string userId)
+    {
+        await _repository.DeleteByReferenceAsync(
+            type,
+            referenceId,
             userId);
     }
 
@@ -125,8 +149,10 @@ public class ReminderService : IReminderService
     }
 
 
-    public Task MarkAsTriggeredForBackgroundAsync(int id)
+    public Task MarkAsTriggeredForBackgroundAsync(
+        int id)
     {
-        return _repository.MarkAsTriggeredForBackgroundAsync(id);
+        return _repository.MarkAsTriggeredForBackgroundAsync(
+            id);
     }
 }

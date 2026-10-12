@@ -36,7 +36,8 @@ public class RecurringExpensesController : ControllerBase
             return Unauthorized();
 
         var items =
-            await _service.GetAllAsync(userId);
+            await _service.GetAllAsync(
+                userId);
 
         return Ok(items);
     }
@@ -50,6 +51,35 @@ public class RecurringExpensesController : ControllerBase
 
         if (string.IsNullOrWhiteSpace(userId))
             return Unauthorized();
+
+
+        if (recurringExpense == null)
+            return BadRequest(
+                "Invalid recurring expense data.");
+
+
+        if (string.IsNullOrWhiteSpace(
+                recurringExpense.Title))
+        {
+            return BadRequest(
+                "Title is required.");
+        }
+
+
+        if (recurringExpense.Amount <= 0)
+        {
+            return BadRequest(
+                "Amount must be greater than zero.");
+        }
+
+
+        if (recurringExpense.DayOfMonth < 1 ||
+            recurringExpense.DayOfMonth > 31)
+        {
+            return BadRequest(
+                "Day of month must be between 1 and 31.");
+        }
+
 
         await _service.AddAsync(
             recurringExpense,
@@ -68,15 +98,16 @@ public class RecurringExpensesController : ControllerBase
         if (string.IsNullOrWhiteSpace(userId))
             return Unauthorized();
 
-        var recurringExpense =
-            await _service.GetByIdAsync(
+
+        var generated =
+            await _service.GenerateExpenseForUserAsync(
                 id,
                 userId);
 
-        if (recurringExpense == null)
+
+        if (!generated)
             return NotFound();
 
-        await _service.GenerateExpenseAsync(id);
 
         return Ok();
     }
@@ -92,8 +123,38 @@ public class RecurringExpensesController : ControllerBase
         if (string.IsNullOrWhiteSpace(userId))
             return Unauthorized();
 
+
+        if (recurringExpense == null)
+            return BadRequest(
+                "Invalid recurring expense data.");
+
+
         if (id != recurringExpense.Id)
             return BadRequest();
+
+
+        if (string.IsNullOrWhiteSpace(
+                recurringExpense.Title))
+        {
+            return BadRequest(
+                "Title is required.");
+        }
+
+
+        if (recurringExpense.Amount <= 0)
+        {
+            return BadRequest(
+                "Amount must be greater than zero.");
+        }
+
+
+        if (recurringExpense.DayOfMonth < 1 ||
+            recurringExpense.DayOfMonth > 31)
+        {
+            return BadRequest(
+                "Day of month must be between 1 and 31.");
+        }
+
 
         var existing =
             await _service.GetByIdAsync(
@@ -102,6 +163,7 @@ public class RecurringExpensesController : ControllerBase
 
         if (existing == null)
             return NotFound();
+
 
         await _service.UpdateAsync(
             recurringExpense,
@@ -120,6 +182,7 @@ public class RecurringExpensesController : ControllerBase
         if (string.IsNullOrWhiteSpace(userId))
             return Unauthorized();
 
+
         var existing =
             await _service.GetByIdAsync(
                 id,
@@ -127,6 +190,7 @@ public class RecurringExpensesController : ControllerBase
 
         if (existing == null)
             return NotFound();
+
 
         await _service.DeleteAsync(
             id,

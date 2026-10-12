@@ -18,12 +18,22 @@ public interface IReminderService
         int id,
         string userId);
 
+    Task<Reminder?> GetByReferenceAsync(
+        string type,
+        int referenceId,
+        string userId);
+
     Task MarkAsTriggeredAsync(
         int id,
         string userId);
 
     Task DeleteAsync(
         int id,
+        string userId);
+
+    Task DeleteByReferenceAsync(
+        string type,
+        int referenceId,
         string userId);
 
     Task UpdateAsync(

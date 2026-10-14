@@ -20,13 +20,11 @@ public class TasksController : ControllerBase
         _service = service;
     }
 
-
     private string? GetUserId()
     {
         return User.FindFirstValue(
             ClaimTypes.NameIdentifier);
     }
-
 
     [HttpPost]
     public async Task<IActionResult> Create(
@@ -37,14 +35,40 @@ public class TasksController : ControllerBase
         if (string.IsNullOrWhiteSpace(userId))
             return Unauthorized();
 
+        if (dto == null)
+            return BadRequest("Invalid task data.");
+
+        var title = dto.Title?.Trim();
+
+        if (string.IsNullOrWhiteSpace(title))
+            return BadRequest("Title is required.");
+
+        if (dto.DueDate == DateTime.MinValue)
+            return BadRequest("Due date is required.");
+
+        if (dto.Priority < 0 || dto.Priority > 5)
+            return BadRequest(
+                "Priority must be between 0 and 5.");
+
+        if (dto.ReminderTime.HasValue &&
+            dto.ReminderTime.Value == DateTime.MinValue)
+        {
+            return BadRequest("Invalid reminder time.");
+        }
+
         var task = new TaskItem
         {
-            Title = dto.Title,
-            Description = dto.Description,
+            Title = title,
+            Description =
+                string.IsNullOrWhiteSpace(dto.Description)
+                    ? null
+                    : dto.Description.Trim(),
             DueDate = dto.DueDate,
             Priority = dto.Priority,
             ReminderTime = dto.ReminderTime,
-            IsCompleted = false
+            RepeatMonthly = dto.RepeatMonthly,
+            IsCompleted = false,
+            HasReminder = dto.ReminderTime.HasValue
         };
 
         await _service.AddTaskAsync(
@@ -53,7 +77,6 @@ public class TasksController : ControllerBase
 
         return Ok();
     }
-
 
     [HttpGet]
     public async Task<IActionResult> GetAll()
@@ -70,7 +93,6 @@ public class TasksController : ControllerBase
         return Ok(tasks);
     }
 
-
     [HttpPut("{id}/complete")]
     public async Task<IActionResult> Complete(
         int id)
@@ -79,6 +101,9 @@ public class TasksController : ControllerBase
 
         if (string.IsNullOrWhiteSpace(userId))
             return Unauthorized();
+
+        if (id <= 0)
+            return BadRequest("Invalid task id.");
 
         var completed =
             await _service.CompleteTaskAsync(
@@ -91,19 +116,47 @@ public class TasksController : ControllerBase
         return Ok();
     }
 
-
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(
         int id,
-        TaskItem task)
+        UpdateTaskDto dto)
     {
         var userId = GetUserId();
 
         if (string.IsNullOrWhiteSpace(userId))
             return Unauthorized();
 
-        if (id != task.Id)
-            return BadRequest();
+        if (id <= 0)
+            return BadRequest("Invalid task id.");
+
+        if (dto == null)
+            return BadRequest("Invalid task data.");
+
+        var title = dto.Title?.Trim();
+
+        if (string.IsNullOrWhiteSpace(title))
+            return BadRequest("Title is required.");
+
+        if (dto.DueDate == DateTime.MinValue)
+            return BadRequest("Due date is required.");
+
+        if (dto.Priority < 0 || dto.Priority > 5)
+            return BadRequest(
+                "Priority must be between 0 and 5.");
+
+        var task = new TaskItem
+        {
+            Id = id,
+            Title = title,
+            Description =
+                string.IsNullOrWhiteSpace(dto.Description)
+                    ? null
+                    : dto.Description.Trim(),
+            DueDate = dto.DueDate,
+            Priority = dto.Priority,
+            ReminderTime = dto.ReminderTime,
+            RepeatMonthly = dto.RepeatMonthly
+        };
 
         var updated =
             await _service.UpdateAsync(
@@ -116,7 +169,6 @@ public class TasksController : ControllerBase
         return Ok();
     }
 
-
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(
         int id)
@@ -125,6 +177,9 @@ public class TasksController : ControllerBase
 
         if (string.IsNullOrWhiteSpace(userId))
             return Unauthorized();
+
+        if (id <= 0)
+            return BadRequest("Invalid task id.");
 
         var deleted =
             await _service.DeleteAsync(

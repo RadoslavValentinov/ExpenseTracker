@@ -5,11 +5,11 @@ namespace ExpenseTracker.Core.Services;
 
 public class RecurringExpenseService : IRecurringExpenseService
 {
-    private static readonly SemaphoreSlim _generationLock =
-        new SemaphoreSlim(1, 1);
-
     private readonly IRecurringExpenseRepository _repository;
     private readonly IExpenseService _expenseService;
+
+    private static readonly SemaphoreSlim _generationLock =
+        new(1, 1);
 
     public RecurringExpenseService(
         IRecurringExpenseRepository repository,
@@ -19,71 +19,115 @@ public class RecurringExpenseService : IRecurringExpenseService
         _expenseService = expenseService;
     }
 
-
     public async Task AddAsync(
         RecurringExpense recurringExpense,
         string userId)
     {
-        recurringExpense.UserId = userId;
+        if (recurringExpense == null)
+            throw new ArgumentNullException(
+                nameof(recurringExpense));
 
-        recurringExpense.Title =
-            recurringExpense.Title?.Trim() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(userId))
+            throw new ArgumentException(
+                "User id is required.",
+                nameof(userId));
 
         if (string.IsNullOrWhiteSpace(
                 recurringExpense.Title))
         {
             throw new ArgumentException(
-                "Title is required.");
+                "Title is required.",
+                nameof(recurringExpense.Title));
         }
 
         if (recurringExpense.Amount <= 0)
-        {
             throw new ArgumentException(
-                "Amount must be greater than zero.");
-        }
+                "Amount must be greater than zero.",
+                nameof(recurringExpense.Amount));
 
         if (recurringExpense.DayOfMonth < 1 ||
             recurringExpense.DayOfMonth > 31)
         {
             throw new ArgumentException(
-                "Day of month must be between 1 and 31.");
+                "Day of month must be between 1 and 31.",
+                nameof(recurringExpense.DayOfMonth));
         }
+
+        recurringExpense.UserId = userId;
+        recurringExpense.Title =
+            recurringExpense.Title.Trim();
 
         await _repository.AddAsync(
             recurringExpense);
     }
 
-
-    public Task<List<RecurringExpense>> GetAllAsync(
+    public async Task<List<RecurringExpense>> GetAllAsync(
         string userId)
     {
-        return _repository.GetAllAsync(
+        return await _repository.GetAllAsync(
             userId);
     }
 
-
-    public Task<List<RecurringExpense>> GetActiveAsync(
+    public async Task<List<RecurringExpense>> GetActiveAsync(
         string userId)
     {
-        return _repository.GetActiveAsync(
+        return await _repository.GetActiveAsync(
             userId);
     }
 
+    public async Task<List<RecurringExpense>>
+        GetActiveForBackgroundAsync()
+    {
+        return await _repository.GetActiveForBackgroundAsync();
+    }
 
     public async Task<RecurringExpense?> GetByIdAsync(
         int id,
         string userId)
     {
+        if (id <= 0)
+            return null;
+
         return await _repository.GetByIdAsync(
             id,
             userId);
     }
 
-
     public async Task UpdateAsync(
         RecurringExpense recurringExpense,
         string userId)
     {
+        if (recurringExpense == null)
+            throw new ArgumentNullException(
+                nameof(recurringExpense));
+
+        if (string.IsNullOrWhiteSpace(userId))
+            return;
+
+        if (recurringExpense.Id <= 0)
+            return;
+
+        if (string.IsNullOrWhiteSpace(
+                recurringExpense.Title))
+        {
+            throw new ArgumentException(
+                "Title is required.",
+                nameof(recurringExpense.Title));
+        }
+
+        if (recurringExpense.Amount <= 0)
+            throw new ArgumentException(
+                "Amount must be greater than zero.",
+                nameof(recurringExpense.Amount));
+
+        if (recurringExpense.DayOfMonth < 1 ||
+            recurringExpense.DayOfMonth > 31)
+        {
+            throw new ArgumentException(
+                "Day of month must be between 1 and 31.",
+                nameof(recurringExpense.DayOfMonth));
+        }
+
         var existing =
             await _repository.GetByIdAsync(
                 recurringExpense.Id,
@@ -92,33 +136,8 @@ public class RecurringExpenseService : IRecurringExpenseService
         if (existing == null)
             return;
 
-
-        var title =
-            recurringExpense.Title?.Trim()
-            ?? string.Empty;
-
-        if (string.IsNullOrWhiteSpace(title))
-        {
-            throw new ArgumentException(
-                "Title is required.");
-        }
-
-        if (recurringExpense.Amount <= 0)
-        {
-            throw new ArgumentException(
-                "Amount must be greater than zero.");
-        }
-
-        if (recurringExpense.DayOfMonth < 1 ||
-            recurringExpense.DayOfMonth > 31)
-        {
-            throw new ArgumentException(
-                "Day of month must be between 1 and 31.");
-        }
-
-
         existing.Title =
-            title;
+            recurringExpense.Title.Trim();
 
         existing.Amount =
             recurringExpense.Amount;
@@ -129,20 +148,20 @@ public class RecurringExpenseService : IRecurringExpenseService
         existing.IsActive =
             recurringExpense.IsActive;
 
-
         await _repository.UpdateAsync(
             existing);
     }
-
-
-    // =========================
-    // USER GENERATION
-    // =========================
 
     public async Task<bool> GenerateExpenseForUserAsync(
         int id,
         string userId)
     {
+        if (id <= 0)
+            return false;
+
+        if (string.IsNullOrWhiteSpace(userId))
+            return false;
+
         await _generationLock.WaitAsync();
 
         try
@@ -164,20 +183,18 @@ public class RecurringExpenseService : IRecurringExpenseService
         }
     }
 
-
-    // =========================
-    // BACKGROUND GENERATION
-    // =========================
-
     public async Task GenerateExpenseAsync(
         int id)
     {
+        if (id <= 0)
+            return;
+
         await _generationLock.WaitAsync();
 
         try
         {
             var recurringExpense =
-                await FindRecurringExpenseForGeneration(
+                await _repository.GetByIdForBackgroundAsync(
                     id);
 
             if (recurringExpense == null)
@@ -192,117 +209,79 @@ public class RecurringExpenseService : IRecurringExpenseService
         }
     }
 
+    public async Task DeleteAsync(
+        int id,
+        string userId)
+    {
+        if (id <= 0)
+            return;
+
+        if (string.IsNullOrWhiteSpace(userId))
+            return;
+
+        await _repository.DeleteAsync(
+            id,
+            userId);
+    }
 
     private async Task<bool> GenerateExpenseInternalAsync(
         RecurringExpense recurringExpense)
     {
         if (!recurringExpense.IsActive)
-            return true;
+            return false;
 
+        var now = DateTime.UtcNow;
 
-        var today =
-            DateTime.Now.Date;
-
-
-        // Already generated for current month.
         if (recurringExpense.LastGeneratedDate.HasValue &&
             recurringExpense.LastGeneratedDate.Value.Year ==
-                today.Year &&
+                now.Year &&
             recurringExpense.LastGeneratedDate.Value.Month ==
-                today.Month)
+                now.Month)
         {
-            return true;
+            return false;
         }
 
+        if (now.Day < recurringExpense.DayOfMonth)
+            return false;
 
-        // Calculate actual day for current month.
-        var day =
+        var daysInMonth =
+            DateTime.DaysInMonth(
+                now.Year,
+                now.Month);
+
+        var generationDay =
             Math.Min(
                 recurringExpense.DayOfMonth,
-                DateTime.DaysInMonth(
-                    today.Year,
-                    today.Month));
+                daysInMonth);
 
+        if (now.Day < generationDay)
+            return false;
 
-        // Not reached yet.
-        if (today.Day < day)
-            return true;
-
-
-        // Planned due date.
-        var dueDate =
+        var expenseDate =
             new DateTime(
-                today.Year,
-                today.Month,
-                day);
+                now.Year,
+                now.Month,
+                generationDay);
 
-
-        var expense =
-            new Expense
-            {
-                UserId =
-                    recurringExpense.UserId,
-
-                Title =
-                    recurringExpense.Title,
-
-                Amount =
-                    recurringExpense.Amount,
-
-                DueDate =
-                    dueDate,
-
-                IsPaid =
-                    false,
-
-                Category =
-                    "Recurring"
-            };
-
+        var expense = new Expense
+        {
+            Title = recurringExpense.Title,
+            Amount = recurringExpense.Amount,
+            DueDate = expenseDate,
+            Category = "Recurring",
+            IsPaid = false
+        };
 
         await _expenseService.AddExpenseAsync(
             expense,
             recurringExpense.UserId);
 
-
-        // Remember generation.
         recurringExpense.LastGeneratedDate =
-            DateTime.UtcNow;
+            now;
 
         await _repository.UpdateAsync(
             recurringExpense);
 
-
         return true;
-    }
-
-
-    private async Task<RecurringExpense?>
-        FindRecurringExpenseForGeneration(
-            int id)
-    {
-        // Background generation is not tied
-        // to an HTTP/JWT user.
-
-        return await _repository
-            .GetByIdForBackgroundAsync(id);
-    }
-
-
-    public Task DeleteAsync(
-        int id,
-        string userId)
-    {
-        return _repository.DeleteAsync(
-            id,
-            userId);
-    }
-
-
-    public Task<List<RecurringExpense>>
-        GetActiveForBackgroundAsync()
-    {
-        return _repository
-            .GetActiveForBackgroundAsync();
     }
 }

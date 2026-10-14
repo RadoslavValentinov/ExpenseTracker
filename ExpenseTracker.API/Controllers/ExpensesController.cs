@@ -20,13 +20,11 @@ public class ExpensesController : ControllerBase
         _service = service;
     }
 
-
     private string? GetUserId()
     {
         return User.FindFirstValue(
             ClaimTypes.NameIdentifier);
     }
-
 
     [HttpPost]
     public async Task<IActionResult> AddExpense(
@@ -37,12 +35,28 @@ public class ExpensesController : ControllerBase
         if (string.IsNullOrWhiteSpace(userId))
             return Unauthorized();
 
+        if (dto == null)
+            return BadRequest("Invalid expense data.");
+
+        var title = dto.Title?.Trim();
+
+        if (string.IsNullOrWhiteSpace(title))
+            return BadRequest("Title is required.");
+
+        if (dto.Amount <= 0)
+            return BadRequest("Amount must be greater than zero.");
+
+        if (dto.DueDate == DateTime.MinValue)
+            return BadRequest("Due date is required.");
+
         var expense = new Expense
         {
-            Title = dto.Title,
+            Title = title,
             Amount = dto.Amount,
             DueDate = dto.DueDate,
-            Category = dto.Category,
+            Category = string.IsNullOrWhiteSpace(dto.Category)
+                ? null
+                : dto.Category.Trim(),
             IsPaid = false
         };
 
@@ -52,7 +66,6 @@ public class ExpensesController : ControllerBase
 
         return Ok();
     }
-
 
     [HttpGet]
     public async Task<IActionResult> GetExpenses()
@@ -69,7 +82,6 @@ public class ExpensesController : ControllerBase
         return Ok(expenses);
     }
 
-
     [HttpPut("{id}/pay")]
     public async Task<IActionResult> MarkAsPaid(
         int id)
@@ -78,6 +90,9 @@ public class ExpensesController : ControllerBase
 
         if (string.IsNullOrWhiteSpace(userId))
             return Unauthorized();
+
+        if (id <= 0)
+            return BadRequest("Invalid expense id.");
 
         var paid =
             await _service.MarkAsPaidAsync(
@@ -90,7 +105,6 @@ public class ExpensesController : ControllerBase
         return Ok();
     }
 
-
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(
         int id)
@@ -99,6 +113,9 @@ public class ExpensesController : ControllerBase
 
         if (string.IsNullOrWhiteSpace(userId))
             return Unauthorized();
+
+        if (id <= 0)
+            return BadRequest("Invalid expense id.");
 
         var deleted =
             await _service.DeleteAsync(
@@ -111,19 +128,43 @@ public class ExpensesController : ControllerBase
         return Ok();
     }
 
-
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(
         int id,
-        Expense expense)
+        UpdateExpenseDto dto)
     {
         var userId = GetUserId();
 
         if (string.IsNullOrWhiteSpace(userId))
             return Unauthorized();
 
-        if (id != expense.Id)
-            return BadRequest();
+        if (id <= 0)
+            return BadRequest("Invalid expense id.");
+
+        if (dto == null)
+            return BadRequest("Invalid expense data.");
+
+        var title = dto.Title?.Trim();
+
+        if (string.IsNullOrWhiteSpace(title))
+            return BadRequest("Title is required.");
+
+        if (dto.Amount <= 0)
+            return BadRequest("Amount must be greater than zero.");
+
+        if (dto.DueDate == DateTime.MinValue)
+            return BadRequest("Due date is required.");
+
+        var expense = new Expense
+        {
+            Id = id,
+            Title = title,
+            Amount = dto.Amount,
+            DueDate = dto.DueDate,
+            Category = string.IsNullOrWhiteSpace(dto.Category)
+                ? null
+                : dto.Category.Trim()
+        };
 
         var updated =
             await _service.UpdateAsync(
@@ -136,7 +177,6 @@ public class ExpensesController : ControllerBase
         return Ok();
     }
 
-
     [HttpGet("month/{month}")]
     public async Task<IActionResult> GetByMonth(
         int month)
@@ -145,6 +185,10 @@ public class ExpensesController : ControllerBase
 
         if (string.IsNullOrWhiteSpace(userId))
             return Unauthorized();
+
+        if (month < 1 || month > 12)
+            return BadRequest(
+                "Month must be between 1 and 12.");
 
         var result =
             await _service.GetByMonthAsync(

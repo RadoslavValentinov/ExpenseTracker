@@ -16,22 +16,48 @@ public class ExpenseService : IExpenseService
         _reminderService = reminderService;
     }
 
-
     public async Task AddExpenseAsync(
         Expense expense,
         string userId)
     {
+        if (expense == null)
+            throw new ArgumentNullException(nameof(expense));
+
+        if (string.IsNullOrWhiteSpace(userId))
+            throw new ArgumentException(
+                "User id is required.",
+                nameof(userId));
+
+        if (string.IsNullOrWhiteSpace(expense.Title))
+            throw new ArgumentException(
+                "Expense title is required.",
+                nameof(expense.Title));
+
+        if (expense.Amount <= 0)
+            throw new ArgumentException(
+                "Expense amount must be greater than zero.",
+                nameof(expense.Amount));
+
+        if (expense.DueDate == DateTime.MinValue)
+            throw new ArgumentException(
+                "Expense due date is required.",
+                nameof(expense.DueDate));
+
         expense.UserId = userId;
+        expense.Title = expense.Title.Trim();
+
+        if (!string.IsNullOrWhiteSpace(expense.Category))
+            expense.Category = expense.Category.Trim();
+
+        expense.IsPaid = false;
 
         await _repository.AddAsync(
             expense);
 
-
         var reminder = new Reminder
         {
             Title = $"Expense: {expense.Title}",
-            ReminderDate =
-                expense.DueDate.AddDays(-1),
+            ReminderDate = expense.DueDate.AddDays(-1),
             Type = "Expense",
             ReferenceId = expense.Id
         };
@@ -41,14 +67,12 @@ public class ExpenseService : IExpenseService
             userId);
     }
 
-
     public async Task<List<Expense>> GetExpensesAsync(
         string userId)
     {
         return await _repository.GetAllAsync(
             userId);
     }
-
 
     public async Task<bool> MarkAsPaidAsync(
         int id,
@@ -65,15 +89,12 @@ public class ExpenseService : IExpenseService
         if (expense.IsPaid)
             return true;
 
-        expense.IsPaid = true;
-
         await _repository.MarkAsPaidAsync(
             id,
             userId);
 
         return true;
     }
-
 
     public async Task<bool> DeleteAsync(
         int id,
@@ -87,13 +108,10 @@ public class ExpenseService : IExpenseService
         if (expense == null)
             return false;
 
-
-        // Delete the related reminder first.
         await _reminderService.DeleteByReferenceAsync(
             "Expense",
             id,
             userId);
-
 
         await _repository.DeleteAsync(
             id,
@@ -102,11 +120,34 @@ public class ExpenseService : IExpenseService
         return true;
     }
 
-
     public async Task<bool> UpdateAsync(
         Expense expense,
         string userId)
     {
+        if (expense == null)
+            throw new ArgumentNullException(nameof(expense));
+
+        if (string.IsNullOrWhiteSpace(userId))
+            return false;
+
+        if (expense.Id <= 0)
+            return false;
+
+        if (string.IsNullOrWhiteSpace(expense.Title))
+            throw new ArgumentException(
+                "Expense title is required.",
+                nameof(expense.Title));
+
+        if (expense.Amount <= 0)
+            throw new ArgumentException(
+                "Expense amount must be greater than zero.",
+                nameof(expense.Amount));
+
+        if (expense.DueDate == DateTime.MinValue)
+            throw new ArgumentException(
+                "Expense due date is required.",
+                nameof(expense.DueDate));
+
         var existingExpense =
             await _repository.GetByIdAsync(
                 expense.Id,
@@ -115,13 +156,11 @@ public class ExpenseService : IExpenseService
         if (existingExpense == null)
             return false;
 
-
         var oldDueDate =
             existingExpense.DueDate;
 
-
         existingExpense.Title =
-            expense.Title;
+            expense.Title.Trim();
 
         existingExpense.Amount =
             expense.Amount;
@@ -130,22 +169,21 @@ public class ExpenseService : IExpenseService
             expense.DueDate;
 
         existingExpense.Category =
-            expense.Category;
+            string.IsNullOrWhiteSpace(expense.Category)
+                ? null
+                : expense.Category.Trim();
 
-        existingExpense.IsPaid =
-            expense.IsPaid;
-
+        // IsPaid is intentionally NOT changed here.
+        // Payment is handled only by MarkAsPaidAsync.
 
         await _repository.UpdateAsync(
             existingExpense);
-
 
         var existingReminder =
             await _reminderService.GetByReferenceAsync(
                 "Expense",
                 existingExpense.Id,
                 userId);
-
 
         if (existingReminder != null)
         {
@@ -155,9 +193,6 @@ public class ExpenseService : IExpenseService
             existingReminder.ReminderDate =
                 existingExpense.DueDate.AddDays(-1);
 
-
-            // If the due date changed,
-            // make the reminder active again.
             if (oldDueDate !=
                 existingExpense.DueDate)
             {
@@ -165,21 +200,38 @@ public class ExpenseService : IExpenseService
                 existingReminder.IsRead = false;
             }
 
-
             await _reminderService.UpdateAsync(
                 existingReminder,
                 userId);
         }
+        else
+        {
+            var reminder = new Reminder
+            {
+                Title = $"Expense: {existingExpense.Title}",
+                ReminderDate =
+                    existingExpense.DueDate.AddDays(-1),
+                Type = "Expense",
+                ReferenceId = existingExpense.Id,
+                IsTriggered = false,
+                IsRead = false
+            };
 
+            await _reminderService.AddAsync(
+                reminder,
+                userId);
+        }
 
         return true;
     }
-
 
     public async Task<List<Expense>> GetByMonthAsync(
         int month,
         string userId)
     {
+        if (month < 1 || month > 12)
+            return new List<Expense>();
+
         return await _repository.GetByMonthAsync(
             month,
             userId);

@@ -1,5 +1,5 @@
-﻿using ExpenseTracker.Core.Interfaces;
-using ExpenseTracker.Core.Models;
+﻿using ExpenseTracker.API.DTOs;
+using ExpenseTracker.Core.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -19,67 +19,79 @@ public class RecurringExpensesController : ControllerBase
         _service = service;
     }
 
-
     private string? GetUserId()
     {
         return User.FindFirstValue(
             ClaimTypes.NameIdentifier);
     }
 
-
     [HttpGet]
-    public async Task<ActionResult<List<RecurringExpense>>> GetAll()
+    public async Task<IActionResult> GetAll()
     {
         var userId = GetUserId();
 
         if (string.IsNullOrWhiteSpace(userId))
             return Unauthorized();
 
-        var items =
+        var result =
             await _service.GetAllAsync(
                 userId);
 
-        return Ok(items);
+        return Ok(result);
     }
 
-
-    [HttpPost]
-    public async Task<IActionResult> Create(
-        RecurringExpense recurringExpense)
+    [HttpGet("active")]
+    public async Task<IActionResult> GetActive()
     {
         var userId = GetUserId();
 
         if (string.IsNullOrWhiteSpace(userId))
             return Unauthorized();
 
+        var result =
+            await _service.GetActiveAsync(
+                userId);
 
-        if (recurringExpense == null)
+        return Ok(result);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Create(
+        CreateRecurringExpenseDto dto)
+    {
+        var userId = GetUserId();
+
+        if (string.IsNullOrWhiteSpace(userId))
+            return Unauthorized();
+
+        if (dto == null)
             return BadRequest(
                 "Invalid recurring expense data.");
 
+        var title = dto.Title?.Trim();
 
-        if (string.IsNullOrWhiteSpace(
-                recurringExpense.Title))
-        {
-            return BadRequest(
-                "Title is required.");
-        }
+        if (string.IsNullOrWhiteSpace(title))
+            return BadRequest("Title is required.");
 
-
-        if (recurringExpense.Amount <= 0)
-        {
+        if (dto.Amount <= 0)
             return BadRequest(
                 "Amount must be greater than zero.");
-        }
 
-
-        if (recurringExpense.DayOfMonth < 1 ||
-            recurringExpense.DayOfMonth > 31)
+        if (dto.DayOfMonth < 1 ||
+            dto.DayOfMonth > 31)
         {
             return BadRequest(
                 "Day of month must be between 1 and 31.");
         }
 
+        var recurringExpense =
+            new ExpenseTracker.Core.Models.RecurringExpense
+            {
+                Title = title,
+                Amount = dto.Amount,
+                DayOfMonth = dto.DayOfMonth,
+                IsActive = dto.IsActive
+            };
 
         await _service.AddAsync(
             recurringExpense,
@@ -87,7 +99,6 @@ public class RecurringExpensesController : ControllerBase
 
         return Ok();
     }
-
 
     [HttpPost("{id}/generate")]
     public async Task<IActionResult> Generate(
@@ -98,63 +109,54 @@ public class RecurringExpensesController : ControllerBase
         if (string.IsNullOrWhiteSpace(userId))
             return Unauthorized();
 
+        if (id <= 0)
+            return BadRequest(
+                "Invalid recurring expense id.");
 
         var generated =
             await _service.GenerateExpenseForUserAsync(
                 id,
                 userId);
 
-
         if (!generated)
             return NotFound();
-
 
         return Ok();
     }
 
-
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(
         int id,
-        RecurringExpense recurringExpense)
+        UpdateRecurringExpenseDto dto)
     {
         var userId = GetUserId();
 
         if (string.IsNullOrWhiteSpace(userId))
             return Unauthorized();
 
+        if (id <= 0)
+            return BadRequest(
+                "Invalid recurring expense id.");
 
-        if (recurringExpense == null)
+        if (dto == null)
             return BadRequest(
                 "Invalid recurring expense data.");
 
+        var title = dto.Title?.Trim();
 
-        if (id != recurringExpense.Id)
-            return BadRequest();
+        if (string.IsNullOrWhiteSpace(title))
+            return BadRequest("Title is required.");
 
-
-        if (string.IsNullOrWhiteSpace(
-                recurringExpense.Title))
-        {
-            return BadRequest(
-                "Title is required.");
-        }
-
-
-        if (recurringExpense.Amount <= 0)
-        {
+        if (dto.Amount <= 0)
             return BadRequest(
                 "Amount must be greater than zero.");
-        }
 
-
-        if (recurringExpense.DayOfMonth < 1 ||
-            recurringExpense.DayOfMonth > 31)
+        if (dto.DayOfMonth < 1 ||
+            dto.DayOfMonth > 31)
         {
             return BadRequest(
                 "Day of month must be between 1 and 31.");
         }
-
 
         var existing =
             await _service.GetByIdAsync(
@@ -164,14 +166,17 @@ public class RecurringExpensesController : ControllerBase
         if (existing == null)
             return NotFound();
 
+        existing.Title = title;
+        existing.Amount = dto.Amount;
+        existing.DayOfMonth = dto.DayOfMonth;
+        existing.IsActive = dto.IsActive;
 
         await _service.UpdateAsync(
-            recurringExpense,
+            existing,
             userId);
 
         return Ok();
     }
-
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(
@@ -182,6 +187,9 @@ public class RecurringExpensesController : ControllerBase
         if (string.IsNullOrWhiteSpace(userId))
             return Unauthorized();
 
+        if (id <= 0)
+            return BadRequest(
+                "Invalid recurring expense id.");
 
         var existing =
             await _service.GetByIdAsync(
@@ -190,7 +198,6 @@ public class RecurringExpensesController : ControllerBase
 
         if (existing == null)
             return NotFound();
-
 
         await _service.DeleteAsync(
             id,

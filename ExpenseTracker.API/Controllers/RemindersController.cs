@@ -1,4 +1,5 @@
-﻿using ExpenseTracker.Core.Interfaces;
+﻿using ExpenseTracker.API.DTOs;
+using ExpenseTracker.Core.Interfaces;
 using ExpenseTracker.Core.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,13 +20,11 @@ public class RemindersController : ControllerBase
         _service = service;
     }
 
-
     private string? GetUserId()
     {
         return User.FindFirstValue(
             ClaimTypes.NameIdentifier);
     }
-
 
     [HttpGet]
     public async Task<ActionResult<List<Reminder>>> Get()
@@ -42,7 +41,6 @@ public class RemindersController : ControllerBase
         return Ok(reminders);
     }
 
-
     [HttpGet("completed")]
     public async Task<ActionResult<List<Reminder>>> GetCompleted()
     {
@@ -58,15 +56,45 @@ public class RemindersController : ControllerBase
         return Ok(reminders);
     }
 
-
     [HttpPost]
     public async Task<IActionResult> Create(
-        Reminder reminder)
+        CreateReminderDto dto)
     {
         var userId = GetUserId();
 
         if (string.IsNullOrWhiteSpace(userId))
             return Unauthorized();
+
+        if (dto == null)
+            return BadRequest("Invalid reminder data.");
+
+        var title = dto.Title?.Trim();
+
+        if (string.IsNullOrWhiteSpace(title))
+            return BadRequest("Title is required.");
+
+        if (dto.ReminderDate == DateTime.MinValue)
+            return BadRequest(
+                "Reminder date is required.");
+
+        var type = dto.Type?.Trim();
+
+        if (string.IsNullOrWhiteSpace(type))
+            return BadRequest("Reminder type is required.");
+
+        if (dto.ReferenceId < 0)
+            return BadRequest(
+                "Reference id cannot be negative.");
+
+        var reminder = new Reminder
+        {
+            Title = title,
+            ReminderDate = dto.ReminderDate,
+            Type = type,
+            ReferenceId = dto.ReferenceId,
+            IsTriggered = false,
+            IsRead = false
+        };
 
         await _service.AddAsync(
             reminder,
@@ -74,7 +102,6 @@ public class RemindersController : ControllerBase
 
         return Ok();
     }
-
 
     [HttpPut("{id}/trigger")]
     public async Task<IActionResult> Trigger(
@@ -84,6 +111,9 @@ public class RemindersController : ControllerBase
 
         if (string.IsNullOrWhiteSpace(userId))
             return Unauthorized();
+
+        if (id <= 0)
+            return BadRequest("Invalid reminder id.");
 
         var reminder =
             await _service.GetByIdAsync(
@@ -100,7 +130,6 @@ public class RemindersController : ControllerBase
         return NoContent();
     }
 
-
     [HttpPut("{id}/read")]
     public async Task<IActionResult> MarkAsRead(
         int id)
@@ -109,6 +138,9 @@ public class RemindersController : ControllerBase
 
         if (string.IsNullOrWhiteSpace(userId))
             return Unauthorized();
+
+        if (id <= 0)
+            return BadRequest("Invalid reminder id.");
 
         var reminder =
             await _service.GetByIdAsync(
@@ -125,7 +157,6 @@ public class RemindersController : ControllerBase
         return NoContent();
     }
 
-
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(
         int id)
@@ -134,6 +165,9 @@ public class RemindersController : ControllerBase
 
         if (string.IsNullOrWhiteSpace(userId))
             return Unauthorized();
+
+        if (id <= 0)
+            return BadRequest("Invalid reminder id.");
 
         var reminder =
             await _service.GetByIdAsync(
@@ -150,19 +184,30 @@ public class RemindersController : ControllerBase
         return Ok();
     }
 
-
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(
         int id,
-        Reminder reminder)
+        UpdateReminderDto dto)
     {
         var userId = GetUserId();
 
         if (string.IsNullOrWhiteSpace(userId))
             return Unauthorized();
 
-        if (id != reminder.Id)
-            return BadRequest();
+        if (id <= 0)
+            return BadRequest("Invalid reminder id.");
+
+        if (dto == null)
+            return BadRequest("Invalid reminder data.");
+
+        var title = dto.Title?.Trim();
+
+        if (string.IsNullOrWhiteSpace(title))
+            return BadRequest("Title is required.");
+
+        if (dto.ReminderDate == DateTime.MinValue)
+            return BadRequest(
+                "Reminder date is required.");
 
         var existing =
             await _service.GetByIdAsync(
@@ -171,6 +216,13 @@ public class RemindersController : ControllerBase
 
         if (existing == null)
             return NotFound();
+
+        var reminder = new Reminder
+        {
+            Id = id,
+            Title = title,
+            ReminderDate = dto.ReminderDate
+        };
 
         await _service.UpdateAsync(
             reminder,

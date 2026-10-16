@@ -9,11 +9,12 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using System.Text;
 using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
+
 
 // =========================================================
 // RATE LIMITING
@@ -28,6 +29,7 @@ builder.Services.AddRateLimiter(options =>
     // GLOBAL LIMIT
     // 120 requests per minute per IP
     // -----------------------------------------------------
+
     options.GlobalLimiter =
         PartitionedRateLimiter.Create<HttpContext, string>(
             httpContext =>
@@ -43,11 +45,13 @@ builder.Services.AddRateLimiter(options =>
                         AutoReplenishment = true
                     }));
 
+
     // -----------------------------------------------------
     // AUTH LIMIT
     // 10 requests per minute per IP
     // Used by Login/Register
     // -----------------------------------------------------
+
     options.AddPolicy(
         "auth",
         httpContext =>
@@ -63,9 +67,11 @@ builder.Services.AddRateLimiter(options =>
                     AutoReplenishment = true
                 }));
 
+
     // -----------------------------------------------------
     // REJECTION RESPONSE
     // -----------------------------------------------------
+
     options.OnRejected = async (
         context,
         cancellationToken) =>
@@ -144,6 +150,10 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(options =>
 {
+    // -----------------------------------------------------
+    // JWT SECURITY DEFINITION
+    // -----------------------------------------------------
+
     options.AddSecurityDefinition(
         "Bearer",
         new OpenApiSecurityScheme
@@ -153,26 +163,24 @@ builder.Services.AddSwaggerGen(options =>
             Scheme = "bearer",
             BearerFormat = "JWT",
             In = ParameterLocation.Header,
-            Description = "Enter your JWT token."
+            Description =
+                "Enter your JWT token."
         });
 
+
+    // -----------------------------------------------------
+    // JWT SECURITY REQUIREMENT
+    // Swashbuckle 10+ syntax
+    // -----------------------------------------------------
+
     options.AddSecurityRequirement(
-        new OpenApiSecurityRequirement
-        {
+        document =>
+            new OpenApiSecurityRequirement
             {
-                new OpenApiSecurityScheme
-                {
-                    Reference =
-                        new OpenApiReference
-                        {
-                            Type =
-                                ReferenceType.SecurityScheme,
-                            Id = "Bearer"
-                        }
-                },
-                Array.Empty<string>()
-            }
-        });
+                [new OpenApiSecuritySchemeReference(
+                    "Bearer",
+                    document)] = []
+            });
 });
 
 
@@ -219,6 +227,7 @@ var jwtAudience =
     ?? throw new InvalidOperationException(
         "JWT Audience is not configured.");
 
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme =
@@ -248,6 +257,7 @@ builder.Services.AddAuthentication(options =>
 
             ClockSkew = TimeSpan.Zero
         };
+
 
     // =====================================================
     // JWT DIAGNOSTICS

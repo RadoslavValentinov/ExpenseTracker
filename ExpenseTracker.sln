@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.11.12306.390 stable
+VisualStudioVersion = 18.11.12306.390
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpenseTracker.API", "ExpenseTracker.API\ExpenseTracker.API.csproj", "{629C811E-C7B2-476D-923E-8DE169B02BEF}"
 EndProject
@@ -10,6 +10,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpenseTracker.Infrastructure", "ExpenseTracker.Infrastructure\ExpenseTracker.Infrastructure.csproj", "{99B02983-6982-40CD-9D8F-457BF9B3CA63}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpenseTracker.UI", "ExpenseTracker.UI\ExpenseTracker.UI.csproj", "{998979B1-55D4-47FA-A085-EC5F6A477564}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpenseTracker.MAUI", "ExpenseTracker.MAUI\ExpenseTracker.MAUI\ExpenseTracker.MAUI\ExpenseTracker.MAUI.csproj", "{607C6D71-9704-DAE1-E846-76961B42FABA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{998979B1-55D4-47FA-A085-EC5F6A477564}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{998979B1-55D4-47FA-A085-EC5F6A477564}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{998979B1-55D4-47FA-A085-EC5F6A477564}.Release|Any CPU.Build.0 = Release|Any CPU
+		{607C6D71-9704-DAE1-E846-76961B42FABA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{607C6D71-9704-DAE1-E846-76961B42FABA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{607C6D71-9704-DAE1-E846-76961B42FABA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{607C6D71-9704-DAE1-E846-76961B42FABA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

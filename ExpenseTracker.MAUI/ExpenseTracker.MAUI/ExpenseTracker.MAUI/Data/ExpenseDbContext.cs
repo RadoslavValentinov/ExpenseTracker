@@ -5,14 +5,11 @@ namespace ExpenseTracker.MAUI.Data;
 
 public class ExpenseDbContext : DbContext
 {
-    public DbSet<Expense> Expenses =>
-        Set<Expense>();
+    public DbSet<Expense> Expenses => Set<Expense>();
 
-    public DbSet<TaskItem> Tasks =>
-        Set<TaskItem>();
+    public DbSet<TaskItem> Tasks => Set<TaskItem>();
 
-    public DbSet<Reminder> Reminders =>
-        Set<Reminder>();
+    public DbSet<Reminder> Reminders => Set<Reminder>();
 
     public DbSet<RecurringExpense> RecurringExpenses =>
         Set<RecurringExpense>();

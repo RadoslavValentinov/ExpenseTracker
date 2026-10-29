@@ -1,4 +1,5 @@
 ﻿using ExpenseTracker.MAUI.Data;
+using ExpenseTracker.MAUI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -19,37 +20,35 @@ public static class MauiProgram
                     "OpenSansRegular");
             });
 
-
         // =====================================================
         // BLAZOR HYBRID
         // =====================================================
 
         builder.Services.AddMauiBlazorWebView();
 
-
 #if DEBUG
-
         builder.Services.AddBlazorWebViewDeveloperTools();
-
         builder.Logging.AddDebug();
-
 #endif
-
 
         // =====================================================
         // LOCAL SQLITE DATABASE
         // =====================================================
 
-        var databasePath =
-            Path.Combine(
-                FileSystem.AppDataDirectory,
-                "expenses.db");
+        var databasePath = Path.Combine(
+            FileSystem.AppDataDirectory,
+            "expenses.db");
 
-        builder.Services.AddDbContext<ExpenseDbContext>(
+        builder.Services.AddDbContextFactory<ExpenseDbContext>(
             options =>
                 options.UseSqlite(
                     $"Data Source={databasePath}"));
 
+        // =====================================================
+        // LOCAL SERVICES
+        // =====================================================
+
+        builder.Services.AddScoped<LocalExpenseService>();
 
         // =====================================================
         // BUILD APPLICATION
@@ -57,20 +56,22 @@ public static class MauiProgram
 
         var app = builder.Build();
 
-
         // =====================================================
         // CREATE LOCAL DATABASE
         // =====================================================
 
         using (var scope = app.Services.CreateScope())
         {
-            var db =
+            var factory =
                 scope.ServiceProvider
-                    .GetRequiredService<ExpenseDbContext>();
+                    .GetRequiredService<
+                        IDbContextFactory<ExpenseDbContext>>();
+
+            using var db =
+                factory.CreateDbContext();
 
             db.Database.EnsureCreated();
         }
-
 
         return app;
     }

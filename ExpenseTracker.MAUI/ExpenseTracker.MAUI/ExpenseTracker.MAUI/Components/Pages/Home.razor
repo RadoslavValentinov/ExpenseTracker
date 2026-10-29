@@ -1,5 +1,98 @@
 ﻿@page "/"
 
-<h1>Hello, world!</h1>
+@using ExpenseTracker.Core.Models
+@using ExpenseTracker.MAUI.Services
 
-Welcome to your new app.
+@inject LocalExpenseService ExpenseService
+
+<PageTitle>ExpenseTracker</PageTitle>
+
+<div style="padding: 30px;">
+
+    <h1>ExpenseTracker</h1>
+
+    <p>
+        Local SQLite database test
+    </p>
+
+    <button class="btn btn-primary"
+            @onclick="AddExpense">
+        Add Test Expense
+    </button>
+
+    <button class="btn btn-secondary ms-2"
+            @onclick="LoadExpenses">
+        Load Expenses
+    </button>
+
+    @if (!string.IsNullOrWhiteSpace(message))
+    {
+        <div class="alert alert-success mt-3">
+            @message
+        </div>
+    }
+
+    @if (expenses.Count > 0)
+    {
+        <div class="mt-4">
+
+            <h3>Saved Expenses</h3>
+
+            @foreach (var expense in expenses)
+            {
+                <div class="card mb-2 p-3">
+
+                    <strong>
+                        @expense.Title
+                    </strong>
+
+                    <div>
+                        Amount:
+                        @expense.Amount.ToString("0.00")
+                    </div>
+
+                    <div>
+                        Due:
+                        @expense.DueDate.ToShortDateString()
+                    </div>
+
+                    <div>
+                        Category:
+                        @expense.Category
+                    </div>
+
+                </div>
+            }
+
+        </div>
+    }
+
+</div>
+
+@code
+{
+    private List<Expense> expenses = new();
+
+    private string? message;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadExpenses();
+    }
+
+    private async Task AddExpense()
+    {
+        await ExpenseService.AddTestExpenseAsync();
+
+        message =
+            "Expense saved to local SQLite database.";
+
+        await LoadExpenses();
+    }
+
+    private async Task LoadExpenses()
+    {
+        expenses =
+            await ExpenseService.GetExpensesAsync();
+    }
+}

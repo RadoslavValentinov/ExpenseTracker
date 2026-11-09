@@ -1,0 +1,41 @@
+﻿@page "/"
+
+@using ExpenseTracker.MAUI.Data
+@using Microsoft.EntityFrameworkCore
+
+@inject IDbContextFactory<ExpenseDbContext> DbFactory
+
+<PageTitle>ExpenseTracker</PageTitle>
+
+<div style="padding: 30px;">
+    <h1>ExpenseTracker</h1>
+
+    <p>Локална SQLite база</p>
+
+    <button class="btn btn-primary" @onclick="TestDatabase">
+        Провери SQLite
+    </button>
+
+    @if (!string.IsNullOrWhiteSpace(message))
+    {
+        <div class="alert alert-success mt-3">
+            @message
+        </div>
+    }
+</div>
+
+@code
+{
+    private string? message;
+
+    private async Task TestDatabase()
+    {
+        await using var db = await DbFactory.CreateDbContextAsync();
+
+        var canConnect = await db.Database.CanConnectAsync();
+
+        message = canConnect
+            ? "SQLite работи успешно на устройството."
+            : "SQLite не успя да се свърже.";
+    }
+}

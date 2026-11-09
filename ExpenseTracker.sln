@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpenseTracker.Infrastructu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpenseTracker.UI", "ExpenseTracker.UI\ExpenseTracker.UI.csproj", "{998979B1-55D4-47FA-A085-EC5F6A477564}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpenseTracker.MAUI", "ExpenseTracker.MAUI\ExpenseTracker.MAUI\ExpenseTracker.MAUI\ExpenseTracker.MAUI.csproj", "{607C6D71-9704-DAE1-E846-76961B42FABA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpenseTracker.MAUI", "ExpenseTracker.MAUI\ExpenseTracker.MAUI.csproj", "{4C465F83-C8E6-4E1E-BE6C-327FB7171988}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,10 +35,11 @@ Global
 		{998979B1-55D4-47FA-A085-EC5F6A477564}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{998979B1-55D4-47FA-A085-EC5F6A477564}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{998979B1-55D4-47FA-A085-EC5F6A477564}.Release|Any CPU.Build.0 = Release|Any CPU
-		{607C6D71-9704-DAE1-E846-76961B42FABA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{607C6D71-9704-DAE1-E846-76961B42FABA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{607C6D71-9704-DAE1-E846-76961B42FABA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{607C6D71-9704-DAE1-E846-76961B42FABA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4C465F83-C8E6-4E1E-BE6C-327FB7171988}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C465F83-C8E6-4E1E-BE6C-327FB7171988}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C465F83-C8E6-4E1E-BE6C-327FB7171988}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{4C465F83-C8E6-4E1E-BE6C-327FB7171988}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C465F83-C8E6-4E1E-BE6C-327FB7171988}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

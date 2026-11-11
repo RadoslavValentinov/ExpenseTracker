@@ -1,17 +1,83 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+<div class="app-shell">
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+    <header class="topbar">
+
+        <div class="app-title">
+            <span class="app-logo">₾</span>
+            <span>ExpenseTracker</span>
         </div>
 
-        <article class="content px-4">
-            @Body
-        </article>
+        <div class="menu-wrapper">
+
+            <button class="menu-button"
+                    @onclick="ToggleMenu"
+                    aria-label="Меню">
+                ☰
+            </button>
+
+            @if (menuOpen)
+            {
+                <div class="menu-dropdown">
+
+                    <NavLink href="/"
+                             Match="NavLinkMatch.All"
+                             @onclick="CloseMenu">
+                        🏠 Начало
+                    </NavLink>
+
+                    <NavLink href="/expenses"
+                             @onclick="CloseMenu">
+                        💰 Разходи
+                    </NavLink>
+
+                    <NavLink href="/tasks"
+                             @onclick="CloseMenu">
+                        ✅ Задачи
+                    </NavLink>
+
+                    <NavLink href="/reminders"
+                             @onclick="CloseMenu">
+                        🔔 Напомняния
+                    </NavLink>
+
+                    <NavLink href="/recurring-expenses"
+                             @onclick="CloseMenu">
+                        🔄 Периодични разходи
+                    </NavLink>
+
+                    <div class="menu-separator"></div>
+
+                    <NavLink href="/settings"
+                             @onclick="CloseMenu">
+                        ⚙ Настройки
+                    </NavLink>
+
+                </div>
+            }
+
+        </div>
+
+    </header>
+
+    <main class="app-content">
+        @Body
     </main>
+
 </div>
+
+@code
+{
+    private bool menuOpen;
+
+    private void ToggleMenu()
+    {
+        menuOpen = !menuOpen;
+    }
+
+    private void CloseMenu()
+    {
+        menuOpen = false;
+    }
+}

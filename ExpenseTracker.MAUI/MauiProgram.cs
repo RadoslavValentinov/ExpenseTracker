@@ -1,6 +1,7 @@
 ﻿using ExpenseTracker.MAUI.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using ExpenseTracker.MAUI.Services;
 
 namespace ExpenseTracker.MAUI;
 
@@ -33,6 +34,8 @@ public static class MauiProgram
             {
                 options.UseSqlite($"Data Source={databasePath}");
             });
+
+        builder.Services.AddScoped<LocalExpenseService>();
 
         var app = builder.Build();
 

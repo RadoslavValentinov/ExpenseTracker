@@ -1,0 +1,199 @@
+﻿.dashboard {
+    padding: 8px 0 30px;
+}
+
+.dashboard-header {
+    margin-bottom: 20px;
+}
+
+    .dashboard-header h1 {
+        margin-bottom: 4px;
+        font-size: 28px;
+        font-weight: 700;
+        color: #1f2937;
+    }
+
+    .dashboard-header p {
+        margin: 0;
+        color: #6b7280;
+    }
+
+.dashboard-main-card {
+    background: linear-gradient(135deg, #2563eb, #4f46e5);
+    color: white;
+    border-radius: 24px;
+    padding: 22px;
+    margin-bottom: 16px;
+    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.18);
+}
+
+.dashboard-main-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.dashboard-main-label {
+    font-size: 14px;
+    opacity: 0.85;
+    margin-bottom: 6px;
+}
+
+.dashboard-main-total {
+    font-size: 30px;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.dashboard-main-description {
+    font-size: 13px;
+    opacity: 0.85;
+}
+
+.expense-circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: conic-gradient( #ffffff var(--paid-percent), rgba(255, 255, 255, 0.20) var(--paid-percent) );
+}
+
+.expense-circle-inner {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    background: #3153d8;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.expense-circle-percent {
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.expense-circle-label {
+    font-size: 11px;
+    opacity: 0.85;
+}
+
+.dashboard-stat {
+    background: white;
+    border-radius: 18px;
+    padding: 18px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+    height: 100%;
+}
+
+.dashboard-stat-label {
+    color: #6b7280;
+    font-size: 13px;
+    margin-bottom: 5px;
+}
+
+.dashboard-stat-value {
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.dashboard-stat-paid {
+    color: #16a34a;
+}
+
+.dashboard-stat-unpaid {
+    color: #d97706;
+}
+
+.dashboard-section {
+    background: white;
+    border-radius: 18px;
+    padding: 18px;
+    margin-top: 16px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+}
+
+.dashboard-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+    .dashboard-section-header h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+    }
+
+.dashboard-link {
+    color: #2563eb;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.dashboard-expense {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 13px 0;
+    border-bottom: 1px solid #eef0f3;
+}
+
+    .dashboard-expense:last-child {
+        border-bottom: 0;
+    }
+
+.dashboard-expense-title {
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.dashboard-expense-meta {
+    font-size: 12px;
+    color: #6b7280;
+    margin-top: 2px;
+}
+
+.dashboard-expense-amount {
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.dashboard-empty {
+    padding: 12px 0;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+@media (max-width: 600px) {
+
+    .dashboard-main-content {
+        align-items: flex-start;
+    }
+
+    .expense-circle {
+        width: 100px;
+        height: 100px;
+    }
+
+    .expense-circle-inner {
+        width: 74px;
+        height: 74px;
+    }
+
+    .expense-circle-percent {
+        font-size: 18px;
+    }
+
+    .dashboard-main-total {
+        font-size: 26px;
+    }
+}

@@ -37,6 +37,8 @@ public static class MauiProgram
 
         builder.Services.AddScoped<LocalExpenseService>();
         builder.Services.AddScoped<LocalTaskService>();
+        builder.Services.AddScoped<LocalReminderService>();
+
 
         var app = builder.Build();
 

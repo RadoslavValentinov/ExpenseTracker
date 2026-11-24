@@ -1,102 +1,294 @@
 .app-shell {
     min-height: 100vh;
-    background: #f5f6f8;
+    background: #f5f7fb;
 }
+
+/* =========================
+   TOP BAR
+   ========================= */
 
 .topbar {
     position: sticky;
     top: 0;
-    z-index: 1000;
+    z-index: 2000;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 28px 18px 14px 18px;
+    padding: 16px 16px 12px;
     background: #ffffff;
-    border-bottom: 1px solid #e5e7eb;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border-bottom: 1px solid #e9edf3;
+    box-shadow: 0 3px 12px rgba(15, 23, 42, 0.06);
 }
 
 .app-title {
     display: flex;
     align-items: center;
-    gap: 10px;
-    font-size: 20px;
-    font-weight: 700;
-    color: #1f2937;
+    gap: 11px;
 }
 
 .app-logo {
+    width: 42px;
+    height: 42px;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 34px;
-    height: 34px;
-    border-radius: 10px;
-    background: #2563eb;
-    color: white;
+    border-radius: 13px;
+    background: linear-gradient(135deg, #2563eb, #4f46e5);
+    color: #ffffff;
+    font-size: 20px;
     font-weight: 700;
+    box-shadow: 0 5px 14px rgba(37, 99, 235, 0.20);
 }
 
-.menu-wrapper {
-    position: relative;
+.app-title-main {
+    font-size: 18px;
+    font-weight: 700;
+    color: #111827;
+    line-height: 1.1;
+}
+
+.app-title-sub {
+    margin-top: 3px;
+    font-size: 12px;
+    color: #8a94a6;
 }
 
 .menu-button {
-    width: 44px;
-    height: 44px;
+    width: 46px;
+    height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border: 0;
-    border-radius: 10px;
-    background: #f3f4f6;
-    color: #1f2937;
-    font-size: 22px;
+    border-radius: 13px;
+    background: #f1f4f8;
+    color: #374151;
+    font-size: 23px;
+    line-height: 1;
     cursor: pointer;
+    position: relative;
+    z-index: 5000;
+    transition: background 0.15s ease, transform 0.15s ease;
 }
 
     .menu-button:hover {
-        background: #e5e7eb;
+        background: #e8edf4;
     }
 
-.menu-dropdown {
-    position: absolute;
-    top: calc(100% + 8px);
+    .menu-button:active {
+        transform: scale(0.96);
+    }
+
+/* =========================
+   DARK OVERLAY
+   ========================= */
+
+.menu-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    background: rgba(15, 23, 42, 0.38);
+    backdrop-filter: blur(2px);
+}
+
+/* =========================
+   SIDE MENU
+   ========================= */
+
+.side-menu {
+    position: fixed;
+    top: 0;
     right: 0;
-    width: 240px;
-    padding: 8px;
+    bottom: 0;
+    z-index: 4000;
+    width: min(330px, 88vw);
+    padding: 18px 14px 20px;
     background: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 14px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
-    overflow: hidden;
+    border-left: 1px solid #e8ebf0;
+    box-shadow: -14px 0 40px rgba(15, 23, 42, 0.14);
+    overflow-y: auto;
 }
 
-    .menu-dropdown a {
-        display: block;
-        padding: 12px 14px;
-        border-radius: 9px;
-        color: #374151;
-        text-decoration: none;
-        font-size: 15px;
+/* =========================
+   MENU HEADER
+   ========================= */
+
+.side-menu-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px 5px 18px;
+    border-bottom: 1px solid #eef1f5;
+}
+
+.side-menu-title {
+    font-size: 23px;
+    font-weight: 750;
+    color: #111827;
+}
+
+.side-menu-subtitle {
+    margin-top: 3px;
+    font-size: 12px;
+    color: #8a94a6;
+}
+
+.close-menu-button {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 12px;
+    background: #f3f5f8;
+    color: #475569;
+    font-size: 17px;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.15s ease;
+}
+
+    .close-menu-button:hover {
+        background: #e9edf3;
     }
 
-        .menu-dropdown a:hover {
-            background: #f3f4f6;
-        }
+    .close-menu-button:active {
+        transform: scale(0.95);
+    }
 
-        .menu-dropdown a.active {
-            background: #eff6ff;
-            color: #2563eb;
-            font-weight: 600;
-        }
+/* =========================
+   MENU NAVIGATION
+   ========================= */
 
-.menu-separator {
-    height: 1px;
-    margin: 6px 4px;
-    background: #e5e7eb;
+.side-menu-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-top: 14px;
 }
+
+/*
+   IMPORTANT:
+   These rules override global anchor styles.
+*/
+
+.side-menu-item,
+.side-menu-item:visited,
+.side-menu-item:hover,
+.side-menu-item:focus,
+.side-menu-item:active {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    width: 100%;
+    min-height: 58px;
+    padding: 8px 11px;
+    border: 0;
+    border-radius: 15px;
+    background: transparent;
+    color: #374151;
+    text-decoration: none !important;
+    outline: none;
+    box-sizing: border-box;
+    transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+    .side-menu-item:hover {
+        background: #f6f8fb;
+        color: #111827;
+    }
+
+    .side-menu-item:active {
+        transform: scale(0.985);
+    }
+
+    .side-menu-item.active {
+        background: #eef4ff;
+        color: #2563eb;
+        font-weight: 650;
+    }
+
+/* =========================
+   ICON
+   ========================= */
+
+.side-menu-icon {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 42px;
+    border-radius: 12px;
+    background: #f3f5f8;
+    font-size: 20px;
+    transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.side-menu-item.active .side-menu-icon {
+    background: #dce9ff;
+}
+
+.side-menu-item:hover .side-menu-icon {
+    transform: scale(1.04);
+}
+
+.side-menu-text {
+    flex: 1;
+    font-size: 15px;
+    font-weight: 600;
+    color: inherit;
+}
+
+.side-menu-arrow {
+    color: #a0a9b7;
+    font-size: 18px;
+}
+
+/* =========================
+   SEPARATOR
+   ========================= */
+
+.side-menu-separator {
+    height: 1px;
+    margin: 10px 7px;
+    background: #e8ecf2;
+}
+
+/* =========================
+   CONTENT
+   ========================= */
 
 .app-content {
     width: 100%;
     max-width: 1100px;
     margin: 0 auto;
     padding: 18px;
+}
+
+/* =========================
+   MOBILE
+   ========================= */
+
+@media (max-width: 600px) {
+
+    .topbar {
+        padding: 15px 14px 11px;
+    }
+
+    .app-title-main {
+        font-size: 17px;
+    }
+
+    .app-title-sub {
+        font-size: 11px;
+    }
+
+    .app-content {
+        padding: 14px;
+    }
+
+    .side-menu {
+        width: min(320px, 90vw);
+    }
 }

@@ -1,0 +1,374 @@
+﻿@page "/calendar"
+
+@using ExpenseTracker.Core.Models
+@using ExpenseTracker.MAUI.Services
+
+@inject LocalExpenseService ExpenseService
+@inject LocalTaskService TaskService
+@inject LocalReminderService ReminderService
+
+<PageTitle>Календар</PageTitle>
+
+<div class="calendar-page">
+
+    <div class="calendar-header">
+
+        <button class="calendar-nav-button"
+                @onclick="PreviousMonth">
+            ‹
+        </button>
+
+        <div class="calendar-title">
+            @CurrentMonth.ToString("MMMM yyyy")
+        </div>
+
+        <button class="calendar-nav-button"
+                @onclick="NextMonth">
+            ›
+        </button>
+
+    </div>
+
+    @if (loading)
+    {
+        <div class="text-muted py-4">
+            Зареждане...
+        </div>
+    }
+    else
+    {
+        <div class="calendar-grid calendar-weekdays">
+
+            @foreach (var dayName in WeekDays)
+            {
+                <div class="calendar-weekday">
+                    @dayName
+                </div>
+            }
+
+        </div>
+
+        <div class="calendar-grid calendar-days">
+
+            @foreach (var day in CalendarDays)
+            {
+                var dayEvents = GetEventsForDate(day);
+
+                <button type="button"
+                        class="calendar-day
+                    @(day.Month != CurrentMonth.Month
+    ? "calendar-day-muted"
+    : "")
+                    @(day.Date == DateTime.Today
+    ? "calendar-day-today"
+    : "")
+                    @(day.Date == selectedDate.Date
+    ? "calendar-day-selected"
+    : "")"
+                        @onclick="() => SelectDate(day)">
+
+                    <div class="calendar-day-number">
+                        @day.Day
+                    </div>
+
+                    @if (dayEvents.Count > 0)
+                    {
+                        <div class="calendar-dots">
+
+                            @if (dayEvents.Any(e => e.Type == CalendarEventType.Expense))
+                            {
+                                <span class="calendar-dot calendar-dot-expense"></span>
+                            }
+
+                            @if (dayEvents.Any(e => e.Type == CalendarEventType.Task))
+                            {
+                                <span class="calendar-dot calendar-dot-task"></span>
+                            }
+
+                            @if (dayEvents.Any(e => e.Type == CalendarEventType.Reminder))
+                            {
+                                <span class="calendar-dot calendar-dot-reminder"></span>
+                            }
+
+                        </div>
+                    }
+
+                </button>
+            }
+
+        </div>
+
+        <div class="calendar-selected-day">
+
+            <div class="calendar-selected-header">
+                <div>
+                    <div class="calendar-selected-title">
+                        @selectedDate.ToString("dd.MM.yyyy")
+                    </div>
+
+                    <div class="text-muted">
+                        Събития за избрания ден
+                    </div>
+                </div>
+            </div>
+
+            @if (SelectedEvents.Count == 0)
+            {
+                <div class="calendar-empty">
+                    Няма събития за този ден.
+                </div>
+            }
+            else
+            {
+                @foreach (var calendarEvent in SelectedEvents)
+                {
+                    <div class="calendar-event">
+
+                        <div class="calendar-event-icon
+                            @GetEventClass(calendarEvent.Type)">
+                            @GetEventIcon(calendarEvent.Type)
+                        </div>
+
+                        <div class="calendar-event-content">
+
+                            <div class="calendar-event-title">
+                                @calendarEvent.Title
+                            </div>
+
+                            <div class="calendar-event-meta">
+
+                                @GetEventTypeName(calendarEvent.Type)
+
+                                @if (calendarEvent.Type == CalendarEventType.Expense)
+                                {
+                                    <span>
+                                        · @calendarEvent.Amount?.ToString("0.00") лв.
+                                    </span>
+                                }
+
+                                @if (calendarEvent.Date.HasValue)
+                                {
+                                    <span>
+                                        · @calendarEvent.Date.Value.ToString("HH:mm")
+                                    </span>
+                                }
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                }
+            }
+
+        </div>
+    }
+
+</div>
+
+@code
+{
+    private DateTime CurrentMonth { get; set; }
+        = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+
+    private DateTime selectedDate =
+        DateTime.Today.Date;
+
+    private bool loading = true;
+
+    private List<Expense> expenses = new();
+    private List<TaskItem> tasks = new();
+    private List<Reminder> reminders = new();
+
+    private readonly string[] WeekDays =
+    {
+        "Пн",
+        "Вт",
+        "Ср",
+        "Чт",
+        "Пт",
+        "Сб",
+        "Нд"
+    };
+
+    private List<DateTime> CalendarDays =>
+        BuildCalendarDays(CurrentMonth);
+
+    private List<CalendarEvent> SelectedEvents =>
+        GetEventsForDate(selectedDate);
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCalendarData();
+    }
+
+    private async Task LoadCalendarData()
+    {
+        loading = true;
+
+        try
+        {
+            expenses = await ExpenseService.GetExpensesAsync();
+            tasks = await TaskService.GetTasksAsync();
+            reminders = await ReminderService.GetRemindersAsync();
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private void PreviousMonth()
+    {
+        CurrentMonth = CurrentMonth.AddMonths(-1);
+
+        selectedDate = new DateTime(
+            CurrentMonth.Year,
+            CurrentMonth.Month,
+            1);
+
+        StateHasChanged();
+    }
+
+    private void NextMonth()
+    {
+        CurrentMonth = CurrentMonth.AddMonths(1);
+
+        selectedDate = new DateTime(
+            CurrentMonth.Year,
+            CurrentMonth.Month,
+            1);
+
+        StateHasChanged();
+    }
+
+    private void SelectDate(DateTime date)
+    {
+        selectedDate = date.Date;
+    }
+
+    private List<DateTime> BuildCalendarDays(DateTime month)
+    {
+        var firstDay = new DateTime(
+            month.Year,
+            month.Month,
+            1);
+
+        var difference =
+            ((int)firstDay.DayOfWeek + 6) % 7;
+
+        var calendarStart =
+            firstDay.AddDays(-difference);
+
+        return Enumerable
+            .Range(0, 42)
+            .Select(i => calendarStart.AddDays(i))
+            .ToList();
+    }
+
+    private List<CalendarEvent> GetEventsForDate(DateTime date)
+    {
+        var result = new List<CalendarEvent>();
+
+        result.AddRange(
+            expenses
+                .Where(e =>
+                    e.DueDate.Date == date.Date)
+                .Select(e =>
+                    new CalendarEvent
+                    {
+                        Type = CalendarEventType.Expense,
+                        Title = e.Title,
+                        Date = e.DueDate,
+                        Amount = e.Amount
+                    }));
+
+        result.AddRange(
+            tasks
+                .Where(t =>
+                    t.DueDate.Date == date.Date)
+                .Select(t =>
+                    new CalendarEvent
+                    {
+                        Type = CalendarEventType.Task,
+                        Title = t.Title,
+                        Date = t.DueDate
+                    }));
+
+        result.AddRange(
+            reminders
+                .Where(r =>
+                    r.ReminderDate.Date == date.Date)
+                .Select(r =>
+                    new CalendarEvent
+                    {
+                        Type = CalendarEventType.Reminder,
+                        Title = r.Title,
+                        Date = r.ReminderDate
+                    }));
+
+        return result
+            .OrderBy(e => e.Date)
+            .ToList();
+    }
+
+    private static string GetEventClass(
+        CalendarEventType type)
+    {
+        return type switch
+        {
+            CalendarEventType.Expense =>
+                "calendar-event-expense",
+
+            CalendarEventType.Task =>
+                "calendar-event-task",
+
+            CalendarEventType.Reminder =>
+                "calendar-event-reminder",
+
+            _ => string.Empty
+        };
+    }
+
+    private static string GetEventIcon(
+        CalendarEventType type)
+    {
+        return type switch
+        {
+            CalendarEventType.Expense => "💰",
+            CalendarEventType.Task => "✅",
+            CalendarEventType.Reminder => "🔔",
+            _ => "•"
+        };
+    }
+
+    private static string GetEventTypeName(
+        CalendarEventType type)
+    {
+        return type switch
+        {
+            CalendarEventType.Expense => "Разход",
+            CalendarEventType.Task => "Задача",
+            CalendarEventType.Reminder => "Напомняне",
+            _ => "Събитие"
+        };
+    }
+
+    private enum CalendarEventType
+    {
+        Expense,
+        Task,
+        Reminder
+    }
+
+    private class CalendarEvent
+    {
+        public CalendarEventType Type { get; set; }
+
+        public string Title { get; set; } = string.Empty;
+
+        public DateTime? Date { get; set; }
+
+        public decimal? Amount { get; set; }
+    }
+}
